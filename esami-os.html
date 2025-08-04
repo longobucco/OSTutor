@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Esercizi Sistemi Operativi - Memoria Virtuale</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 2rem;
+        background-color: #f9f9f9;
+      }
+      h1 {
+        color: #2c3e50;
+        margin-bottom: 2rem;
+      }
+      #esercizi-list {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .esercizio-card {
+        background: #fff;
+        border-left: 5px solid #3498db;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+        padding: 0;
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      .esercizio-header {
+        cursor: pointer;
+        padding: 1rem;
+        font-weight: bold;
+        background: #eaf6fb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        outline: none;
+      }
+      .esercizio-header:focus {
+        box-shadow: 0 0 0 2px #3498db;
+      }
+      .arrow {
+        font-size: 1.2em;
+        transition: transform 0.2s;
+      }
+      .esercizio-content {
+        padding: 1rem;
+        border-top: 1px solid #eee;
+        display: none;
+      }
+      .domanda {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+      }
+      .risposta {
+        color: #27ae60;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+      }
+      .spiegazione {
+        margin-top: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Esercizi Sistemi Operativi - Memoria Virtuale</h1>
+    <div id="esercizi-list"></div>
+    <noscript
+      ><p>
+        Abilita JavaScript per visualizzare gli esercizi in modo interattivo.
+      </p></noscript
+    >
+    <script>
+      const esercizi = [
+        {
+          domanda:
+            "In un sistema di memoria virtuale con un grado fisso di multiprogrammazione, il thrashing può verificarsi anche se la somma dei working set di tutti i processi è inferiore alla memoria fisica disponibile, ma l'algoritmo di sostituzione della pagina non è ottimizzato?",
+          risposta: "YES",
+          spiegazione:
+            "Il thrashing può comunque verificarsi se l'algoritmo di sostituzione delle pagine non tiene conto dei working set o causa sostituzioni frequenti e non necessarie. Anche con memoria sufficiente, un cattivo algoritmo può degradare le prestazioni.",
+        },
+        {
+          domanda:
+            "In un sistema con paginazione basata su inverted page table (IPT), è possibile che più pagine virtuali di processi diversi condividano una singola entry della tabella delle pagine senza causare un conflitto nella traduzione degli indirizzi?",
+          risposta: "YES",
+          spiegazione:
+            "L'IPT utilizza una singola entry per ogni frame fisico e include anche l'ID del processo. Quindi, anche se due pagine virtuali diverse condividono un frame, la tabella può distinguerle grazie al PID e non si verifica conflitto.",
+        },
+        {
+          domanda:
+            "In un sistema di paginazione a richiesta che utilizza la sostituzione delle pagine locale (a un singolo processo), un processo con frequenza di page fault molto elevata può comunque causare una riduzione della memoria fisica disponibile per altri processi?",
+          risposta: "NO",
+          spiegazione:
+            "La sostituzione locale limita l'uso della memoria fisica da parte del processo alle sue proprie pagine. Anche se il processo ha molti page fault, non può 'rubare' frame ad altri processi, quindi non riduce la memoria disponibile per loro.",
+        },
+        {
+          domanda:
+            "Si consideri un sistema a 64 bit con uno spazio di indirizzi virtuale di 2^64 Byte, una dimensione di pagina di 4 KB e 16 GB di memoria fisica. Si supponga che il sistema utilizzi una Inverted Page Table (IPT). Calcolare e spiegare quanto segue:<ol><li>Il numero di bit necessari per il numero di frame fisico.</li><li>Il numero totale di entry nella Inverted Page Table.</li><li>Dato l’indirizzo virtuale <code>0x00007FFFFFFFF000</code>, determinare l’indirizzo fisico se è mappato al frame fisico 1024.</li></ol>",
+          risposta: "1) 22 bit, 2) 4M entry, 3) 0x0000000004000000",
+          spiegazione: `<strong>1. Numero di bit per frame fisico:</strong><br>La memoria fisica è di 16 GB = 2<sup>34</sup> byte.<br>La dimensione di una pagina è 4 KB = 2<sup>12</sup> byte.<br>Numero di frame fisici = 2<sup>34</sup> / 2<sup>12</sup> = 2<sup>22</sup> = 4M frame.<br>Per identificare ciascun frame servono <strong>22 bit</strong>.<br><br><strong>2. Numero totale di entry nella IPT:</strong><br>L'Inverted Page Table contiene un'entry per ciascun frame fisico.<br>Quindi contiene <strong>2<sup>22</sup> = 4 milioni di entry</strong>.<br><br><strong>3. Traduzione indirizzo virtuale:</strong><br>Indirizzo virtuale: <code>0x00007FFFFFFFF000</code><br>Dimensione pagina = 4 KB = 2<sup>12</sup> → offset = ultimi 12 bit = <code>0x000</code><br>Quindi offset = 0, e il numero di pagina è dato da:<br><code>0x00007FFFFFFFF000 / 0x1000 = 0x00007FFFFFFFF</code> (numero di pagina virtuale)<br>Il frame fisico a cui è mappato è il <strong>1024</strong>-esimo →<br>Indirizzo fisico = <code>1024 * 0x1000 = 0x400000</code><br>Offset = 0 →<br><strong>Indirizzo fisico finale:</strong> <code>0x0000000004000000</code>`,
+        },
+        {
+          domanda:
+            "Si consideri un file system che utilizza l'allocazione di tipo <strong>linked</strong>. Il disco è diviso in blocchi di 4 KB, e ogni blocco contiene un puntatore al blocco successivo (4 byte). Un file richiede 5 MB di spazio.<ol><li>Calcolare il numero di blocchi necessari, includendo lo spazio per i puntatori.</li><li>Ricalcolare con puntatori da 2 byte. È più efficiente?</li><li>Confrontare il sovraccarico dei puntatori in entrambi i casi, come percentuale del totale.</li></ol>",
+          risposta: `A) 1282 blocchi<br>B) 1281 blocchi, sì, leggermente più efficiente<br>C) Sovraccarico: 5128B (4B), 2562B (2B)`,
+          spiegazione: `<strong>A. Calcolo con puntatori da 4 byte:</strong><br>Ogni blocco è di 4096 B, ma 4 B sono riservati al puntatore → 4092 B utili per dati.<br>File = 5 MB = 5 × 1024 × 1024 = 5,242,880 B<br>Numero blocchi = 5,242,880 / 4092 ≈ <strong>1282 blocchi</strong><br><br><strong>B. Calcolo con puntatori da 2 byte:</strong><br>Dati per blocco = 4096 - 2 = 4094 B<br>5,242,880 / 4094 ≈ <strong>1281 blocchi</strong><br>Meno blocchi → meno frammentazione interna → <strong>più efficiente</strong><br><br><strong>C. Sovraccarico in entrambi i casi:</strong><br>- Puntatori da 4 B: 1282 × 4 = <strong>5128 B</strong><br>- Puntatori da 2 B: 1281 × 2 = <strong>2562 B</strong><br>Percentuali:<br>- Caso 1: (5128 / 5,242,880) × 100 ≈ <strong>0.098%</strong><br>- Caso 2: (2562 / 5,242,880) × 100 ≈ <strong>0.049%</strong><br>→ <em>Il sovraccarico si dimezza passando da 4 B a 2 B, anche se in valore assoluto è già molto basso.</em>`,
+        },
+        {
+          domanda:
+            "In un sistema con memoria virtuale basata su paginazione a richiesta e DMA, è possibile che si verifichi un page fault durante un trasferimento DMA, causando l'esito negativo del trasferimento se non vengono prese le dovute precauzioni?",
+          risposta: "YES",
+          spiegazione:
+            "Il DMA accede direttamente alla memoria fisica. Se l’indirizzo richiesto non è ancora stato caricato in RAM (page fault), il trasferimento fallisce, a meno che non si usino tecniche come il pinning delle pagine per evitarne lo spostamento.",
+        },
+        {
+          domanda:
+            "In un sistema con più dispositivi di I/O e una singola CPU, le operazioni di I/O possono essere eseguite in parallelo se la CPU è occupata nell'esecuzione di un processo?",
+          risposta: "YES",
+          spiegazione:
+            "Le operazioni di I/O possono procedere in parallelo grazie a meccanismi come il DMA o l’I/O asincrono. La CPU può continuare a eseguire altri processi mentre i dispositivi gestiscono autonomamente i trasferimenti.",
+        },
+        {
+          domanda:
+            "In un sistema che utilizza I/O basato su interrupt, è possibile che un interrupt venga perso se il controller di interrupt è occupato nell'elaborazione di un altro interrupt e il dispositivo che ha attivato il secondo interrupt non supporta l'accodamento degli interrupt?",
+          risposta: "YES",
+          spiegazione:
+            "Se il controller non è in grado di gestire interrupt concorrenti o accodarli, e il dispositivo non supporta il buffering degli interrupt, un secondo interrupt può essere ignorato mentre il primo è ancora in elaborazione.",
+        },
+        {
+          domanda:
+            "Prendere in considerazione un'unità disco rigido (HDD) con le seguenti specifiche:<br>· Dimensione del settore: 512 byte<br>· Numero di tracce per faccia: 5.000<br>· Numero di settori per traccia: 300<br>· Numero di piatti a doppia faccia: 6<br>· Velocità di rotazione del piatto: 7.200 giri/min (giri al minuto)<br><ol><li>Calcolare la velocità di trasferimento dati massima possibile in megabyte al secondo (MB/s), supponendo che sia possibile trasferire una traccia di dati per giro.</li><li>Se il disco subisce un arresto anomalo della testina su un piatto, in che modo ciò influisce sulla capacità totale e sulla disponibilità dei dati supponendo che non siano in atto meccanismi RAID o di backup?</li><li>Se il disco ha un tempo di ricerca medio di 4 ms e deve leggere un file da 1 GB suddiviso in 200 tracce non contigue, calcolare il tempo totale necessario per leggere il file. Includi il tempo per la ricerca, la latenza rotazionale e il trasferimento dei dati. Si supponga che la latenza rotazionale media sia di 4,165 ms e che sia possibile leggere una traccia per giro.</li></ol>",
+          risposta: `1) 17.58 MB/s<br>2) Capacità ridotta a 7.87 GB<br>3) Tempo totale ≈ 8.25 s`,
+          spiegazione: `<strong>1. Velocità di trasferimento:</strong><br>Ogni traccia contiene 512B × 300 = 150 KB.<br>Velocità di rotazione: 7.200 giri/min = 120 giri/s dunque 1 giro in 1/120 s = 8.33 ms.<br>150 KB × 120 = <strong>18.000 KB/s</strong> = <strong>17.58 MB/s</strong>.<br><br><strong>2. Arresto testina su un piatto:</strong><br>1 piatto = 150 KB × 5.000 tracce = 732.4 MB.<br>Capacità totale iniziale = 8.58 GB.<br>Capacità ridotta = 8.58 GB - 732.4 MB = <strong>7.87 GB</strong>.<br><br><strong>3. Tempo di lettura file 1 GB su 200 tracce:</strong><br>Tempo di ricerca medio = 4 ms.<br>Latenza rotazionale media = 4.165 ms.<br>Tempo per giro = 8.33 ms.<br>Tempo totale = 200 × (4 + 4.165 + 8.33) = 3.299 s.<br>Nota: 1 GB non può stare in sole 200 tracce, servono circa 583 tracce.<br>Tempo totale per 583 tracce = 583 × (4 + 4.165 + 8.33) ≈ <strong>8.25 s</strong>.<br>Se si leggessero solo 200 tracce: <strong>3.3 s</strong>.<br>La stima dipende dalla reale distribuzione del file sulle tracce.`,
+        },
+      ];
+      const eserciziList = document.getElementById("esercizi-list");
+      esercizi.forEach((ex, idx) => {
+        const card = document.createElement("div");
+        card.className = "esercizio-card";
+        card.innerHTML = `
+        <div class="esercizio-header" tabindex="0" role="button" aria-expanded="false">
+          <span>ESERCIZIO ${idx + 1}</span>
+          <span class="arrow">&#9654;</span>
+        </div>
+        <div class="esercizio-content">
+          <div class="domanda">${ex.domanda}</div>
+          <div class="risposta">Risposta: ${ex.risposta}</div>
+          <div class="spiegazione">${ex.spiegazione}</div>
+        </div>
+      `;
+        const header = card.querySelector(".esercizio-header");
+        const content = card.querySelector(".esercizio-content");
+        const arrow = card.querySelector(".arrow");
+        content.style.display = "none";
+        header.addEventListener("click", function () {
+          const expanded = content.style.display === "block";
+          content.style.display = expanded ? "none" : "block";
+          arrow.innerHTML = expanded ? "&#9654;" : "&#9660;";
+          header.setAttribute("aria-expanded", !expanded);
+        });
+        header.addEventListener("keypress", function (e) {
+          if (e.key === "Enter" || e.key === " ") {
+            header.click();
+          }
+        });
+        eserciziList.appendChild(card);
+      });
+    </script>
+  </body>
+</html>

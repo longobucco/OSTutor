@@ -1,0 +1,2170 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Flashcard - Gestione Memoria OS</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #f9f9f9;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 2rem;
+      }
+      .card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        padding: 1.5rem;
+        margin: 1rem;
+        width: 90%;
+        max-width: 600px;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+      .card:hover {
+        background: #e6f7ff;
+      }
+      .question {
+        font-weight: bold;
+      }
+      .answer {
+        display: none;
+        margin-top: 0.5rem;
+      }
+      .card.open .answer {
+        display: block;
+      }
+      .section-btn {
+        background: #007acc;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        margin: 0.5rem;
+        border-radius: 5px;
+        cursor: pointer;
+        transition: background 0.3s;
+      }
+      .section-btn:hover {
+        background: #005999;
+      }
+      .section-btn.active {
+        background: #005999;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Flashcard OS</h1>
+    <div id="sections">
+      <button class="section-btn" data-section="memoria">
+        Gestione della Memoria
+      </button>
+      <button class="section-btn" data-section="thread">
+        Gestione dei Thread
+      </button>
+      <button class="section-btn" data-section="calcoli">
+        Calcoli Paging, IPT e EAT
+      </button>
+      <button class="section-btn" data-section="processi">
+        Processi e Memoria Virtuale
+      </button>
+      <button class="section-btn" data-section="reclaiming">
+        Reclaiming Pages e Memoria
+      </button>
+      <button class="section-btn" data-section="os161">OS161</button>
+      <button class="section-btn" data-section="io">
+        Gestione I/O e File System
+      </button>
+      <button class="section-btn" data-section="dischi">
+        Dischi, SSD e RAID
+      </button>
+
+      <!-- Sezione Memoria -->
+      <div id="memoria" class="section-cards" style="display: none">
+        <div class="card">
+          <div class="question">
+            Cos'è la gestione della memoria in un sistema operativo?
+          </div>
+          <div class="answer">
+            Allocare, monitorare e liberare la memoria in modo sicuro ed
+            efficiente tra i processi, garantendo isolamento e massimizzazione
+            dell'utilizzo delle risorse.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cos'è la memoria virtuale e perché è importante?
+          </div>
+          <div class="answer">
+            Permette l'esecuzione di processi più grandi della memoria fisica,
+            isolamento tra processi e allocazione non contigua, migliorando
+            flessibilità e sicurezza.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è la paginazione (paging)?</div>
+          <div class="answer">
+            Divide la memoria virtuale in pagine e la memoria fisica in frame di
+            dimensione fissa. Mappa le pagine ai frame tramite una tabella delle
+            pagine, evitando frammentazione esterna.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è la differenza tra indirizzo logico e indirizzo fisico?
+          </div>
+          <div class="answer">
+            L'indirizzo logico è generato dal processo (CPU), mentre l'indirizzo
+            fisico è quello reale in RAM. La MMU esegue la traduzione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">A cosa serve la tabella delle pagine?</div>
+          <div class="answer">
+            Tiene traccia della corrispondenza tra pagine logiche e frame
+            fisici, includendo anche bit di controllo (presenza, modifica,
+            protezione, ecc.).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa significa "demand paging"?</div>
+          <div class="answer">
+            Le pagine sono caricate in RAM solo quando richieste, riducendo
+            l'uso iniziale della memoria e accelerando l'avvio dei processi.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Quando si verifica un page fault?</div>
+          <div class="answer">
+            Quando un processo accede a una pagina non presente in RAM. Il
+            sistema operativo interrompe il processo, carica la pagina da disco,
+            aggiorna la tabella e riprende l'esecuzione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono i principali algoritmi di sostituzione delle pagine?
+          </div>
+          <div class="answer">
+            FIFO: sostituisce la pagina più vecchia. LRU: sostituisce la meno
+            recentemente usata. Clock: approssima LRU in modo efficiente.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa fa lo swapping in un sistema operativo?
+          </div>
+          <div class="answer">
+            Sposta interi processi tra memoria RAM e disco per liberare spazio,
+            utile nei sistemi senza memoria virtuale o con poca RAM.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come si gestiscono i blocchi liberi nella memoria fisica?
+          </div>
+          <div class="answer">
+            Bitmap: array di bit, 1 = occupato, 0 = libero. Elenchi: liste di
+            blocchi liberi con indirizzo e dimensione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali tecniche usa il kernel per gestire dinamicamente la memoria?
+          </div>
+          <div class="answer">
+            Buddy System: divide la memoria in potenze di 2. Slab Allocator:
+            prealloca oggetti dello stesso tipo per evitare frammentazione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cos'è la frammentazione e che tipi esistono?
+          </div>
+          <div class="answer">
+            Interna: spazio inutilizzato dentro i blocchi allocati. Esterna:
+            spazio libero tra blocchi non contigui, non riutilizzabile
+            efficacemente.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come si può ottimizzare la gestione della memoria?
+          </div>
+          <div class="answer">
+            Usando TLB, clustering di pagine, allocazione basata su priorità, e
+            compressione delle pagine inattive.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            In che modo la memoria virtuale aumenta efficienza e flessibilità?
+          </div>
+          <div class="answer">
+            Permette isolamento, protezione, multitasking efficiente, carico
+            parziale dei programmi, e gestione ottimizzata delle risorse
+            fisiche.
+          </div>
+        </div>
+      </div>
+
+      <!-- Sezione Dischi -->
+      <div id="dischi" class="section-cards" style="display: none">
+        <div class="card">
+          <div class="question">Cos'è un HDD e come funziona?</div>
+          <div class="answer">
+            Un HDD è composto da dischi magnetici rotanti. I dati vengono
+            registrati e letti tramite un pattern magnetico sulla superficie dei
+            dischi.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un cilindro in un HDD?</div>
+          <div class="answer">
+            È un insieme di tracce allineate su tutte le piastre.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono le componenti del tempo di accesso di un HDD?
+          </div>
+          <div class="answer">
+            Seek time (tempo per spostare la testa alla traccia giusta) e
+            rotational latency (tempo per allineare il settore giusto).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come si calcola il Tempo Medio di Accesso?</div>
+          <div class="answer">
+            Average Access Time = Average Seek Time + Average Rotational Latency
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa include il Tempo Medio di I/O?</div>
+          <div class="answer">
+            Average Access Time + (Amount to Transfer / Transfer Rate) +
+            Controller Overhead.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono i vantaggi degli SSD rispetto agli HDD?
+          </div>
+          <div class="answer">
+            Sono più veloci, affidabili, consumano meno energia e non hanno
+            parti mobili.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa il Flash Translation Layer (FTL)?</div>
+          <div class="answer">
+            Mappa i blocchi logici ai fisici e gestisce la garbage collection.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un RAM drive?</div>
+          <div class="answer">
+            Una porzione di RAM usata come memoria secondaria, estremamente
+            veloce, per archiviazione temporanea.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono le principali interfacce di connessione dei dischi?
+          </div>
+          <div class="answer">SATA, NVMe, USB, SCSI.</div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali algoritmi di disk scheduling conosci?
+          </div>
+          <div class="answer">FCFS, SCAN, C-SCAN.</div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è l'algoritmo SCAN?</div>
+          <div class="answer">
+            Il braccio si muove in una direzione servendo richieste, poi torna
+            indietro.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Quali sono i livelli RAID principali?</div>
+          <div class="answer">RAID 0, 1, 4, 5, 6, 0+1, 1+0.</div>
+          <div class="card">
+            <div class="question">
+              Quali algoritmi di disk scheduling conosci?
+            </div>
+            <div class="answer">FCFS, SCAN, C-SCAN.</div>
+          </div>
+          <div class="card">
+            <div class="question">Cos'è l'algoritmo SCAN?</div>
+            <div class="answer">
+              Il braccio si muove in una direzione servendo richieste, poi torna
+              indietro.
+            </div>
+          </div>
+          <div class="card">
+            <div class="question">Quali sono i livelli RAID principali?</div>
+            <div class="answer">RAID 0, 1, 4, 5, 6, 0+1, 1+0.</div>
+          </div>
+          <div class="card">
+            <div class="question">Come si calcola l'MTTDL in RAID 1?</div>
+            <div class="answer">MTTDL ≈ MTTF² / (2 × MTTR).</div>
+          </div>
+          <div class="card">
+            <div class="question">Cos'è lo striping?</div>
+            <div class="answer">
+              Distribuzione dei dati su più dischi per migliorare le
+              prestazioni.
+            </div>
+          </div>
+          <div class="card">
+            <div class="question">Differenze tra RAID 0 e RAID 1?</div>
+            <div class="answer">
+              RAID 0: striping, prestazioni. RAID 1: mirroring, affidabilità.
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come si calcola l'MTTDL in RAID 1?</div>
+          <div class="answer">MTTDL ≈ MTTF² / (2 × MTTR).</div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è lo striping?</div>
+          <div class="answer">
+            Distribuzione dei dati su più dischi per migliorare le prestazioni.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Differenze tra RAID 0 e RAID 1?</div>
+          <div class="answer">
+            RAID 0: striping, prestazioni. RAID 1: mirroring, affidabilità.
+          </div>
+        </div>
+      </div>
+
+      <!-- Sezione OS161 -->
+      <div id="os161" class="section-cards" style="display: none">
+        <div class="card">
+          <div class="question">Cos'è OS161?</div>
+          <div class="answer">
+            Un sistema operativo didattico che gira su architettura MIPS
+            simulata. È progettato per essere semplice e comprensibile.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il comportamento di un processo quando termina in OS161 e
+            cosa succede se nessuno chiama waitpid() su di esso?
+          </div>
+          <div class="answer">
+            Il processo entra in uno stato "zombie" e la sua struttura dati
+            struct proc resta in memoria finché un altro processo non recupera
+            il suo stato di uscita tramite waitpid().
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quale funzione viene utilizzata per creare un nuovo processo tramite
+            proc_create_runprogram()?
+          </div>
+          <div class="answer">
+            La funzione crea il processo e lo avvia, salvando il suo pid, ad
+            esempio in proc→p_pid, e possibilmente utilizzando sys_getpid(proc)
+            per recuperarne il pid.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quando un processo termina e un altro processo chiama sys_waitpid(),
+            cosa succede?
+          </div>
+          <div class="answer">
+            La funzione cerca il processo corrispondente nella tabella, chiama
+            proc_wait() passando il processo, attende la sua terminazione,
+            libera la struct proc e ritorna il codice di uscita.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è l’obiettivo di proc_wait() in relazione alla funzione
+            sys_waitpid()?
+          </div>
+          <div class="answer">
+            proc_wait() viene chiamata internamente da sys_waitpid() ed è
+            responsabile di attendere la terminazione del processo, di liberare
+            la sua struttura dati e di fornire il codice di uscita.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come si garantisce la corretta gestione dei processi zombie in
+            OS161?
+          </div>
+          <div class="answer">
+            Attraverso l’uso di waitpid(), che permette a un processo di
+            aspettare la terminazione del processo figlio, recuperarne lo stato
+            e liberare le risorse assegnate, evitando che rimangano in memoria
+            in stato zombie.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Perché è importante implementare correttamente waitpid() nel sistema
+            operativo?
+          </div>
+          <div class="answer">
+            Per permettere la sincronizzazione tra processi nel loro ciclo di
+            vita e per liberare correttamente le risorse, prevenendo perdite di
+            memoria o processi zombie inutilmente in memoria.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Che ruolo gioca sys_getpid() nel contesto dei processi?
+          </div>
+          <div class="answer">
+            sys_getpid() permette di ottenere il pid del processo corrente,
+            utile per identificare e gestire i processi in tutte le operazioni
+            di sistema.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono i passi principali coinvolti nella terminazione di un
+            processo e nell’attesa di un processo figlio?
+          </div>
+          <div class="answer">
+            Creazione del processo con proc_create_runprogram(), terminazione
+            del processo, gestione di processi zombie, chiamata a waitpid() per
+            recuperare lo stato di uscita e liberare le risorse.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il ruolo di proc_end_waitpid() nel ciclo di gestione dei
+            processi in OS161?
+          </div>
+          <div class="answer">
+            Rimuove un processo dalla tabella dei processi, dealloca le
+            strutture di sincronizzazione associate a waitpid() come semafori,
+            condition variable, e lock, e libera le risorse di memoria usate dal
+            processo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come viene assegnato un PID univoco in OS161?
+          </div>
+          <div class="answer">
+            Durante l'inizializzazione, proc_init_waitpid() cerca un indice
+            libero nella tabella dei processi, lo assegna a p_pid e lo inserisce
+            nella tabella, garantendo unicità finché ci sono slot disponibili.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Che funzione svolge proc_init_waitpid()?</div>
+          <div class="answer">
+            Assegna un PID univoco a un nuovo processo, inserisce il processo
+            nella tabella globale, e inizializza le strutture di
+            sincronizzazione come semafori o condition variable per waitpid().
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Perché viene preferibile delegare la distruzione di un processo a
+            proc_wait() invece che a sys__exit()?
+          </div>
+          <div class="answer">
+            Per evitare che il processo rimanga zombie; proc_wait() attende la
+            terminazione, recupera lo stato di uscita e distrugge correttamente
+            la struttura, assicurando che il padre possa recuperare lo stato
+            senza problemi.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali campi sono fondamentali in struct proc per la gestione di
+            waitpid() e perché?
+          </div>
+          <div class="answer">
+            p_status salva lo stato di uscita, p_pid identifica il processo
+            univocamente, e le strutture di sincronizzazione (p_sem o p_cv e
+            p_lock) sono usate per sincronizzare il padre con il termine del
+            figlio.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Che cosa succede quando un processo chiama exit() in OS161?
+          </div>
+          <div class="answer">
+            Cambia lo stato a terminato, imposta p_status, risveglia il padre
+            tramite V(p_sem) o cv_signal(), ma la struttura proc resta fino a
+            quando waitpid() non la libera, per evitare processi zombie.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            In cosa consiste l'implementazione di proc_end_waitpid()?
+          </div>
+          <div class="answer">
+            Rimuove il processo dalla tabella, dealloca i semafori o condition
+            variable e lock associati, e libera la risorsa di memoria,
+            garantendo la corretta gestione delle risorse dei processi
+            terminati.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il ruolo di proc_wait() nel gestire la terminazione di un
+            processo in OS161?
+          </div>
+          <div class="answer">
+            proc_wait() blocca il processo padre finché il processo figlio non
+            termina, recupera lo stato di uscita (p_status), e libera le risorse
+            associate alla struttura proc, garantendo una gestione corretta del
+            ciclo di vita del processo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come viene sincronizzata la terminazione del processo tra exit() e
+            waitpid()?
+          </div>
+          <div class="answer">
+            exit() aggiorna p_status e risveglia il padre con V(p_sem) o
+            cv_signal(), mentre waitpid() si blocca attendendo questa notifica,
+            poi recupera p_status e libera la struttura proc.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Che funzione ha la variabile return_status in proc_wait()?
+          </div>
+          <div class="answer">
+            Memorizza il valore di p_status del processo terminato, che sarà
+            restituito come risultato della chiamata proc_wait().
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Qual è il comportamento di proc_destroy()?</div>
+          <div class="answer">
+            Libera tutte le risorse associate al processo, incluse le strutture
+            di sincronizzazione (semaphori, CV, lock) e la memoria allocata, e
+            rimuove il processo dalla tabella globale prontamente usata dal
+            sistema.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Perché la rimozione di un processo termina a proc_destroy() e non
+            immediatamente in exit()?
+          </div>
+          <div class="answer">
+            Per garantire che il processo padre abbia il tempo di recuperare lo
+            stato di uscita prima che le risorse vengano deallocate, evitando
+            così processi zombie.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come avviene il recupero della risorsa p_sem o p_cv in
+            proc_end_waitpid()?
+          </div>
+          <div class="answer">
+            Viene deallocata tramite sem_destroy() o cv_destroy() e
+            lock_destroy(), rispettivamente, per liberare le risorse di
+            sincronizzazione associate al processo terminato.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è l'importanza di mantenere p_status aggiornato?
+          </div>
+          <div class="answer">
+            Permette al processo padre di conoscere lo stato di uscita del
+            processo figlio, utile in waitpid() per decidere il comportamento
+            successivo e per gestire l'esito della terminazione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa sono paddr_t e vaddr_t?</div>
+          <div class="answer">
+            paddr_t è un indirizzo fisico in RAM; vaddr_t è un indirizzo
+            virtuale usato da processi o kernel.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come avviene il debugging del kernel OS161?
+          </div>
+          <div class="answer">
+            Con sys161 -w kernel in ascolto e mips-harvard-os161-gdb su un
+            secondo terminale.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa thread_fork in OS161?</div>
+          <div class="answer">
+            Crea un nuovo thread specificando nome, processo padre e funzione da
+            eseguire.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Che struttura rappresenta un processo in OS161?
+          </div>
+          <div class="answer">
+            La struct proc, contenente nome, lock, numero thread, addrspace,
+            cwd, e info waitpid.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è la struct addrspace?</div>
+          <div class="answer">
+            Rappresenta lo spazio di indirizzamento virtuale di un processo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come funziona DumbVM?</div>
+          <div class="answer">
+            Traduce vaddr in paddr usando segmenti fissi per codice, dati e
+            stack, con allocazione contigua.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">A cosa serve ram_stealmem?</div>
+          <div class="answer">
+            Alloca pagine fisiche in modo contiguo direttamente dalla RAM.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Che ruolo ha la funzione getppages?</div>
+          <div class="answer">
+            Interfaccia di allocazione memoria che usa getfreeppages o
+            ram_stealmem.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come viene gestita la deallocazione della memoria?
+          </div>
+          <div class="answer">
+            Con freeppages, che segna le pagine come libere in freeRamFrames.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come funziona la syscall write?</div>
+          <div class="answer">
+            Scrive dati su stdout/stderr leggendo byte da un buffer utente.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come funziona la syscall read?</div>
+          <div class="answer">
+            Legge dati da stdin, byte per byte, memorizzandoli in un buffer.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cos'è una syscall e come viene gestita in OS161?
+          </div>
+          <div class="answer">
+            È un'interfaccia per servizi del kernel, gestita da syscall() che
+            usa un trapframe.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come funziona waitpid?</div>
+          <div class="answer">
+            Permette a un processo padre di attendere la terminazione del figlio
+            e recuperarne lo stato.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Che struttura tiene traccia dei processi in OS161?
+          </div>
+          <div class="answer">
+            La tabella processTable, che associa PID a struct proc.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa sono race condition, deadlock e starvation?
+          </div>
+          <div class="answer">
+            Problemi della concorrenza dovuti all'ordine di esecuzione e
+            gestione delle risorse.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è la soluzione di Peterson?</div>
+          <div class="answer">
+            Un algoritmo software per mutua esclusione tra due processi.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa compare_and_swap?</div>
+          <div class="answer">
+            Aggiorna una variabile solo se ha il valore atteso, garantendo
+            atomicità.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Che differenza c'è tra lock e semaforo?</div>
+          <div class="answer">
+            Il lock ha ownership, può essere rilasciato solo dal proprietario;
+            il semaforo no.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è una condition variable?</div>
+          <div class="answer">
+            Meccanismo di sincronizzazione che consente a un thread di attendere
+            una condizione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come funziona cv_wait?</div>
+          <div class="answer">
+            Il thread rilascia il lock, va in attesa e lo riacquisisce al
+            risveglio.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è una wait channel?</div>
+          <div class="answer">
+            Struttura kernel per mettere in attesa i thread in modo efficiente.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa la funzione proc_wait?</div>
+          <div class="answer">
+            Attende la terminazione del processo figlio e ne recupera lo stato.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come funziona la system call exit?</div>
+          <div class="answer">
+            Libera l'addrspace, notifica il padre e termina il thread con
+            thread_exit.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è la differenza tra proc_wait e sys_waitpid?
+          </div>
+          <div class="answer">
+            proc_wait lavora con puntatori a proc, sys_waitpid lavora con PID.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come si implementano lock in OS161?</div>
+          <div class="answer">
+            Con semaforo binario o con wait channel e spinlock, a seconda
+            dell'opzione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come funziona il test tt1?</div>
+          <div class="answer">
+            Crea 8 thread che stampano caratteri; verifica la gestione dei
+            thread.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il comportamento di un processo quando termina in OS161 e
+            cosa succede se nessuno chiama waitpid() su di esso?
+          </div>
+          <div class="answer">
+            Il processo entra in uno stato "zombie" e la sua struttura dati
+            struct proc resta in memoria finché un altro processo non recupera
+            il suo stato di uscita tramite waitpid().
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quale funzione viene utilizzata per creare un nuovo processo tramite
+            proc_create_runprogram()?
+          </div>
+          <div class="answer">
+            La funzione crea il processo e lo avvia, salvando il suo pid, ad
+            esempio in proc→p_pid, e possibilmente utilizzando sys_getpid(proc)
+            per recuperarne il pid.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quando un processo termina e un altro processo chiama sys_waitpid(),
+            cosa succede?
+          </div>
+          <div class="answer">
+            La funzione cerca il processo corrispondente nella tabella, chiama
+            proc_wait() passando il processo, attende la sua terminazione,
+            libera la struct proc e ritorna il codice di uscita.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è l'obiettivo di proc_wait() in relazione alla funzione
+            sys_waitpid()?
+          </div>
+          <div class="answer">
+            proc_wait() viene chiamata internamente da sys_waitpid() ed è
+            responsabile di attendere la terminazione del processo, di liberare
+            la sua struttura dati e di fornire il codice di uscita.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come si garantisce la corretta gestione dei processi zombie in
+            OS161?
+          </div>
+          <div class="answer">
+            Attraverso l'uso di waitpid(), che permette a un processo di
+            aspettare la terminazione del processo figlio, recuperarne lo stato
+            e liberare le risorse assegnate, evitando che rimangano in memoria
+            in stato zombie.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Perché è importante implementare correttamente waitpid() nel sistema
+            operativo?
+          </div>
+          <div class="answer">
+            Per permettere la sincronizzazione tra processi nel loro ciclo di
+            vita e per liberare correttamente le risorse, prevenendo perdite di
+            memoria o processi zombie inutilmente in memoria.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Che ruolo gioca sys_getpid() nel contesto dei processi?
+          </div>
+          <div class="answer">
+            sys_getpid() permette di ottenere il pid del processo corrente,
+            utile per identificare e gestire i processi in tutte le operazioni
+            di sistema.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono i passi principali coinvolti nella terminazione di un
+            processo e nell'attesa di un processo figlio?
+          </div>
+          <div class="answer">
+            Creazione del processo con proc_create_runprogram(), terminazione
+            del processo, gestione di processi zombie, chiamata a waitpid() per
+            recuperare lo stato di uscita e liberare le risorse.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il ruolo di proc_end_waitpid() nel ciclo di gestione dei
+            processi in OS161?
+          </div>
+          <div class="answer">
+            Rimuove un processo dalla tabella dei processi, dealloca le
+            strutture di sincronizzazione associate a waitpid() come semafori,
+            condition variable, e lock, e libera le risorse di memoria usate dal
+            processo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come viene assegnato un PID univoco in OS161?
+          </div>
+          <div class="answer">
+            Durante l'inizializzazione, proc_init_waitpid() cerca un indice
+            libero nella tabella dei processi, lo assegna a p_pid e lo inserisce
+            nella tabella, garantendo unicità finché ci sono slot disponibili.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Che funzione svolge proc_init_waitpid()?</div>
+          <div class="answer">
+            Assegna un PID univoco a un nuovo processo, inserisce il processo
+            nella tabella globale, e inizializza le strutture di
+            sincronizzazione come semafori o condition variable per waitpid().
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Perché viene preferibile delegare la distruzione di un processo a
+            proc_wait() invece che a sys__exit()?
+          </div>
+          <div class="answer">
+            Per evitare che il processo rimanga zombie; proc_wait() attende la
+            terminazione, recupera lo stato di uscita e distrugge correttamente
+            la struttura, assicurando che il padre possa recuperare lo stato
+            senza problemi.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali campi sono fondamentali in struct proc per la gestione di
+            waitpid() e perché?
+          </div>
+          <div class="answer">
+            p_status salva lo stato di uscita, p_pid identifica il processo
+            univocamente, e le strutture di sincronizzazione (p_sem o p_cv e
+            p_lock) sono usate per sincronizzare il padre con il termine del
+            figlio.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Che cosa succede quando un processo chiama exit() in OS161?
+          </div>
+          <div class="answer">
+            Cambia lo stato a terminato, imposta p_status, risveglia il padre
+            tramite V(p_sem) o cv_signal(), ma la struttura proc resta fino a
+            quando waitpid() non la libera, per evitare processi zombie.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            In cosa consiste l'implementazione di proc_end_waitpid()?
+          </div>
+          <div class="answer">
+            Rimuove il processo dalla tabella, dealloca i semafori o condition
+            variable e lock associati, e libera la risorsa di memoria,
+            garantendo la corretta gestione delle risorse dei processi
+            terminati.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono i campi principali della struttura proc per la gestione
+            del ciclo di vita dei processi in OS161?
+          </div>
+          <div class="answer">
+            I campi principali sono p_status, p_pid, p_name, p_lock, p_cv o
+            p_sem, p_addrspace, p_cwd, oltre a contatori di thread e altre
+            strutture di sistema.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            A cosa serve il campo p_status nella struttura proc?
+          </div>
+          <div class="answer">
+            p_status salva lo stato di uscita del processo ed è utilizzato dalla
+            funzione waitpid() per determinare se un processo è terminato.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come viene identificato univocamente un processo in OS161?
+          </div>
+          <div class="answer">
+            Attraverso il campo p_pid, che assegna un identificatore univoco a
+            ogni processo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è lo scopo di un meccanismo di sincronizzazione come semafori o
+            variabili di condizione?
+          </div>
+          <div class="answer">
+            Permette al processo padre di attendere la terminazione del processo
+            figlio, garantendo una gestione corretta delle operazioni di exit()
+            e waitpid().
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quando p_status viene inizializzato e perché?
+          </div>
+          <div class="answer">
+            p_status viene inizializzato a 0 per indicare che il processo non ha
+            ancora terminato o segnalato il suo stato di uscita.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali strutture di sincronizzazione vengono usate nelle
+            implementazioni di waitpid()?
+          </div>
+          <div class="answer">
+            Si possono usare semafori (p_sem) o variabili di condizione (p_cv) e
+            lock (p_lock), a seconda della configurazione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come viene assegnato un PID ai processi durante l'inizializzazione
+            in OS161?
+          </div>
+          <div class="answer">
+            Utilizzando una strategia circolare in una tabella di processi,
+            tramite la funzione proc_init_waitpid(), che assegna un PID libero e
+            lo registra nella tabella.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            In cosa consiste la funzione common_prog() presente in questa
+            versione di sys_waitpid()?
+          </div>
+          <div class="answer">
+            Crea un processo, avvia un thread per eseguire il programma, quindi
+            ottiene il PID del processo figlio e attende la sua terminazione
+            tramite sys_waitpid(pid).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il ruolo della tabella globale dei processi in sys_waitpid()?
+          </div>
+          <div class="answer">
+            Tiene traccia di tutti i processi e permette di effettuare l'attesa
+            e il recupero dello stato di uscita attraverso i PID, poiché i
+            kernel o processi utente non accedono direttamente a proc.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Perché nel kernel OS161 bisogna usare KASSERT()?
+          </div>
+          <div class="answer">
+            Per verificare che le condizioni critiche siano vere durante
+            l'esecuzione; se false, il sistema effettua un panico per prevenire
+            danni seri come sovrascrizioni di memoria o comportamento
+            imprevedibile.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è l’obiettivo principale di proc_init_waitpid() in OS161?
+          </div>
+          <div class="answer">
+            Inizializza i campi di un processo, in particolare p_pid, p_status,
+            e le strutture di sincronizzazione (p_sem o p_cv e p_lock), per
+            consentire la gestione della terminazione e dell’attesa tramite
+            waitpid().
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come funziona proc_init_waitpid() per assegnare un PID a un nuovo
+            processo?
+          </div>
+          <div class="answer">
+            Cerca un indice libero nella tabella dei processi usando una
+            strategia circolare, assegna il processo a quell’indice, e imposta
+            p_pid di conseguenza. Se la tabella è piena, genera un panico.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il valore di p_status all’inizio durante l’inizializzazione
+            con proc_init_waitpid()?
+          </div>
+          <div class="answer">
+            p_status viene impostato a 0, indicando uno stato iniziale di uscita
+            ancora non definito.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come viene creato il semaforo o le variabili di condizione associate
+            a un processo in proc_init_waitpid()?
+          </div>
+          <div class="answer">
+            Se si usa USE_SEMAPHORE_FOR_WAITPID, si crea un semaforo con
+            sem_create(). Altrimenti, si creano una variabile di condizione
+            (cv_create()) e un lock (lock_create()).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è lo scopo di p_sem, p_cv, e p_lock nei processi?
+          </div>
+          <div class="answer">
+            Sono usati per sincronizzare il processo padre con il processo
+            figlio durante la terminazione, permettendo al padre di aspettare
+            (waitpid()) e di leggere lo stato di uscita.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa succede se la tabella dei processi è piena durante
+            proc_init_waitpid()?
+          </div>
+          <div class="answer">
+            Viene chiamato panic() con un messaggio di errore, indicando che il
+            sistema ha troppi processi attivi e la tabella è piena.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il ruolo di p_pid nel sistema di gestione dei processi in
+            OS161?
+          </div>
+          <div class="answer">
+            Identifica univocamente un processo nel sistema, permettendo di
+            riferirsi ad esso nelle chiamate di sistema come waitpid() e nelle
+            tabelle globali.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il ruolo della funzione proc_search_pid() in OS161?
+          </div>
+          <div class="answer">
+            Restituisce il puntatore alla struttura proc associata a un dato
+            PID, utile per implementare waitpid() o per cercare figli da parte
+            del processo padre.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come funziona proc_search_pid()?</div>
+          <div class="answer">
+            Controlla che il PID sia valido (tra 1 e MAX_PROC), quindi ritorna
+            il puntatore nella tabella processTable.proc[pid], verificando che
+            il PID corrisponda.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Che cosa rappresenta la struttura _processTable in OS161?
+          </div>
+          <div class="answer">
+            È una tabella globale che tiene traccia di tutti i processi attivi,
+            inclusa la lista di puntatori a proc, l’indice dell’ultimo PID
+            assegnato (last_i), e un lock (lk) per l’accesso concorrente.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è lo scopo di proc_destroy() in OS161?
+          </div>
+          <div class="answer">
+            Dealloca le risorse associate a un processo, come p_sem o p_cv,
+            rimuove il processo dalla tabella, e libera la memoria strutturale,
+            garantendo che non rimangano processi zombie.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come funziona proc_end_waitpid()?</div>
+          <div class="answer">
+            Rimuove il processo dalla tabella dei processi, dealloca le
+            strutture di sincronizzazione (p_sem, p_cv, p_lock), e libera le
+            risorse usate dal processo, come parte della gestione di
+            terminazione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Perché proc_wait() non distrugge immediatamente il processo?
+          </div>
+          <div class="answer">
+            Per garantire che il padre possa recuperare lo stato di uscita del
+            figlio, proc_wait() aspetta che il processo termini, recupera lo
+            stato e poi distrugge la struttura proc.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come funziona proc_wait() in OS161?</div>
+          <div class="answer">
+            Usa un meccanismo di sincronizzazione (semaphore o CV+lock) per
+            bloccare il processo padre fino a quando il figlio termina. Quindi
+            legge p_status, chiama proc_destroy(), e restituisce lo stato di
+            uscita.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Che cosa succede quando un processo termina in sys__exit()?
+          </div>
+          <div class="answer">
+            Notifica il termine con thread_exit() ma non distrugge subito la
+            struttura proc, lasciando questa operazione a proc_wait() per
+            evitare processi zombie.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come vengono rimosse risorse di sincronizzazione in
+            proc_end_waitpid()?
+          </div>
+          <div class="answer">
+            Se si usa un semaforo, si chiama sem_destroy(). Se si usano CV e
+            lock, si chiamano cv_destroy() e lock_destroy(). Poi si rimuove il
+            processo dalla tabella.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Che cosa rappresenta p_status in una proc?</div>
+          <div class="answer">
+            Memorizza lo stato di uscita del processo, impostato da exit() e
+            letto da waitpid(); inizialmente a 0, poi aggiornato al termine.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Perché si utilizza una strategia circolare con last_i in
+            proc_init_waitpid()?
+          </div>
+          <div class="answer">
+            Per cercare in modo efficiente una posizione libera nella tabella
+            dei processi, ripartendo dall’ultimo assegnato, ottimizzando
+            l’allocazione dei PID.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Qual è il ruolo di KASSERT() nel sistema?</div>
+          <div class="answer">
+            È una macro di controllo che verifica condizioni critiche durante
+            l’esecuzione. Se una condizione fallisce, blocca il sistema e stampa
+            un messaggio di errore, facilitando il debugging.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come viene garantita la sicurezza delle operazioni sulla tabella dei
+            processi?
+          </div>
+          <div class="answer">
+            Utilizzando un spinlock (processTable.lk) per controllare l’accesso
+            concorrente e mantenere l’integrità dei dati.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Che cosa si intende con “processi zombie” in OS161?
+          </div>
+          <div class="answer">
+            Processi terminati che non sono ancora stati distrutti, ancora
+            presenti nella tabella dei processi, perché il padre non ha chiamato
+            waitpid() per recuperare lo stato.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il comportamento di proc_destroy() in relazione a waitpid()?
+          </div>
+          <div class="answer">
+            proc_destroy() viene chiamato da proc_wait() dopo aver recuperato lo
+            stato di uscita, garantendo che il processo sia correttamente
+            eliminato dalla tabella e tutte le risorse siano deallocate.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è lo scopo principale di proc_init_waitpid()?
+          </div>
+          <div class="answer">
+            Assegnare un PID unico, registrare il processo nella tabella
+            globale, e inizializzare le primitive di sincronizzazione (p_sem o
+            p_cv e p_lock) per supportare waitpid().
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come vengono allocate le risorse di sincronizzazione in
+            proc_init_waitpid()?
+          </div>
+          <div class="answer">
+            Se si utilizza un semaforo, si crea con sem_create(). Se si
+            utilizzano CV e lock, si creano con cv_create() e lock_create()
+            rispettivamente.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il ruolo di p_pid all’interno della struttura proc?
+          </div>
+          <div class="answer">
+            Identifica in modo univoco il processo nel sistema, assegnato da
+            proc_init_waitpid() e usato per cercare processi specifici.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa la funzione proc_end_waitpid()?</div>
+          <div class="answer">
+            Rimuove un processo dalla tabella, dealloca le primitive di
+            sincronizzazione, e libera le risorse associate a waitpid().
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come viene gestita la rimozione di un processo dalla tabella in
+            proc_end_waitpid()?
+          </div>
+          <div class="answer">
+            Acquisisce il lock sulla tabella, azzera l’entry corrispondente a
+            p_pid, poi dealloca p_sem o p_cv e p_lock secondo l’opzione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Che cosa rappresenta p_status in struct proc?
+          </div>
+          <div class="answer">
+            Lo stato di uscita del processo, vengono impostati da exit() e letti
+            da waitpid(), inizialmente a 0.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il ruolo di proc_destroy() nel ciclo di vita di un processo?
+          </div>
+          <div class="answer">
+            Dealloca le risorse della struttura proc, rimuove il processo dalla
+            tabella e libera la memoria, mantenendo il sistema pulito da
+            processi zombie.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come si assegna un nuovo p_pid in proc_init_waitpid()?
+          </div>
+          <div class="answer">
+            Si cerca un indice libero nella tabella usando un’operazione
+            circolare partendo da last_i+1 e, una volta trovato, si assegna
+            p_pid e si aggiorna last_i.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa succede se la tabella dei processi è piena in
+            proc_init_waitpid()?
+          </div>
+          <div class="answer">
+            La funzione panica con il messaggio "troppi processi. proc table is
+            full" quando non è possibile assegnare un PID.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Qual è la funzione di proc_search_pid()?</div>
+          <div class="answer">
+            Cerca e ritorna il puntatore alla struttura proc associata a uno
+            specifico PID, facilitando operazioni come waitpid().
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come viene garantita la sicurezza durante l’assegnazione dei PID?
+          </div>
+          <div class="answer">
+            Acquisendo il lock processTable.lk prima di modificare la tabella,
+            per garantire accesso esclusivo e integrità dei dati.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Che cosa succede quando un processo termina e exit() viene chiamato?
+          </div>
+          <div class="answer">
+            Aggiorna p_status con il valore di uscita, avvisa eventualmente il
+            padre tramite la primitive di sincronizzazione, ma la distruzione
+            del processo avviene tramite waitpid().
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Perché in proc_end_waitpid() si rimuove il processo dalla tabella?
+          </div>
+          <div class="answer">
+            Per evitare riferimenti pendenti e per mantenere aggiornata la
+            tabella, consentendo di riutilizzare gli slot liberi per nuovi
+            processi.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come si deallocano le primitive di sincronizzazione in
+            proc_end_waitpid()?
+          </div>
+          <div class="answer">
+            Se si usa un semaforo, si chiama sem_destroy(). Se si usa CV e lock,
+            si chiamano cv_destroy() e lock_destroy().
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è la funzione principale del ciclo di vita di proc in relazione
+            a waitpid()?
+          </div>
+          <div class="answer">
+            Creare, assegnare PID, sincronizzare con padre, attendere
+            terminazione, leggere stato di uscita, e infine deallocare le
+            risorse.
+          </div>
+        </div>
+      </div>
+
+      <!-- Sezione I/O -->
+      <div id="io" class="section-cards" style="display: none">
+        <div class="card">
+          <div class="question">
+            Cos'è la gestione I/O nei sistemi operativi?
+          </div>
+          <div class="answer">
+            È la componente che controlla l'interazione tra il sistema e i
+            dispositivi I/O, astratta tramite driver.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono i componenti hardware principali per l'I/O?
+          </div>
+          <div class="answer">
+            Porta, bus (es. PCIe), e controller (es. HBA).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come comunica la CPU con un controller I/O?
+          </div>
+          <div class="answer">
+            Tramite registri mappati in memoria o porte I/O.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è il polling e quando è inefficiente?</div>
+          <div class="answer">
+            Tecnica in cui la CPU controlla ripetutamente lo stato del
+            dispositivo; inefficiente con dispositivi lenti.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa sono gli interrupt e come migliorano l'efficienza?
+          </div>
+          <div class="answer">
+            Segnali hardware che avvisano la CPU quando un dispositivo è pronto,
+            evitando il polling continuo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Differenza tra interrupt, eccezioni e trappole?
+          </div>
+          <div class="answer">
+            Interrupt: evento esterno. Eccezione: errore interno. Trappola:
+            istruzione software.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è il DMA e quale vantaggio offre?</div>
+          <div class="answer">
+            Permette trasferimento diretto tra memoria e dispositivo senza CPU,
+            utile per grandi volumi di dati.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa il kernel per ottimizzare l'I/O?</div>
+          <div class="answer">
+            Gestisce buffering, caching, spooling, errori e pianificazione I/O.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un file system?</div>
+          <div class="answer">
+            Sistema che organizza e gestisce file e directory sui dispositivi di
+            memorizzazione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono le operazioni fondamentali sui file?
+          </div>
+          <div class="answer">
+            Creazione, lettura, scrittura, seek, eliminazione, truncamento.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un file lock e quali tipi esistono?</div>
+          <div class="answer">
+            Meccanismo di blocco per garantire l'accesso esclusivo; può essere
+            condiviso o esclusivo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Differenza tra accesso sequenziale e diretto?
+          </div>
+          <div class="answer">
+            Sequenziale: lettura/scrittura ordinata. Diretto: accesso a blocchi
+            specifici.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come funziona una directory tree-structured?
+          </div>
+          <div class="answer">
+            Ogni file ha un percorso unico; gli utenti possono creare
+            sottodirectory.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Quali metodi di accesso ai file esistono?</div>
+          <div class="answer">
+            Sequenziale, diretto, indicizzato (es. ISAM).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un FCB?</div>
+          <div class="answer">
+            File Control Block: contiene metadati del file, come permessi e
+            posizione sul disco.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono i principali metodi di allocazione dei file?
+          </div>
+          <div class="answer">Contigua, legata, indicizzata.</div>
+        </div>
+      </div>
+
+      <!-- Sezione Reclaiming -->
+      <div id="reclaiming" class="section-cards" style="display: none">
+        <div class="card">
+          <div class="question">Cos'è la strategia di reclaiming pages?</div>
+          <div class="answer">
+            Una tecnica del kernel che libera memoria quando la free list scende
+            sotto una soglia minima, tramite una routine detta "reaper", per
+            prevenire il thrashing e mantenere il sistema reattivo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è NUMA (Non-Uniform Memory Access)?</div>
+          <div class="answer">
+            È un'architettura in cui l'accesso alla memoria varia in base alla
+            CPU: ogni CPU accede più velocemente alla sua memoria locale
+            rispetto a quella delle altre CPU.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa causa il thrashing?</div>
+          <div class="answer">
+            Un numero eccessivo di page fault causati da processi con troppo
+            poche pagine disponibili, portando il sistema a passare più tempo a
+            gestire pagine che a eseguire codice.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come si può prevenire il thrashing?</div>
+          <div class="answer">
+            Limitando la multiprogrammazione o usando il Locality Model e
+            Working Set Model per allocare frame sufficienti ai processi.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa rappresenta il Working Set di un processo?
+          </div>
+          <div class="answer">
+            L'insieme delle pagine usate nelle ultime Δ operazioni di memoria,
+            rappresentando una stima della località attiva del processo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            In cosa consiste l'algoritmo Page-Fault Frequency (PFF)?
+          </div>
+          <div class="answer">
+            Monitora la frequenza dei page fault: se è alta, aumenta i frame al
+            processo; se è bassa, rimuove le pagine non usate.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Perché la memoria del kernel viene allocata separatamente?
+          </div>
+          <div class="answer">
+            Perché il kernel ha bisogno di allocazioni contigue e oggetti
+            piccoli e dinamici, per cui usa sistemi come buddy system e slab
+            allocator.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come funziona il buddy system?</div>
+          <div class="answer">
+            Divide la memoria in blocchi di potenze di due e li suddivide
+            ricorsivamente finché trova un blocco adeguato; al rilascio, i buddy
+            adiacenti possono essere uniti (coalescing).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è la slab allocation?</div>
+          <div class="answer">
+            È un metodo per allocare oggetti kernel in cache preinizializzate
+            (slab), evitando frammentazione e migliorando le performance.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Qual è lo scopo del dirty bit?</div>
+          <div class="answer">
+            Indica se una pagina è stata modificata: se non lo è, può essere
+            rimossa senza salvarla su disco durante un page replacement,
+            riducendo overhead.
+          </div>
+        </div>
+      </div>
+
+      <!-- Sezione Processi -->
+      <div id="processi" class="section-cards" style="display: none">
+        <div class="card">
+          <div class="question">
+            Cosa sono gli stack utente e kernel in OS161?
+          </div>
+          <div class="answer">
+            Ogni thread ha due stack: uno per l'esecuzione utente, uno per
+            l'esecuzione kernel (privilegiata).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa contiene il PCB (Process Control Block)?
+          </div>
+          <div class="answer">
+            Nome, numero thread attivi, spinlock, puntatore a addrspace del
+            processo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono i passaggi per eseguire un programma in OS161?
+          </div>
+          <div class="answer">
+            proc_create_runprogram → thread_fork → runprogram (creazione spazio
+            indirizzi, ELF, passaggio al codice utente).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come avviene una system call?</div>
+          <div class="answer">
+            L'utente genera un'interruzione, il kernel esegue la syscall e
+            ritorna in user mode.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è il demand paging?</div>
+          <div class="answer">
+            Tecnica che carica in memoria solo le pagine necessarie
+            all'esecuzione corrente del processo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">A cosa serve la free-frame list?</div>
+          <div class="answer">
+            Tiene traccia dei frame liberi da allocare in caso di page fault.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa accade in caso di page fault con frame liberi?
+          </div>
+          <div class="answer">
+            Il frame libero viene assegnato e la pagina viene caricata dal
+            disco.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa accade in caso di page fault senza frame liberi?
+          </div>
+          <div class="answer">
+            Si sceglie un victim frame da liberare (page replacement), si
+            aggiorna la page table e si carica la pagina richiesta.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è il copy-on-write?</div>
+          <div class="answer">
+            Tecnica in cui processi padre e figlio condividono pagine finché non
+            vengono modificate.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Qual è la formula dell'EAT?</div>
+          <div class="answer">
+            EAT = (1 - p) * ma + p * page fault time, con p = probabilità di
+            page fault.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cos'è l'algoritmo FIFO di page replacement?
+          </div>
+          <div class="answer">
+            Sostituisce la pagina più vecchia in memoria (prima entrata).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è l'anomalia di Belady?</div>
+          <div class="answer">
+            Con FIFO, più frame possono causare più page fault: comportamento
+            controintuitivo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cos'è l'algoritmo Ottimale di page replacement?
+          </div>
+          <div class="answer">
+            Sostituisce la pagina che non sarà usata per il periodo di tempo più
+            lungo.
+          </div>
+        </div>
+      </div>
+
+      <!-- Sezione Calcoli -->
+      <div id="calcoli" class="section-cards" style="display: none">
+        <div class="card">
+          <div class="question">
+            Quanti bit servono per identificare la pagina con un address space a
+            64 bit e pagine da 4KB?
+          </div>
+          <div class="answer">
+            Servono 52 bit per identificare la pagina (64 - 12).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quante voci avrebbe una page table a due livelli per 64-bit?
+          </div>
+          <div class="answer">
+            Primo livello: 2^42 voci; Secondo livello: 2^10 voci. Troppo grande
+            da gestire.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come si calcolano le voci in una page table convenzionale?
+          </div>
+          <div class="answer">
+            Numero voci = Virtual address space / Page size.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            E come si calcolano le voci in una Inverted Page Table?
+          </div>
+          <div class="answer">Numero voci = Physical memory / Page size.</div>
+        </div>
+        <div class="card">
+          <div class="question">Qual è la formula dell'EAT con TLB?</div>
+          <div class="answer">
+            EAT = hit_ratio × TLB_access + miss_ratio × (TLB_access +
+            memory_access × livelli_page_table)
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Esempio: 21-bit VA, 16-bit PA, 2KB pagine. Quante pagine logiche?
+          </div>
+          <div class="answer">2^21 / 2^11 = 2^10 = 1024 pagine logiche.</div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Esempio: 21-bit VA, 16-bit PA, 2KB pagine. Quante pagine fisiche?
+          </div>
+          <div class="answer">2^16 / 2^11 = 2^5 = 32 pagine fisiche.</div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Esempio: 32-bit VA, 512MB RAM, pagine da 4KB. Quante voci nella page
+            table?
+          </div>
+          <div class="answer">
+            Page table convenzionale: 2^20 voci; IPT: 2^17 voci.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Qual è il vantaggio dell'IPT?</div>
+          <div class="answer">
+            Una sola tabella per tutti i processi; riduce l'uso di memoria.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">E lo svantaggio dell'IPT?</div>
+          <div class="answer">
+            Richiede ricerche lente; migliorabile con hashing o TLB.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come funziona una hashed page table?</div>
+          <div class="answer">
+            Usa una funzione di hash sull'indirizzo virtuale per accedere alla
+            tabella; collisioni gestite con liste concatenate.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa accade in uno swap standard?</div>
+          <div class="answer">
+            L'intero processo viene spostato nel disco (backing store).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il vantaggio dello swapping con paging?
+          </div>
+          <div class="answer">
+            Solo alcune pagine vengono spostate, riducendo il tempo di swap.
+          </div>
+        </div>
+      </div>
+
+      <!-- Sezione Memoria -->
+      <div id="memoria" class="section-cards">
+        <div class="card">
+          <div class="question">Qual è lo scopo del file system?</div>
+          <div class="answer">
+            Gestire l'archiviazione, l'accesso e la protezione dei file su
+            dispositivi secondari.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono alcune strutture del file system?
+          </div>
+          <div class="answer">
+            Directory, attributi, spazio libero, journaling, controlli di
+            accesso.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa sono le system call?</div>
+          <div class="answer">
+            Un'interfaccia per richiedere servizi al kernel.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Differenza tra mutex e semaforo?</div>
+          <div class="answer">
+            Il mutex consente accesso esclusivo, il semaforo può controllare
+            accesso multiplo con contatore.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come viene garantita la protezione della memoria?
+          </div>
+          <div class="answer">
+            Tramite i registri base e limit: se l'indirizzo non rientra, si
+            genera un trap.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa la MMU?</div>
+          <div class="answer">
+            Traduce dinamicamente gli indirizzi logici in fisici aggiungendo
+            l'indirizzo di rilocazione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Differenza tra indirizzo logico e fisico?</div>
+          <div class="answer">
+            Logico è generato dalla CPU, fisico è usato dalla RAM.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono i principali algoritmi di allocazione dinamica?
+          </div>
+          <div class="answer">First-fit, best-fit, worst-fit.</div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è la frammentazione interna?</div>
+          <div class="answer">
+            Parte di memoria allocata ma non utilizzata (es. fine pagina).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è il paging?</div>
+          <div class="answer">
+            Tecnica che divide memoria logica in pagine e memoria fisica in
+            frame, per evitare frammentazione esterna.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Vantaggi del paging?</div>
+          <div class="answer">
+            Elimina frammentazione esterna, supporta esecuzione non contigua.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è l'offset in un indirizzo logico?</div>
+          <div class="answer">
+            È la posizione interna alla pagina da cui si accede.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come lavora la MMU con il paging?</div>
+          <div class="answer">
+            Estrae la pagina, consulta la page table per il frame, costruisce
+            l'indirizzo fisico combinando frame + offset.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Con paging, perché si ha frammentazione interna?
+          </div>
+          <div class="answer">
+            Perché l'ultima pagina può essere solo parzialmente utilizzata.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Qual è il vantaggio principale del paging?</div>
+          <div class="answer">
+            Permette gestione della memoria non contigua, eliminando la
+            frammentazione esterna.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali strutture compongono la memoria nel paging?
+          </div>
+          <div class="answer">
+            Pagine nella memoria logica e frame nella memoria fisica.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">A cosa serve la page table?</div>
+          <div class="answer">
+            Mappa le pagine logiche ai frame fisici per ciascun processo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come viene diviso un indirizzo logico nel paging?
+          </div>
+          <div class="answer">
+            In Page Number (indice nella page table) e Page Offset (posizione
+            nella pagina).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Qual è il ruolo del PTBR?</div>
+          <div class="answer">
+            Contiene l'indirizzo base della page table per il processo corrente.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è la TLB?</div>
+          <div class="answer">
+            Una cache hardware per le traduzioni indirizzi, accelera l'accesso
+            alla page table.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa accade in caso di TLB miss?</div>
+          <div class="answer">
+            Si accede alla page table in memoria, con penalità di tempo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come si proteggono le pagine di memoria?</div>
+          <div class="answer">
+            Tramite bit di protezione nella page table (es. read-only) e
+            valid-invalid bit.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa sono le pagine condivise?</div>
+          <div class="answer">
+            Pagine di codice condivise da più processi, mentre i dati restano
+            separati.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il problema della page table lineare?
+          </div>
+          <div class="answer">
+            Richiede troppa memoria contigua (es. 4 MB per processo).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è la soluzione alla page table lineare?
+          </div>
+          <div class="answer">
+            Usare una page table gerarchica (multi-livello).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come funziona una page table a due livelli?
+          </div>
+          <div class="answer">
+            L'indirizzo logico è diviso in tre parti: indice esterno, indice
+            interno e offset.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è la causa della frammentazione interna nel paging?
+          </div>
+          <div class="answer">
+            L'ultima pagina può essere parzialmente inutilizzata.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quanto spazio si spreca mediamente per frammentazione interna?
+          </div>
+          <div class="answer">In media, mezza pagina per processo.</div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono gli effetti di avere pagine piccole?
+          </div>
+          <div class="answer">
+            Meno frammentazione interna, ma più overhead (più entry nella page
+            table).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono gli effetti di avere pagine grandi?
+          </div>
+          <div class="answer">
+            Più frammentazione interna, ma meno overhead di gestione.
+          </div>
+        </div>
+      </div>
+
+      <!-- Sezione Thread -->
+      <div id="thread" class="section-cards" style="display: none">
+        <div class="card">
+          <div class="question">
+            Quali sono gli stati principali di un thread?
+          </div>
+          <div class="answer">Running, Ready, Blocked/Waiting, Terminated.</div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa contiene il TCB di un thread?</div>
+          <div class="answer">
+            Stack, PC, registri CPU, stato, e altre info per ripristino.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un context switch?</div>
+          <div class="answer">
+            È il salvataggio dello stato del thread attivo e il caricamento di
+            quello del thread successivo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono i campi chiave di struct thread in OS/161?
+          </div>
+          <div class="answer">
+            t_name, t_state, t_stack, t_context, t_cpu, t_proc, t_wchan_name.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è la relazione tra thread, processo e CPU?
+          </div>
+          <div class="answer">
+            Ogni thread appartiene a un processo; t_cpu indica il core dove è
+            attivo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa thread_fork()?</div>
+          <div class="answer">
+            Crea un nuovo thread, assegnandogli una funzione iniziale, nome e
+            processo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa thread_yield()?</div>
+          <div class="answer">
+            Il thread attivo cede volontariamente la CPU.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa thread_exit()?</div>
+          <div class="answer">Termina il thread e libera le sue risorse.</div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa thread_consider_migration()?</div>
+          <div class="answer">
+            Valuta la migrazione del thread su un altro core.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa thread_make_runnable()?</div>
+          <div class="answer">
+            Inserisce un thread nella coda dei pronti all'esecuzione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa thread_switch()?</div>
+          <div class="answer">
+            Gestisce il salvataggio e il caricamento del contesto tra due
+            thread.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è switchframe_init()?</div>
+          <div class="answer">
+            Prepara la struttura dati con lo stato dei registri CPU.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è switchframe_switch()?</div>
+          <div class="answer">
+            Funzione assembly che salva e carica i registri durante il cambio di
+            contesto.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Perché OS/161 usa assembly per il context switch?
+          </div>
+          <div class="answer">
+            Perché solo in assembly si possono manipolare direttamente i
+            registri della CPU MIPS.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Mostra solo la sezione selezionata
+      document.querySelectorAll(".section-btn").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          document.querySelectorAll(".section-cards").forEach((sec) => {
+            sec.style.display = "none";
+          });
+          document.getElementById(btn.dataset.section).style.display = "block";
+        });
+      });
+
+      // Gestione apertura card
+      function setupCardListeners(sectionId) {
+        document.querySelectorAll(`#${sectionId} .card`).forEach((card) => {
+          card.addEventListener("click", () => {
+            card.classList.toggle("open");
+          });
+        });
+      }
+
+      setupCardListeners("memoria");
+      setupCardListeners("thread");
+      setupCardListeners("calcoli");
+      setupCardListeners("processi");
+      setupCardListeners("reclaiming");
+      setupCardListeners("os161");
+      setupCardListeners("io");
+      setupCardListeners("dischi");
+    </script>
+  </body>
+</html>
