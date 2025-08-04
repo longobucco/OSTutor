@@ -150,7 +150,44 @@
         },
       ];
       const eserciziSettembre2024 = esercizi.slice(0, 10);
-      const eserciziGiugno2024 = []; // ora vuoto
+      const eserciziGiugno2024 = [
+        {
+          domanda:
+            "L'indirizzo 0x80803005 può essere un indirizzo logico utente, un indirizzo logico kernel o un indirizzo fisico?",
+          risposta: "Indirizzo logico kernel",
+          spiegazione:
+            "Non può essere un indirizzo logico utente perché è > 2GB. Non può essere un indirizzo fisico perché è maggiore di 4MB (la RAM disponibile). Può essere un indirizzo logico del kernel, ma nel contesto specifico non è compatibile con la RAM disponibile, che termina a 0x80400000.",
+        },
+        {
+          domanda:
+            "L'indirizzo 0x312010 può essere un indirizzo logico utente, un indirizzo logico kernel o un indirizzo fisico?",
+          risposta: "Indirizzo logico utente o indirizzo fisico",
+          spiegazione:
+            "L'indirizzo è < 2GB, quindi valido come indirizzo logico utente. È anche < 4MB, quindi può essere un indirizzo fisico valido. Non può essere un indirizzo logico del kernel perché è al di sotto del limite minimo del kernel (0x80000000).",
+        },
+        {
+          domanda:
+            "L'indirizzo 0x532100 può essere un indirizzo logico utente, un indirizzo logico kernel o un indirizzo fisico?",
+          risposta: "Indirizzo logico utente",
+          spiegazione:
+            "È < 2GB, quindi può essere un indirizzo logico utente. Tuttavia è > 4MB, quindi non può essere un indirizzo fisico (dato che la RAM ha solo 4MB). Non è un indirizzo logico del kernel, poiché è < 0x80000000.",
+        },
+        {
+          domanda:
+            "Dato l'indirizzo logico utente 0x4010, calcolare l'indirizzo fisico corrispondente usando: as_pbase1 = 0x100000, as_pbase2 = 0x200000, as_vbase1 = 0x3000, as_vbase2 = 0x6000, as_npages1 = 2, as_npages2 = 4",
+          risposta: "0x10001010",
+          spiegazione:
+            "Le pagine in OS/161 sono da 4KB (12 bit di offset). L'indirizzo 0x4010 appartiene alla pagina 4 ed ha un offset di 0x10. Il primo segmento utente parte da 0x3000 e ha 2 pagine (fino a 0x7000), quindi 0x4010 appartiene al segmento 1. L'offset rispetto alla base virtuale è 0x4010 - 0x3000 = 0x1010. Indirizzo fisico = 0x100000 + 0x1010 = 0x10001010.",
+        },
+        {
+          domanda:
+            "Perché in dumbvm la memoria fisica è allocata in multipli della dimensione di pagina, anche se lo schema è contiguo?",
+          risposta:
+            "Perché l'MMU del MIPS usa un TLB, quindi la traduzione logico-fisica richiede pagine",
+          spiegazione:
+            "La traduzione degli indirizzi logici in fisici è gestita dal TLB, che opera a livello di pagina. Per questo motivo, anche se l’allocazione è contigua, la memoria è gestita in unità di pagina. Le altre motivazioni sono errate: l’allocazione a pagina può aumentare la frammentazione, dumbvm non usa una page table, e kmalloc può richiedere qualsiasi dimensione.",
+        },
+      ];
       const eserciziList = document.getElementById("esercizi-list");
       const esameSelect = document.getElementById("esame-select");
 

@@ -65,14 +65,138 @@
   </head>
   <body>
     <h1>Esercizi Sistemi Operativi - Memoria Virtuale</h1>
-    <div id="esercizi-list"></div>
-    <noscript
-      ><p>
-        Abilita JavaScript per visualizzare gli esercizi in modo interattivo.
-      </p></noscript
+    <label
+      for="scheda-select"
+      style="font-weight: bold; margin-bottom: 1rem; display: block"
+      >Seleziona scheda esercizi:</label
     >
+    <select id="scheda-select" style="margin-bottom: 2rem">
+      <option value="giugno">Appello Giugno 2024</option>
+      <option value="settembre">Appello Settembre 2024</option>
+    </select>
+    <div id="esercizi-list"></div>
+    <noscript>
+      <p>
+        Abilita JavaScript per visualizzare gli esercizi in modo interattivo.
+      </p>
+    </noscript>
     <script>
-      const esercizi = [
+      // Esercizi giugno 2024 (primi 4)
+      const eserciziGiugno = [
+        {
+          domanda:
+            "La politica di rimpiazzamento delle pagine basata sul working set è una politica a dimensione fissa?",
+          risposta: "NO",
+          spiegazione:
+            "La dimensione del working set (insieme residente) cambia dinamicamente in base alle pagine accedute nella finestra temporale Delta, quindi non è fissa.",
+        },
+        {
+          domanda:
+            "Perché è difficile implementare la politica del working set?",
+          risposta: [
+            "Perché l'insieme residente va aggiornato anche in assenza di page fault",
+            "Perché la tecnica richiede di memorizzare il tempo dell’ultimo accesso per ogni pagina",
+          ],
+          spiegazione:
+            "Non è difficile scegliere un buon Delta: il valore influenza solo le prestazioni. Non è necessario mantenere una lista completa degli accessi, basta l'ultimo accesso. La difficoltà sta nel dover aggiornare il working set anche quando non ci sono page fault, e nel dover tenere traccia del tempo dell'ultimo accesso per ogni pagina.",
+        },
+        {
+          domanda:
+            "Considera una strategia LRU basata su pila (stack) con 5 frame. Dato il reference string: 4, 6, 4, 1, 7, 8, 2, 2, 3 (T1), 4, 2 (T2). Rappresenta lo stack al tempo T1 (dopo il riferimento a 3) e T2 (dopo il secondo riferimento a 2).",
+          risposta: {
+            T1: "3,2,8,7,1",
+            T2: "2,4,3,2,8",
+          },
+          spiegazione:
+            "La pila viene aggiornata spostando in cima la pagina più recentemente usata. A T1 la pila contiene: 3,2,8,7,1. Dopo l'accesso alla pagina 4 e poi a 2 (T2), la pila diventa: 2,4,3,2,8.",
+        },
+        {
+          domanda:
+            "Due sequenze di riferimento w1 e w2 (di uguale lunghezza) vengono valutate con due algoritmi di rimpiazzamento A1 e A2, con p2 = 2*p1. A1 produce lo stesso numero di page fault (5000) per entrambe le sequenze. A2 produce un numero diverso di fault per w1 e w2, ma la somma è 10000. Se A1 ha una frequenza di page fault del 20% superiore rispetto ad A2, calcola F1 e F2 di A2.",
+          risposta: {
+            F1_A2: 2500,
+            F2_A2: 7500,
+          },
+          spiegazione:
+            "Sappiamo che F(A1) = p1 * (5000 + 2 * 5000) = 15000 * p1. Dato che F(A1) è il 20% in più di F(A2), allora: 1.2 * (x + 2y) = 15000 → x + 2y = 12500. Insieme a x + y = 10000, risolvendo il sistema otteniamo: x = 2500 e y = 7500.",
+        },
+        {
+          domanda:
+            "Un file binario di dimensione 23033 KB è memorizzato in un file system con allocazione indicizzata e blocchi di 4KB. Calcolare il numero esatto di blocchi dati e blocchi indice utilizzati, e la frammentazione interna per entrambi.",
+          risposta: {
+            blocchi_dati: 5759,
+            blocchi_indice: 6,
+            frammentazione_interna_dati: "3KB",
+            frammentazione_interna_indici: "1516B",
+          },
+          spiegazione:
+            "Ogni blocco dati è di 4KB, quindi servono ceil(23033KB / 4KB) = 5759 blocchi dati. L’ultimo blocco dati è riempito solo al 25%, quindi la frammentazione interna nei dati è 0.75 * 4KB = 3KB. Ogni blocco indice può contenere 1023 puntatori (4096 / 1024) a blocchi dati, più uno per collegare il blocco indice successivo. Per contenere 5759 blocchi dati servono ceil(5759 / 1023) = 6 blocchi indice. La frammentazione interna nei blocchi indice è data dagli slot non usati: 6 * 1023 - 5759 = 379 slot inutilizzati → 379 * 4B = 1516B.",
+        },
+        {
+          domanda:
+            "Un file di testo di 15300 byte contiene linee di lunghezza variabile, ognuna terminata da ‘\\n’. La lunghezza media è di 50 caratteri (escluso ‘\\n’), e la lunghezza massima è 100. Quante righe contiene il file?",
+          risposta: 300,
+          spiegazione:
+            "La lunghezza media effettiva di ogni riga è 51 byte (50 caratteri + 1 carattere ‘\\n’). Quindi: numero di righe = 15300 / 51 = 300 righe esatte. Non è necessario indicare un intervallo minimo/massimo.",
+        },
+        {
+          domanda:
+            "Nel file precedente (B), la presenza di righe di lunghezza variabile influisce sulla strategia di allocazione del file system?",
+          risposta: "NO",
+          spiegazione:
+            "L’allocazione dei blocchi su disco è gestita dal file system ed è indipendente dalla struttura del contenuto del file. Che il file contenga righe fisse o variabili, l’allocazione è fatta a blocchi di dimensione fissa.",
+        },
+        {
+          domanda:
+            "Tutti i blocchi allocati contengono lo stesso numero di righe, calcolabile come dimensione del blocco diviso la lunghezza massima della riga?",
+          risposta: "NO",
+          spiegazione:
+            "Il numero di righe per blocco dipende dalla lunghezza reale delle righe, che è variabile. Anche se il massimo è 100, alcune righe possono essere più corte. Inoltre, questa è una questione di livello applicativo: il file system gestisce blocchi di byte, non righe di testo.",
+        },
+        {
+          domanda:
+            "La reach del TLB diminuisce quando aumenta la dimensione della pagina?",
+          risposta: "NO",
+          spiegazione:
+            "La reach del TLB, cioè la quantità di memoria virtuale che può essere mappata tramite il TLB, aumenta con l’aumentare della dimensione delle pagine, perché il numero di entry nel TLB resta fisso, ma ciascuna entry copre una porzione maggiore di memoria.",
+        },
+        {
+          domanda:
+            "La frammentazione aumenta quando aumenta la dimensione della pagina, perché sono necessarie partizioni contigue più grandi?",
+          risposta: "NO",
+          spiegazione:
+            "La frammentazione interna effettivamente aumenta con pagine più grandi, ma la motivazione indicata è errata: nella paginazione non c'è allocazione contigua, quindi il problema non dipende da partizioni contigue.",
+        },
+        {
+          domanda:
+            "Il prepaging è utile solo se la probabilità che una pagina pre-caricata venga realmente usata è superiore all'80%?",
+          risposta: "NO",
+          spiegazione:
+            "Il prepaging è utile quando le pagine pre-caricate hanno un’alta probabilità di essere usate, ma non esiste una soglia fissa del tipo 'superiore all'80%'.",
+        },
+        {
+          domanda:
+            "Tutte le strutture dati del kernel richiedono allocazione contigua?",
+          risposta: "NO",
+          spiegazione:
+            "Solo alcune strutture del kernel richiedono allocazione contigua (per efficienza o per vincoli hardware), come ad esempio la tabella delle pagine. Molte altre strutture possono essere allocate in modo non contiguo.",
+        },
+        {
+          domanda: "L’allocatore slab usa solo dimensioni pari a potenze di 2?",
+          risposta: "NO",
+          spiegazione:
+            "L’allocatore buddy utilizza taglie pari a potenze di 2. Lo slab allocator invece è progettato per ridurre la frammentazione e può usare dimensioni arbitrarie basate sugli oggetti richiesti.",
+        },
+        {
+          domanda:
+            "Una free list di pagine ha in media una frammentazione interna pari a mezza pagina?",
+          risposta: "NO",
+          spiegazione:
+            "Le free list non contengono dati, ma solo riferimenti a pagine libere. Quindi non introducono frammentazione interna: rappresentano solo spazio disponibile.",
+        },
+      ];
+      // Esercizi settembre 2024 (tutti gli altri)
+      const eserciziSettembre = [
         {
           domanda:
             "In un sistema di memoria virtuale con un grado fisso di multiprogrammazione, il thrashing può verificarsi anche se la somma dei working set di tutti i processi è inferiore alla memoria fisica disponibile, ma l'algoritmo di sostituzione della pagina non è ottimizzato?",
@@ -134,38 +258,64 @@
           spiegazione: `<strong>1. Velocità di trasferimento:</strong><br>Ogni traccia contiene 512B × 300 = 150 KB.<br>Velocità di rotazione: 7.200 giri/min = 120 giri/s dunque 1 giro in 1/120 s = 8.33 ms.<br>150 KB × 120 = <strong>18.000 KB/s</strong> = <strong>17.58 MB/s</strong>.<br><br><strong>2. Arresto testina su un piatto:</strong><br>1 piatto = 150 KB × 5.000 tracce = 732.4 MB.<br>Capacità totale iniziale = 8.58 GB.<br>Capacità ridotta = 8.58 GB - 732.4 MB = <strong>7.87 GB</strong>.<br><br><strong>3. Tempo di lettura file 1 GB su 200 tracce:</strong><br>Tempo di ricerca medio = 4 ms.<br>Latenza rotazionale media = 4.165 ms.<br>Tempo per giro = 8.33 ms.<br>Tempo totale = 200 × (4 + 4.165 + 8.33) = 3.299 s.<br>Nota: 1 GB non può stare in sole 200 tracce, servono circa 583 tracce.<br>Tempo totale per 583 tracce = 583 × (4 + 4.165 + 8.33) ≈ <strong>8.25 s</strong>.<br>Se si leggessero solo 200 tracce: <strong>3.3 s</strong>.<br>La stima dipende dalla reale distribuzione del file sulle tracce.`,
         },
       ];
-      const eserciziList = document.getElementById("esercizi-list");
-      esercizi.forEach((ex, idx) => {
-        const card = document.createElement("div");
-        card.className = "esercizio-card";
-        card.innerHTML = `
-        <div class="esercizio-header" tabindex="0" role="button" aria-expanded="false">
-          <span>ESERCIZIO ${idx + 1}</span>
-          <span class="arrow">&#9654;</span>
-        </div>
-        <div class="esercizio-content">
-          <div class="domanda">${ex.domanda}</div>
-          <div class="risposta">Risposta: ${ex.risposta}</div>
-          <div class="spiegazione">${ex.spiegazione}</div>
-        </div>
-      `;
-        const header = card.querySelector(".esercizio-header");
-        const content = card.querySelector(".esercizio-content");
-        const arrow = card.querySelector(".arrow");
-        content.style.display = "none";
-        header.addEventListener("click", function () {
-          const expanded = content.style.display === "block";
-          content.style.display = expanded ? "none" : "block";
-          arrow.innerHTML = expanded ? "&#9654;" : "&#9660;";
-          header.setAttribute("aria-expanded", !expanded);
-        });
-        header.addEventListener("keypress", function (e) {
-          if (e.key === "Enter" || e.key === " ") {
-            header.click();
+
+      function renderEsercizi(esercizi) {
+        const eserciziList = document.getElementById("esercizi-list");
+        eserciziList.innerHTML = "";
+        esercizi.forEach((ex, idx) => {
+          const card = document.createElement("div");
+          card.className = "esercizio-card";
+          let rispostaHtml = "";
+          if (typeof ex.risposta === "object" && !Array.isArray(ex.risposta)) {
+            rispostaHtml = Object.entries(ex.risposta)
+              .map(([k, v]) => `<div><strong>${k}:</strong> ${v}</div>`)
+              .join("");
+          } else if (Array.isArray(ex.risposta)) {
+            rispostaHtml = ex.risposta.map((r) => `<div>${r}</div>`).join("");
+          } else {
+            rispostaHtml = `Risposta: ${ex.risposta}`;
           }
+          card.innerHTML = `
+            <div class="esercizio-header" tabindex="0" role="button" aria-expanded="false">
+              <span>ESERCIZIO ${idx + 1}</span>
+              <span class="arrow">&#9654;</span>
+            </div>
+            <div class="esercizio-content">
+              <div class="domanda">${ex.domanda}</div>
+              <div class="risposta">${rispostaHtml}</div>
+              <div class="spiegazione">${ex.spiegazione}</div>
+            </div>
+          `;
+          const header = card.querySelector(".esercizio-header");
+          const content = card.querySelector(".esercizio-content");
+          const arrow = card.querySelector(".arrow");
+          content.style.display = "none";
+          header.addEventListener("click", function () {
+            const expanded = content.style.display === "block";
+            content.style.display = expanded ? "none" : "block";
+            arrow.innerHTML = expanded ? "&#9654;" : "&#9660;";
+            header.setAttribute("aria-expanded", !expanded);
+          });
+          header.addEventListener("keypress", function (e) {
+            if (e.key === "Enter" || e.key === " ") {
+              header.click();
+            }
+          });
+          eserciziList.appendChild(card);
         });
-        eserciziList.appendChild(card);
-      });
+      }
+
+      const schedaSelect = document.getElementById("scheda-select");
+      function updateScheda() {
+        if (schedaSelect.value === "giugno") {
+          renderEsercizi(eserciziGiugno);
+        } else {
+          renderEsercizi(eserciziSettembre);
+        }
+      }
+      schedaSelect.addEventListener("change", updateScheda);
+      // Mostra di default la scheda di giugno
+      renderEsercizi(eserciziGiugno);
     </script>
   </body>
 </html>

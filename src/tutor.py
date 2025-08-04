@@ -37,12 +37,20 @@ def domanda_gia_fatta(domanda, domande_fatte):
 def fai_quiz(contexto, progressi):
     prompt = "Genera una singola domanda d'esame nuova e utile, diversa da queste:\n\n"
     gia_fatte = [d["domanda"] for d in progressi["domande_fatte"]]
-    prompt += "\n".join(f"- {d}" for d in gia_fatte[-10:])
+    if gia_fatte:
+        prompt += "\n".join(f"- {d}" for d in gia_fatte[-10:])
     prompt += "\n\nSolo una domanda, chiara e completa."
     domanda = ask_ai(prompt, contexto).strip()
-    print("\n🤖 Domanda:", domanda)
-    valutazione = input(
-        "Hai risposto correttamente? (corretto / sbagliato / da_rivedere): ").strip().lower()
+    if not domanda:
+        print("Errore: impossibile generare una domanda. Riprova più tardi.")
+        return
+    print("\nDomanda:", domanda)
+    while True:
+        valutazione = input(
+            "Hai risposto correttamente? (corretto / sbagliato / da_rivedere): ").strip().lower()
+        if valutazione in ["corretto", "sbagliato", "da_rivedere"]:
+            break
+        print("Valore non valido. Inserisci: corretto / sbagliato / da_rivedere.")
     progressi["domande_fatte"].append({
         "domanda": domanda,
         "valutazione": valutazione
@@ -128,7 +136,7 @@ if __name__ == "__main__":
     esercizi_os = estrai_esercizi("exam-os.html")
     esercizi_os161 = estrai_esercizi("exam-os161.html")
     progressi = carica_progressi()
-    print("OSTutor avviato. Comandi: 'flashcard', 'esercizio', 'spiega', 'quiz', 'fine'")
+    print("OSTutor avviato. Comandi: 'flashcard', 'esercizio', 'spiega', 'fine'")
     while True:
         cmd = input("\n🧑‍🎓 Tu: ").strip().lower()
         if cmd in ["fine", "exit", "esci"]:
@@ -169,14 +177,14 @@ if __name__ == "__main__":
                 "valutazione": valutazione
             })
             salva_progressi(progressi)
-        elif cmd == "quiz":
-            contexto = "[TEORIA]\n" + "\n".join(q for q, _ in flashcards) + "\n[ESERCIZI]\n" + "\n".join(
-                ex["domanda"] for ex in esercizi_os + esercizi_os161)
-            fai_quiz(contexto, progressi)
+        # elif cmd == "quiz":
+        #     contexto = "[TEORIA]\n" + "\n".join(q for q, _ in flashcards) + "\n[ESERCIZI]\n" + "\n".join(
+        #         ex["domanda"] for ex in esercizi_os + esercizi_os161)
+        #     fai_quiz(contexto, progressi)
         elif cmd == "riprendi":
             print("Domande già fatte:")
             for d in progressi["domande_fatte"]:
                 print(f"- {d['domanda']} [{d['valutazione']}]")
         else:
             print(
-                "Comando non riconosciuto. Usa 'flashcard', 'esercizio', 'spiega', 'quiz', 'riprendi', 'fine'.")
+                "Comando non riconosciuto. Usa 'flashcard', 'esercizio', 'spiega', 'riprendi', 'fine'.")
