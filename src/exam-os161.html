@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Esercizi OS/161 - Gestione Memoria</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 2rem;
+        background-color: #f9f9f9;
+      }
+      h1 {
+        color: #2c3e50;
+        margin-bottom: 2rem;
+      }
+      #esercizi-list {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+      .esercizio-card {
+        background: #fff;
+        border-left: 5px solid #3498db;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1rem;
+        padding: 0;
+        border-radius: 6px;
+        overflow: hidden;
+      }
+      .esercizio-header {
+        cursor: pointer;
+        padding: 1rem;
+        font-weight: bold;
+        background: #eaf6fb;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        outline: none;
+      }
+      .esercizio-header:focus {
+        box-shadow: 0 0 0 2px #3498db;
+      }
+      .arrow {
+        font-size: 1.2em;
+        transition: transform 0.2s;
+      }
+      .esercizio-content {
+        padding: 1rem;
+        border-top: 1px solid #eee;
+        display: none;
+      }
+      .domanda {
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+      }
+      .risposta {
+        color: #27ae60;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+      }
+      .spiegazione {
+        margin-top: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Esercizi OS/161 - Gestione Memoria</h1>
+    <label for="esame-select" style="font-weight: bold; margin-right: 1rem"
+      >Seleziona esame:</label
+    >
+    <select id="esame-select" style="margin-bottom: 2rem">
+      <option value="settembre2024">Appello Settembre 2024</option>
+      <option value="giugno2024">Appello Giugno 2024</option>
+    </select>
+    <div id="esercizi-list"></div>
+    <noscript>
+      <p>
+        Abilita JavaScript per visualizzare gli esercizi in modo interattivo.
+      </p>
+    </noscript>
+    <script>
+      const esercizi = [
+        {
+          domanda:
+            "Sebbene la soluzione proposta per supportare la deallocazione della memoria (freeppages) sia basata su una bitmap, potrebbe essere utilizzata anche una lista concatenata.",
+          risposta: "TRUE",
+          spiegazione:
+            "Una lista concatenata è un'alternativa possibile alla bitmap per gestire i blocchi di memoria libera, anche se meno efficiente in termini di accesso e frammentazione. OS/161 usa una bitmap, ma una linked list sarebbe concettualmente valida.",
+        },
+        {
+          domanda:
+            "La funzione ram_stealmem alloca in modo incrementale la memoria a partire dal primo indirizzo disponibile dopo aver fatto load del kernel.",
+          risposta: "TRUE",
+          spiegazione:
+            "ram_stealmem alloca memoria in modo grezzo e lineare, partendo dall’indirizzo subito dopo la fine del kernel, senza supportare la deallocazione. È usata solo all'inizio, prima dell'inizializzazione completa della gestione della memoria.",
+        },
+        {
+          domanda:
+            "Quando si utilizza una bitmap per tenere traccia della RAM allocata/libera, è necessario un secondo array che memorizzi le dimensioni delle partizioni allocate per l'allocazione sia della memoria dinamica del kernel che dei processi utente.",
+          risposta: "FALSE",
+          spiegazione:
+            "Una bitmap tiene traccia dello stato di ciascun frame (libero/occupato), ma non richiede necessariamente un secondo array per le dimensioni delle allocazioni. Le dimensioni vengono gestite logicamente dal gestore della memoria, non servono strutture separate in questo caso.",
+        },
+        {
+          domanda:
+            "Lo stack di un processo utente non viene allocato (in dumbvm) chiamando ram_stealmem, perché la dimensione dello stack è una costante e lo stack si trova sempre agli stessi indirizzi logici.",
+          risposta: "FALSE",
+          spiegazione:
+            "In dumbvm, lo stack viene comunque allocato in RAM con ram_stealmem, come ogni altra parte della memoria utente (stack, heap, text, data). Il fatto che abbia un indirizzo logico fisso non implica che non serva l’allocazione fisica.",
+        },
+        {
+          domanda:
+            "Lo schema di allocazione utilizzato da ram_stealmem non consentirà l'intercalare partizioni contigue del kernel e dei processi user (in altre parole, le partizioni del kernel e le partizioni user non saranno mai interlacciate).",
+          risposta: "FALSE",
+          spiegazione:
+            "Poiché ram_stealmem alloca memoria in modo sequenziale prima che il sistema sia completamente operativo, non è garantita alcuna separazione o intercalazione strutturata tra memoria kernel e user. Anzi, possono trovarsi mescolate in memoria fisica.",
+        },
+        {
+          domanda:
+            "La funzione ram_stealmem viene chiamata per l'allocazione della memoria sia del kernel (memoria dinamica) che dei processi user.",
+          risposta: "TRUE",
+          spiegazione:
+            "In OS/161, prima che sia inizializzato un sistema più avanzato di gestione della memoria (es. con freeppages o bitmap), sia la memoria dinamica del kernel che quella utente vengono allocate tramite ram_stealmem.",
+        },
+        {
+          domanda: "Convertire l'indirizzo logico 0x8110 in indirizzo fisico",
+          risposta: "0x201110",
+          spiegazione:
+            "L'indirizzo 0x8110 rientra nel primo segmento dello spazio utente, che inizia da as_vbase1 = 0x3000 e si estende per 3 pagine da 4 KB, quindi fino a 0xF000. Essendo 0x8110 compreso tra 0x3000 e 0xF000, si trova in questo intervallo. Il corrispondente indirizzo fisico si ottiene sommando all'indirizzo base fisico as_pbase1 = 0x200000 l'offset dell'indirizzo virtuale all'interno del segmento: 0x8110 - 0x3000 = 0x5110. Quindi l'indirizzo fisico è 0x200000 + 0x5110 = 0x201110.",
+        },
+        {
+          domanda: "Convertire l'indirizzo logico 0x6500 in indirizzo fisico",
+          risposta: "0x80006500 (fuori dallo user space)",
+          spiegazione:
+            "L'indirizzo 0x6500 non appartiene a nessuno dei due segmenti utente: non è compreso né tra 0x3000 e 0xF000 (primo segmento), né tra 0x7000 e 0x17000 (secondo segmento). In OS/161, se un indirizzo non rientra nello spazio utente e non appartiene a una regione valida, viene considerato appartenente al kernel. In dumbvm, gli indirizzi del kernel sono mappati 1:1, quindi 0x6500 è interpretato come fisico nel kernel space → 0x80006500.",
+        },
+        {
+          domanda:
+            "Convertire l'indirizzo logico 0x7FFFE010 in indirizzo fisico",
+          risposta: "0x3FE010",
+          spiegazione:
+            "L'indirizzo 0x7FFFE010 si trova nello spazio di stack utente. In dumbvm, lo stack utente occupa le ultime 18 pagine da 4 KB prima dell'indirizzo USERSTACK = 0x80000000. Quindi lo stack inizia a 0x80000000 - 18×4096 = 0x7FFFC000. Poiché 0x7FFFE010 è compreso tra 0x7FFFC000 e 0x80000000, appartiene allo stack. Il base fisico dello stack è as_stackpbase = 0x400000, e l'offset è 0x7FFFE010 - 0x7FFFC000 = 0x2010. Sommando: 0x400000 + 0x2010 = 0x3FE010.",
+        },
+        {
+          domanda:
+            "Convertire l'indirizzo logico 0x805000B0 in indirizzo fisico",
+          risposta: "0x5000B0",
+          spiegazione:
+            "L'indirizzo 0x805000B0 si trova nello spazio del kernel, poiché è maggiore di 0x80000000. In dumbvm, lo spazio del kernel è mappato 1:1, cioè l'indirizzo fisico corrisponde all'indirizzo logico meno 0x80000000. Calcolando: 0x805000B0 - 0x80000000 = 0x5000B0.",
+        },
+      ];
+      const eserciziSettembre2024 = esercizi.slice(0, 10);
+      const eserciziGiugno2024 = []; // ora vuoto
+      const eserciziList = document.getElementById("esercizi-list");
+      const esameSelect = document.getElementById("esame-select");
+
+      function renderEsercizi(esame) {
+        eserciziList.innerHTML = "";
+        let gruppoDiv = document.createElement("div");
+        let eserciziDaMostrare = [];
+        let titolo = "";
+        if (esame === "settembre2024") {
+          titolo = "Appello Settembre 2024";
+          eserciziDaMostrare = eserciziSettembre2024;
+        } else {
+          titolo = "Appello Giugno 2024";
+          eserciziDaMostrare = eserciziGiugno2024;
+        }
+        gruppoDiv.innerHTML = `<h2 style=\"color:#2980b9;margin-top:2rem;\">${titolo}</h2>`;
+        eserciziList.appendChild(gruppoDiv);
+        eserciziDaMostrare.forEach((ex, idx) => {
+          const card = document.createElement("div");
+          card.className = "esercizio-card";
+          card.innerHTML = `
+          <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"false\">
+            <span>ESERCIZIO ${idx + 1}</span>
+            <span class=\"arrow\">&#9654;</span>
+          </div>
+          <div class=\"esercizio-content\">
+            <div class=\"domanda\">${ex.domanda}</div>
+            <div class=\"risposta\">Risposta: ${ex.risposta}</div>
+            <div class=\"spiegazione\">${ex.spiegazione}</div>
+          </div>
+        `;
+          const header = card.querySelector(".esercizio-header");
+          const content = card.querySelector(".esercizio-content");
+          const arrow = card.querySelector(".arrow");
+          content.style.display = "none";
+          header.addEventListener("click", function () {
+            const expanded = content.style.display === "block";
+            content.style.display = expanded ? "none" : "block";
+            arrow.innerHTML = expanded ? "&#9654;" : "&#9660;";
+            header.setAttribute("aria-expanded", !expanded);
+          });
+          header.addEventListener("keypress", function (e) {
+            if (e.key === "Enter" || e.key === " ") {
+              header.click();
+            }
+          });
+          eserciziList.appendChild(card);
+        });
+      }
+
+      esameSelect.addEventListener("change", function (e) {
+        renderEsercizi(e.target.value);
+      });
+      // Mostra di default settembre 2024
+      renderEsercizi("settembre2024");
+    </script>
+  </body>
+</html>
