@@ -19,3 +19,25 @@ OSTutor è una piattaforma interattiva pensata per aiutare gli studenti a compre
 ## Destinatari
 
 Il progetto è pensato per studenti universitari di informatica, ingegneria informatica o chiunque voglia approfondire i concetti di base dei sistemi operativi in modo pratico e guidato. Grazie all'integrazione del tutor digitale, OSTutor è adatto sia per lo studio autonomo che per l'utilizzo in contesti didattici strutturati.
+
+## Prerequisiti
+
+- Python 3.x installato sul sistema
+- Browser web
+
+## Cartella flashcards e PDF
+
+La cartella `flashcards/` contiene materiali di supporto allo studio, tra cui il file `OS_flashcards.pdf` che raccoglie domande e risposte rapide sui principali argomenti di sistemi operativi.
+Sono inoltre presenti PDF di approfondimento nella cartella `src/OSTutor/` (ad esempio `OS-Internals.pdf`).
+
+## Contribuire
+
+Contributi, suggerimenti e nuove proposte di esercizi sono benvenuti!
+Per contribuire:
+
+- Forka il repository e crea una nuova branch per le tue modifiche.
+- Invia una pull request descrivendo chiaramente le modifiche proposte.
+- Puoi anche segnalare errori o suggerimenti tramite la sezione Issues di GitHub.
+
+## Licenza
+Questo progetto è rilasciato sotto la licenza MIT. Consulta il file `LICENSE` per maggiori dettagli.
