@@ -151,7 +151,7 @@
         },
       ];
       const eserciziSettembre2024 = esercizi.slice(0, 10);
-      // Nuova sezione Gennaio 2025
+
       const eserciziGennaio2025 = [
         {
           domanda:
@@ -180,6 +180,34 @@
             '#include "opt-project.h" seguito da #if OPT_PROJECT project_init(); #endif',
           spiegazione:
             "La macro OPT_PROJECT, definita in opt-project.h, consente di includere codice solo quando l’opzione è abilitata.",
+        },
+        {
+          domanda:
+            "Quale, tra trapframe e switchframe, viene usato per gestire una system call?",
+          risposta: "Trapframe",
+          spiegazione:
+            "Viene utilizzato un trapframe, perché una chiamata di sistema viene gestita tramite un protocollo trap/interrupt (una chiamata di sistema è una sorta di interruzione software).",
+        },
+        {
+          domanda:
+            "Un trapframe viene allocato nello user stack o nello stack a livello kernel di un processo?",
+          risposta: "Stack a livello kernel",
+          spiegazione:
+            "Il trapframe viene allocato nello stack del kernel, poiché è una struttura dati del kernel. Lasciarlo nello user space lo renderebbe vulnerabile a modifiche da parte del programma utente.",
+        },
+        {
+          domanda:
+            "Perché i dispositivi di IO sono mappati in kseg1? È possibile che un dispositivo di IO sia mappato in kseg0?",
+          risposta: "Sono mappati in kseg1; non è corretto mapparli in kseg0.",
+          spiegazione:
+            "I dispositivi IO sono mappati in kseg1 perché questa regione non è mappata in cache. Le operazioni su dispositivi devono essere dirette e non passare dalla cache. Kseg0, invece, è cache-mapped e quindi non adatto.",
+        },
+        {
+          domanda:
+            "Cosa succede se un processo user chiama read(fd, buf, nb), dove buf è un indirizzo in kseg0? Cosa dovrebbe fare la system call SYS_read, al fine di gestire correttamente questo caso?",
+          risposta: "È un errore: SYS_read deve rifiutare la chiamata.",
+          spiegazione:
+            "L'indirizzo di destinazione appartiene al kernel e non dovrebbe essere accessibile da codice utente. SYS_read dovrebbe controllare la validità dell’indirizzo e rifiutare l’operazione per sicurezza, restituendo un errore.",
         },
       ];
       const eserciziGiugno2024 = [
