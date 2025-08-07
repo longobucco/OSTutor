@@ -70,6 +70,7 @@
     >
     <select id="esame-select" style="margin-bottom: 2rem">
       <option value="settembre2024">Appello Settembre 2024</option>
+      <option value="gennaio2025">Appello Gennaio 2025</option>
       <option value="giugno2024">Appello Giugno 2024</option>
     </select>
     <div id="esercizi-list"></div>
@@ -150,7 +151,75 @@
         },
       ];
       const eserciziSettembre2024 = esercizi.slice(0, 10);
-      const eserciziGiugno2024 = []; // ora vuoto
+      // Nuova sezione Gennaio 2025
+      const eserciziGennaio2025 = [
+        {
+          domanda:
+            "Le modifiche a conf.kern + esecuzione di ./config PROJECT sono sufficienti per compilare syscall/project.c con bmake depend + bmake?",
+          risposta: "No",
+          spiegazione:
+            "Le modifiche definiscono l'opzione e il file opzionale, ma affinché il file venga effettivamente compilato, l'opzione deve essere abilitata esplicitamente nel file PROJECT con la direttiva 'options project'.",
+        },
+        {
+          domanda:
+            "Quale file viene generato da ./config PROJECT? È sempre generato o solo se 'options project' è presente in PROJECT?",
+          risposta: "opt-project.h (sempre generato)",
+          spiegazione:
+            "Il file viene generato automaticamente se 'conf.kern' contiene 'defoption project', anche se 'options project' non è presente nel file PROJECT.",
+        },
+        {
+          domanda: "Cosa contiene il file opt-project.h?",
+          risposta: "#define OPT_PROJECT 1 oppure #define OPT_PROJECT 0",
+          spiegazione:
+            "Include anche la protezione contro inclusioni multiple. Il valore 1 o 0 dipende dalla presenza o assenza della riga 'options project' nel file PROJECT.",
+        },
+        {
+          domanda:
+            "Come si può compilare project_init() in main.c solo se l’opzione project è attiva?",
+          risposta:
+            '#include "opt-project.h" seguito da #if OPT_PROJECT project_init(); #endif',
+          spiegazione:
+            "La macro OPT_PROJECT, definita in opt-project.h, consente di includere codice solo quando l’opzione è abilitata.",
+        },
+      ];
+      const eserciziGiugno2024 = [
+        {
+          domanda:
+            "L'indirizzo 0x80803005 può essere un indirizzo logico utente, un indirizzo logico kernel o un indirizzo fisico?",
+          risposta: "Indirizzo logico kernel",
+          spiegazione:
+            "Non può essere un indirizzo logico utente perché è > 2GB. Non può essere un indirizzo fisico perché è maggiore di 4MB (la RAM disponibile). Può essere un indirizzo logico del kernel, ma nel contesto specifico non è compatibile con la RAM disponibile, che termina a 0x80400000.",
+        },
+        {
+          domanda:
+            "L'indirizzo 0x312010 può essere un indirizzo logico utente, un indirizzo logico kernel o un indirizzo fisico?",
+          risposta: "Indirizzo logico utente o indirizzo fisico",
+          spiegazione:
+            "L'indirizzo è < 2GB, quindi valido come indirizzo logico utente. È anche < 4MB, quindi può essere un indirizzo fisico valido. Non può essere un indirizzo logico del kernel perché è al di sotto del limite minimo del kernel (0x80000000).",
+        },
+        {
+          domanda:
+            "L'indirizzo 0x532100 può essere un indirizzo logico utente, un indirizzo logico kernel o un indirizzo fisico?",
+          risposta: "Indirizzo logico utente",
+          spiegazione:
+            "È < 2GB, quindi può essere un indirizzo logico utente. Tuttavia è > 4MB, quindi non può essere un indirizzo fisico (dato che la RAM ha solo 4MB). Non è un indirizzo logico del kernel, poiché è < 0x80000000.",
+        },
+        {
+          domanda:
+            "Dato l'indirizzo logico utente 0x4010, calcolare l'indirizzo fisico corrispondente usando: as_pbase1 = 0x100000, as_pbase2 = 0x200000, as_vbase1 = 0x3000, as_vbase2 = 0x6000, as_npages1 = 2, as_npages2 = 4",
+          risposta: "0x10001010",
+          spiegazione:
+            "Le pagine in OS/161 sono da 4KB (12 bit di offset). L'indirizzo 0x4010 appartiene alla pagina 4 ed ha un offset di 0x10. Il primo segmento utente parte da 0x3000 e ha 2 pagine (fino a 0x7000), quindi 0x4010 appartiene al segmento 1. L'offset rispetto alla base virtuale è 0x4010 - 0x3000 = 0x1010. Indirizzo fisico = 0x100000 + 0x1010 = 0x10001010.",
+        },
+        {
+          domanda:
+            "Perché in dumbvm la memoria fisica è allocata in multipli della dimensione di pagina, anche se lo schema è contiguo?",
+          risposta:
+            "Perché l'MMU del MIPS usa un TLB, quindi la traduzione logico-fisica richiede pagine",
+          spiegazione:
+            "La traduzione degli indirizzi logici in fisici è gestita dal TLB, che opera a livello di pagina. Per questo motivo, anche se l’allocazione è contigua, la memoria è gestita in unità di pagina. Le altre motivazioni sono errate: l’allocazione a pagina può aumentare la frammentazione, dumbvm non usa una page table, e kmalloc può richiedere qualsiasi dimensione.",
+        },
+      ];
       const eserciziList = document.getElementById("esercizi-list");
       const esameSelect = document.getElementById("esame-select");
 
@@ -162,6 +231,9 @@
         if (esame === "settembre2024") {
           titolo = "Appello Settembre 2024";
           eserciziDaMostrare = eserciziSettembre2024;
+        } else if (esame === "gennaio2025") {
+          titolo = "Appello Gennaio 2025";
+          eserciziDaMostrare = eserciziGennaio2025;
         } else {
           titolo = "Appello Giugno 2024";
           eserciziDaMostrare = eserciziGiugno2024;
@@ -172,16 +244,15 @@
           const card = document.createElement("div");
           card.className = "esercizio-card";
           card.innerHTML = `
-          <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"false\">
-            <span>ESERCIZIO ${idx + 1}</span>
-            <span class=\"arrow\">&#9654;</span>
-          </div>
-          <div class=\"esercizio-content\">
-            <div class=\"domanda\">${ex.domanda}</div>
-            <div class=\"risposta\">Risposta: ${ex.risposta}</div>
-            <div class=\"spiegazione\">${ex.spiegazione}</div>
-          </div>
-        `;
+          <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"false\">\n      <span>ESERCIZIO ${
+            idx + 1
+          }</span>\n      <span class=\"arrow\">&#9654;</span>\n    </div>\n    <div class=\"esercizio-content\">\n      <div class=\"domanda\">${
+            ex.domanda
+          }</div>\n      <div class=\"risposta\">Risposta: ${
+            ex.risposta
+          }</div>\n      <div class=\"spiegazione\">${
+            ex.spiegazione
+          }</div>\n    </div>\n  `;
           const header = card.querySelector(".esercizio-header");
           const content = card.querySelector(".esercizio-content");
           const arrow = card.querySelector(".arrow");

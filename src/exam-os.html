@@ -65,14 +65,280 @@
   </head>
   <body>
     <h1>Esercizi Sistemi Operativi - Memoria Virtuale</h1>
-    <div id="esercizi-list"></div>
-    <noscript
-      ><p>
-        Abilita JavaScript per visualizzare gli esercizi in modo interattivo.
-      </p></noscript
+    <label
+      for="scheda-select"
+      style="font-weight: bold; margin-bottom: 1rem; display: block"
+      >Seleziona scheda esercizi:</label
     >
+    <select id="scheda-select" style="margin-bottom: 2rem">
+      <option value="giugno">Appello Giugno 2024</option>
+      <option value="settembre">Appello Settembre 2024</option>
+      <option value="gennaio-inglese">Gennaio 2025 Inglese</option>
+    </select>
+    <div id="esercizi-list"></div>
+    <noscript>
+      <p>
+        Abilita JavaScript per visualizzare gli esercizi in modo interattivo.
+      </p>
+    </noscript>
     <script>
-      const esercizi = [
+      // Esercizi giugno 2024 (primi 4)
+      const eserciziGiugno = [
+        {
+          domanda:
+            "La politica di rimpiazzamento delle pagine basata sul working set è una politica a dimensione fissa?",
+          risposta: "NO",
+          spiegazione:
+            "La dimensione del working set (insieme residente) cambia dinamicamente in base alle pagine accedute nella finestra temporale Delta, quindi non è fissa.",
+        },
+        {
+          domanda:
+            "Perché è difficile implementare la politica del working set?",
+          risposta: [
+            "Perché l'insieme residente va aggiornato anche in assenza di page fault",
+            "Perché la tecnica richiede di memorizzare il tempo dell’ultimo accesso per ogni pagina",
+          ],
+          spiegazione:
+            "Non è difficile scegliere un buon Delta: il valore influenza solo le prestazioni. Non è necessario mantenere una lista completa degli accessi, basta l'ultimo accesso. La difficoltà sta nel dover aggiornare il working set anche quando non ci sono page fault, e nel dover tenere traccia del tempo dell'ultimo accesso per ogni pagina.",
+        },
+        {
+          domanda:
+            "Considera una strategia LRU basata su pila (stack) con 5 frame. Dato il reference string: 4, 6, 4, 1, 7, 8, 2, 2, 3 (T1), 4, 2 (T2). Rappresenta lo stack al tempo T1 (dopo il riferimento a 3) e T2 (dopo il secondo riferimento a 2).",
+          risposta: {
+            T1: "3,2,8,7,1",
+            T2: "2,4,3,2,8",
+          },
+          spiegazione:
+            "La pila viene aggiornata spostando in cima la pagina più recentemente usata. A T1 la pila contiene: 3,2,8,7,1. Dopo l'accesso alla pagina 4 e poi a 2 (T2), la pila diventa: 2,4,3,2,8.",
+        },
+        {
+          domanda:
+            "Due sequenze di riferimento w1 e w2 (di uguale lunghezza) vengono valutate con due algoritmi di rimpiazzamento A1 e A2, con p2 = 2*p1. A1 produce lo stesso numero di page fault (5000) per entrambe le sequenze. A2 produce un numero diverso di fault per w1 e w2, ma la somma è 10000. Se A1 ha una frequenza di page fault del 20% superiore rispetto ad A2, calcola F1 e F2 di A2.",
+          risposta: {
+            F1_A2: 2500,
+            F2_A2: 7500,
+          },
+          spiegazione:
+            "Sappiamo che F(A1) = p1 * (5000 + 2 * 5000) = 15000 * p1. Dato che F(A1) è il 20% in più di F(A2), allora: 1.2 * (x + 2y) = 15000 → x + 2y = 12500. Insieme a x + y = 10000, risolvendo il sistema otteniamo: x = 2500 e y = 7500.",
+        },
+        {
+          domanda:
+            "Un file binario di dimensione 23033 KB è memorizzato in un file system con allocazione indicizzata e blocchi di 4KB. Calcolare il numero esatto di blocchi dati e blocchi indice utilizzati, e la frammentazione interna per entrambi.",
+          risposta: {
+            blocchi_dati: 5759,
+            blocchi_indice: 6,
+            frammentazione_interna_dati: "3KB",
+            frammentazione_interna_indici: "1516B",
+          },
+          spiegazione:
+            "Ogni blocco dati è di 4KB, quindi servono ceil(23033KB / 4KB) = 5759 blocchi dati. L’ultimo blocco dati è riempito solo al 25%, quindi la frammentazione interna nei dati è 0.75 * 4KB = 3KB. Ogni blocco indice può contenere 1023 puntatori (4096 / 1024) a blocchi dati, più uno per collegare il blocco indice successivo. Per contenere 5759 blocchi dati servono ceil(5759 / 1023) = 6 blocchi indice. La frammentazione interna nei blocchi indice è data dagli slot non usati: 6 * 1023 - 5759 = 379 slot inutilizzati → 379 * 4B = 1516B.",
+        },
+        {
+          domanda:
+            "Un file di testo di 15300 byte contiene linee di lunghezza variabile, ognuna terminata da ‘\\n’. La lunghezza media è di 50 caratteri (escluso ‘\\n’), e la lunghezza massima è 100. Quante righe contiene il file?",
+          risposta: 300,
+          spiegazione:
+            "La lunghezza media effettiva di ogni riga è 51 byte (50 caratteri + 1 carattere ‘\\n’). Quindi: numero di righe = 15300 / 51 = 300 righe esatte. Non è necessario indicare un intervallo minimo/massimo.",
+        },
+        {
+          domanda:
+            "Nel file precedente (B), la presenza di righe di lunghezza variabile influisce sulla strategia di allocazione del file system?",
+          risposta: "NO",
+          spiegazione:
+            "L’allocazione dei blocchi su disco è gestita dal file system ed è indipendente dalla struttura del contenuto del file. Che il file contenga righe fisse o variabili, l’allocazione è fatta a blocchi di dimensione fissa.",
+        },
+        {
+          domanda:
+            "Tutti i blocchi allocati contengono lo stesso numero di righe, calcolabile come dimensione del blocco diviso la lunghezza massima della riga?",
+          risposta: "NO",
+          spiegazione:
+            "Il numero di righe per blocco dipende dalla lunghezza reale delle righe, che è variabile. Anche se il massimo è 100, alcune righe possono essere più corte. Inoltre, questa è una questione di livello applicativo: il file system gestisce blocchi di byte, non righe di testo.",
+        },
+        {
+          domanda:
+            "La reach del TLB diminuisce quando aumenta la dimensione della pagina?",
+          risposta: "NO",
+          spiegazione:
+            "La reach del TLB, cioè la quantità di memoria virtuale che può essere mappata tramite il TLB, aumenta con l’aumentare della dimensione delle pagine, perché il numero di entry nel TLB resta fisso, ma ciascuna entry copre una porzione maggiore di memoria.",
+        },
+        {
+          domanda:
+            "La frammentazione aumenta quando aumenta la dimensione della pagina, perché sono necessarie partizioni contigue più grandi?",
+          risposta: "NO",
+          spiegazione:
+            "La frammentazione interna effettivamente aumenta con pagine più grandi, ma la motivazione indicata è errata: nella paginazione non c'è allocazione contigua, quindi il problema non dipende da partizioni contigue.",
+        },
+        {
+          domanda:
+            "Il prepaging è utile solo se la probabilità che una pagina pre-caricata venga realmente usata è superiore all'80%?",
+          risposta: "NO",
+          spiegazione:
+            "Il prepaging è utile quando le pagine pre-caricate hanno un’alta probabilità di essere usate, ma non esiste una soglia fissa del tipo 'superiore all'80%'.",
+        },
+        {
+          domanda:
+            "Tutte le strutture dati del kernel richiedono allocazione contigua?",
+          risposta: "NO",
+          spiegazione:
+            "Solo alcune strutture del kernel richiedono allocazione contigua (per efficienza o per vincoli hardware), come ad esempio la tabella delle pagine. Molte altre strutture possono essere allocate in modo non contiguo.",
+        },
+        {
+          domanda: "L’allocatore slab usa solo dimensioni pari a potenze di 2?",
+          risposta: "NO",
+          spiegazione:
+            "L’allocatore buddy utilizza taglie pari a potenze di 2. Lo slab allocator invece è progettato per ridurre la frammentazione e può usare dimensioni arbitrarie basate sugli oggetti richiesti.",
+        },
+        {
+          domanda:
+            "Una free list di pagine ha in media una frammentazione interna pari a mezza pagina?",
+          risposta: "NO",
+          spiegazione:
+            "Le free list non contengono dati, ma solo riferimenti a pagine libere. Quindi non introducono frammentazione interna: rappresentano solo spazio disponibile.",
+        },
+      ];
+      // Esercizi settembre 2024 (tutti gli altri)
+
+      // Esercizi Gennaio 2025 Inglese
+      const eserciziGennaioInglese = [
+        {
+          domanda:
+            "[EN] Example: What is the main advantage of demand paging in virtual memory systems?",
+          risposta:
+            "It allows programs to use more memory than physically available, loading pages only when needed.",
+          spiegazione:
+            "Demand paging improves memory utilization and enables running large programs by loading only the required pages into RAM, reducing memory waste.",
+        },
+        {
+          domanda:
+            "[EN] Comparison between standard Page Table and Inverted Page Table (IPT)",
+          risposta: "See details below.",
+          spiegazione: `
+            <strong>System:</strong><br>
+            Architecture: 64 bit<br>
+            Total RAM: 16GB (Kernel: 4GB, User: 12GB)<br>
+            Page size: 4KB<br>
+            Virtual address space per process: 48GB<br>
+            PID bits: 12<br>
+            Page index bits: 28<br><br>
+            <strong>Advantages of IPT:</strong><br>
+            <ul>
+              <li>"Always saves memory": <span style="color:red;">False</span> – With few processes and small address space, PT can be smaller.</li>
+              <li>"Depends on RAM size, number of processes, and their virtual address space": <span style="color:green;">True</span> – Memory saving with IPT depends on context.</li>
+              <li>"Always saves memory when process address space > RAM size": <span style="color:green;">True</span> – PT grows with virtual space, IPT is fixed size.</li>
+              <li>"Can save memory even if process address space < RAM size": <span style="color:green;">True</span> – IPT is unique for all processes, PTs are many.</li>
+            </ul>
+            <strong>Disadvantages of IPT:</strong><br>
+            <ul>
+              <li>"Search key is (pid,frame)": <span style="color:red;">False</span> – Frame is the index, not the search key.</li>
+              <li>"Search key is (pid,page)": <span style="color:green;">True</span> – IPT is accessed via (pid, page number).</li>
+              <li>"To improve performance, replace IPT with a hash table": <span style="color:red;">False</span> – That is a different approach.</li>
+              <li>"To improve performance, add a hash table to IPT": <span style="color:green;">True</span> – Standard technique to speed up IPT access.</li>
+            </ul>
+            <strong>Calculations:</strong><br>
+            <u>Standard Page Table:</u><br>
+            Number of pages: 12,582,912<br>
+            Cell size: 4B<br>
+            Total size: 48MB<br>
+            <u>IPT:</u><br>
+            Number of frames: 3,145,728<br>
+            Cell size: 8B (PID: 12 bits, Page: 28 bits)<br>
+            Total size: 24MB<br>
+            <strong>Maximum virtual address space with IPT:</strong><br>
+            Page index bits: 28 → Max pages: 268,435,456<br>
+            Page size: 4KB<br>
+            Max virtual space: 1TB<br>
+            Reason: 28 bits = 256M pages × 4KB = 1TB<br>
+            <strong>Conclusions:</strong><br>
+            <ul>
+              <li>Memory advantage: IPT is more compact (24MB vs 48MB)</li>
+              <li>Virtual address space limit: 1TB per process (with 28 page index bits)</li>
+              <li>IPT performance: Slower, improved with hash table</li>
+              <li>PT flexibility: Can support larger virtual spaces if hierarchical</li>
+            </ul>
+          `,
+        },
+        {
+          domanda: "[IT] Link/Load, Inverted Page Table (IPT) e TLB (JSON)",
+          risposta: "Vedi dettagli sotto.",
+          spiegazione: `
+            <strong>Titolo:</strong> Link/Load, Inverted Page Table (IPT) e TLB<br><br>
+            <u>Sezione A</u><br>
+            <strong>1. È possibile caricare dinamicamente un programma senza che sia necessario il dynamic linking?</strong><br>
+            <span style='color:green;'>Risposta: Sì</span><br>
+            <em>Motivazione:</em> Il caricamento dinamico (dynamic loading) consiste nel caricare parti del programma solo quando necessarie. Può essere usato anche con linking statico, ad esempio caricando moduli opzionali in runtime senza doverli linkare dinamicamente.<br><br>
+            <strong>2. Il dynamic linking richiede che un programma sia anche caricabile dinamicamente?</strong><br>
+            <span style='color:red;'>Risposta: No</span><br>
+            <em>Motivazione:</em> Il linking dinamico (dynamic linking) può avvenire anche con moduli già presenti in memoria (come librerie condivise), senza caricare il programma in modo incrementale. Sono due concetti separati e indipendenti.<br><br>
+            <u>Sezione B</u><br>
+            <strong>Perché un'Inverted Page Table necessita di una tabella di hash e in che cosa differisce da una Page Table basata su hash?</strong><br>
+            <ul>
+              <li><strong>PID nella IPT:</strong> Ogni entry della IPT deve contenere il PID per distinguere tra le pagine di processi diversi. Questo non è necessario nella PT classica, perché ogni processo ha la propria tabella delle pagine.</li>
+              <li><strong>Necessità hash:</strong> Una ricerca nella IPT senza hash sarebbe lineare: si deve cercare la coppia (PID, numero di pagina virtuale) per trovare il frame.</li>
+              <li><strong>Differenza hash IPT vs PT hash:</strong> Con la IPT + hash table, le entry della IPT sono referenziate direttamente tramite le liste della hash table (più efficiente), mentre in una PT hash-based si allocano dinamicamente nuove entry, con maggiore overhead di memoria e gestione.</li>
+              <li><strong>Nota:</strong> La IPT è globale per tutto il sistema, mentre le PT (anche se hash-based) sono per singolo processo.</li>
+            </ul>
+            <u>Sezione C</u><br>
+            <strong>1. La TLB può contenere entry di più processi simultaneamente?</strong><br>
+            <span style='color:green;'>Risposta: Sì, ma dipende dall'architettura</span><br>
+            <em>Motivazione:</em> Esistono TLB con campo ASID (Address Space Identifier), che permettono di distinguere tra processi e mantenere entry multiple. Se assente, la TLB è monoprocesso e deve essere azzerata a ogni context switch.<br><br>
+            <strong>2. Il valid bit della TLB è una semplice copia del valid bit della Page Table?</strong><br>
+            <span style='color:red;'>Risposta: No</span><br>
+            <em>Motivazione:</em> Il significato è diverso: nella TLB il 'valid' indica se l'entry è attiva o può essere riutilizzata; nella Page Table indica se la pagina è effettivamente mappata in un frame di memoria fisica.<br>
+          `,
+        },
+        {
+          domanda:
+            "[IT] Organizzazione di un disco: calcoli e rapporti tra blocchi, bitmap e FCB",
+          risposta: "Vedi dettagli sotto.",
+          spiegazione: `
+            <strong>Specifiche disco:</strong><br>
+            Dimensione blocco: <strong>8KB</strong><br>
+            Partizione: <strong>A</strong><br>
+            NB: numero totale di blocchi<br>
+            NM: numero blocchi metadati<br>
+            ND: numero blocchi dati<br>
+            Bitmap blocchi: <strong>NM/4</strong><br>
+            Bitmap note: 1 bit per ogni blocco dati<br><br>
+            <strong>Sezione A:</strong><br>
+            <u>Domanda:</u> Calcolare il rapporto ND/NM<br>
+            <u>Calcoli:</u><br>
+            Dimensione bitmap (bit): NM/4 × 8KB × 8 = 16K × NM bit<br>
+            ND = 16K × NM<br>
+            <u>Risultato:</u><br>
+            ND/NM = <strong>16K</strong><br><br>
+            <strong>Sezione B:</strong><br>
+            <u>Domanda:</u> Dimensione massima di un intervallo contiguo di blocchi liberi, in base alla configurazione della bitmap<br>
+            <u>Ipotesi:</u> 1 blocco libero ogni 3 usati (33.33%)<br>
+            <u>Calcoli:</u><br>
+            Nbit totali = 16K × NM<br>
+            Nfree = 0.25 × Nbit totali = 4K × NM<br>
+            <u>Risultato:</u><br>
+            Più favorevole: <strong>4K × NM blocchi liberi contigui</strong><br>
+            Meno favorevole: <strong>1 blocco libero contiguo massimo</strong><br><br>
+            <strong>Sezione C:</strong><br>
+            <u>Domanda:</u> Calcolo di ND, NM, NB e dimensione partizione A, dati FCB da 256B e 16K file massimi<br>
+            <u>Dati:</u><br>
+            Dimensione FCB: 256B<br>
+            FCB per blocco: 32<br>
+            Blocchi FCB: NM/4<br>
+            Max file: 16K<br>
+            <u>Calcoli:</u><br>
+            FCB totali: 32 × NM/4 = 8 × NM<br>
+            Equazione: 8 × NM = 16K ⇒ NM = 2K<br>
+            ND = 16K × NM = 32M<br>
+            NB = ND + NM = 32M + 2K<br>
+            Dimensione bitmap: NM/4 × 8KB = 512 × 8KB = 4MB<br>
+            Dimensione partizione A: (32M + 2K) × 8KB = 256GB + 16MB<br>
+            <u>Risultato:</u><br>
+            NM: <strong>2K blocchi</strong><br>
+            ND: <strong>32M blocchi</strong><br>
+            NB: <strong>32M + 2K blocchi</strong><br>
+            Bitmap: <strong>4MB</strong><br>
+            Dimensione partizione A: <strong>256GB + 16MB</strong><br>
+          `,
+        },
+      ];
+      const eserciziSettembre = [
         {
           domanda:
             "In un sistema di memoria virtuale con un grado fisso di multiprogrammazione, il thrashing può verificarsi anche se la somma dei working set di tutti i processi è inferiore alla memoria fisica disponibile, ma l'algoritmo di sostituzione della pagina non è ottimizzato?",
@@ -134,38 +400,66 @@
           spiegazione: `<strong>1. Velocità di trasferimento:</strong><br>Ogni traccia contiene 512B × 300 = 150 KB.<br>Velocità di rotazione: 7.200 giri/min = 120 giri/s dunque 1 giro in 1/120 s = 8.33 ms.<br>150 KB × 120 = <strong>18.000 KB/s</strong> = <strong>17.58 MB/s</strong>.<br><br><strong>2. Arresto testina su un piatto:</strong><br>1 piatto = 150 KB × 5.000 tracce = 732.4 MB.<br>Capacità totale iniziale = 8.58 GB.<br>Capacità ridotta = 8.58 GB - 732.4 MB = <strong>7.87 GB</strong>.<br><br><strong>3. Tempo di lettura file 1 GB su 200 tracce:</strong><br>Tempo di ricerca medio = 4 ms.<br>Latenza rotazionale media = 4.165 ms.<br>Tempo per giro = 8.33 ms.<br>Tempo totale = 200 × (4 + 4.165 + 8.33) = 3.299 s.<br>Nota: 1 GB non può stare in sole 200 tracce, servono circa 583 tracce.<br>Tempo totale per 583 tracce = 583 × (4 + 4.165 + 8.33) ≈ <strong>8.25 s</strong>.<br>Se si leggessero solo 200 tracce: <strong>3.3 s</strong>.<br>La stima dipende dalla reale distribuzione del file sulle tracce.`,
         },
       ];
-      const eserciziList = document.getElementById("esercizi-list");
-      esercizi.forEach((ex, idx) => {
-        const card = document.createElement("div");
-        card.className = "esercizio-card";
-        card.innerHTML = `
-        <div class="esercizio-header" tabindex="0" role="button" aria-expanded="false">
-          <span>ESERCIZIO ${idx + 1}</span>
-          <span class="arrow">&#9654;</span>
-        </div>
-        <div class="esercizio-content">
-          <div class="domanda">${ex.domanda}</div>
-          <div class="risposta">Risposta: ${ex.risposta}</div>
-          <div class="spiegazione">${ex.spiegazione}</div>
-        </div>
-      `;
-        const header = card.querySelector(".esercizio-header");
-        const content = card.querySelector(".esercizio-content");
-        const arrow = card.querySelector(".arrow");
-        content.style.display = "none";
-        header.addEventListener("click", function () {
-          const expanded = content.style.display === "block";
-          content.style.display = expanded ? "none" : "block";
-          arrow.innerHTML = expanded ? "&#9654;" : "&#9660;";
-          header.setAttribute("aria-expanded", !expanded);
-        });
-        header.addEventListener("keypress", function (e) {
-          if (e.key === "Enter" || e.key === " ") {
-            header.click();
+
+      function renderEsercizi(esercizi) {
+        const eserciziList = document.getElementById("esercizi-list");
+        eserciziList.innerHTML = "";
+        esercizi.forEach((ex, idx) => {
+          const card = document.createElement("div");
+          card.className = "esercizio-card";
+          let rispostaHtml = "";
+          if (typeof ex.risposta === "object" && !Array.isArray(ex.risposta)) {
+            rispostaHtml = Object.entries(ex.risposta)
+              .map(([k, v]) => `<div><strong>${k}:</strong> ${v}</div>`)
+              .join("");
+          } else if (Array.isArray(ex.risposta)) {
+            rispostaHtml = ex.risposta.map((r) => `<div>${r}</div>`).join("");
+          } else {
+            rispostaHtml = `Risposta: ${ex.risposta}`;
           }
+          card.innerHTML = `
+            <div class="esercizio-header" tabindex="0" role="button" aria-expanded="false">
+              <span>ESERCIZIO ${idx + 1}</span>
+              <span class="arrow">&#9654;</span>
+            </div>
+            <div class="esercizio-content">
+              <div class="domanda">${ex.domanda}</div>
+              <div class="risposta">${rispostaHtml}</div>
+              <div class="spiegazione">${ex.spiegazione}</div>
+            </div>
+          `;
+          const header = card.querySelector(".esercizio-header");
+          const content = card.querySelector(".esercizio-content");
+          const arrow = card.querySelector(".arrow");
+          content.style.display = "none";
+          header.addEventListener("click", function () {
+            const expanded = content.style.display === "block";
+            content.style.display = expanded ? "none" : "block";
+            arrow.innerHTML = expanded ? "&#9654;" : "&#9660;";
+            header.setAttribute("aria-expanded", !expanded);
+          });
+          header.addEventListener("keypress", function (e) {
+            if (e.key === "Enter" || e.key === " ") {
+              header.click();
+            }
+          });
+          eserciziList.appendChild(card);
         });
-        eserciziList.appendChild(card);
-      });
+      }
+
+      const schedaSelect = document.getElementById("scheda-select");
+      function updateScheda() {
+        if (schedaSelect.value === "giugno") {
+          renderEsercizi(eserciziGiugno);
+        } else if (schedaSelect.value === "settembre") {
+          renderEsercizi(eserciziSettembre);
+        } else if (schedaSelect.value === "gennaio-inglese") {
+          renderEsercizi(eserciziGennaioInglese);
+        }
+      }
+      schedaSelect.addEventListener("change", updateScheda);
+      // Mostra di default la scheda di giugno
+      renderEsercizi(eserciziGiugno);
     </script>
   </body>
 </html>

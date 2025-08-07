@@ -83,6 +83,50 @@
       <!-- Sezione Memoria -->
       <div id="memoria" class="section-cards" style="display: none">
         <div class="card">
+          <div class="question">Quando il prepaging è vantaggioso?</div>
+          <div class="answer">
+            Quando α (percentuale di pagine utilizzate tra quelle precaricate) è
+            sufficientemente alta, così che il costo dei page fault risparmiati
+            superi il costo delle pagine inutilmente caricate.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono i pro e i contro di usare pagine grandi o piccole in
+            memoria virtuale?
+          </div>
+          <div class="answer">
+            Pagine piccole: meno frammentazione interna, ma tabelle più grandi.
+            Pagine grandi: meno accessi I/O e meno page fault, ma più
+            frammentazione interna.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è la TLB Reach e perché è importante?</div>
+          <div class="answer">
+            È la quantità di memoria coperta dalla TLB: TLB Reach = dimensione
+            TLB × dimensione pagina. Se non copre l'insieme di lavoro del
+            processo, aumentano i page fault.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come influisce la struttura del programma sulla gestione della
+            memoria virtuale?
+          </div>
+          <div class="answer">
+            Esempio: azzerare una matrice per righe genera molti più page fault
+            rispetto a farlo per colonne, se ogni riga occupa una pagina.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è il pinning di una pagina in memoria?</div>
+          <div class="answer">
+            È il blocco di una pagina durante l'I/O per evitare che venga
+            rimossa dal sistema prima della fine dell’operazione.
+          </div>
+        </div>
+        <div class="card">
           <div class="question">
             Cos'è la gestione della memoria in un sistema operativo?
           </div>
@@ -90,6 +134,309 @@
             Allocare, monitorare e liberare la memoria in modo sicuro ed
             efficiente tra i processi, garantendo isolamento e massimizzazione
             dell'utilizzo delle risorse.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è la MMU e quale ruolo svolge?</div>
+          <div class="answer">
+            La MMU (Memory Management Unit) è un dispositivo hardware che
+            converte gli indirizzi logici in indirizzi fisici durante
+            l'esecuzione, usando ad esempio il registro di rilocazione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">In cosa consiste il caricamento dinamico?</div>
+          <div class="answer">
+            È la tecnica che carica in RAM solo le parti del programma al
+            momento in cui vengono utilizzate, risparmiando spazio e migliorando
+            l'efficienza della memoria.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è il collegamento dinamico?</div>
+          <div class="answer">
+            È un meccanismo in cui il collegamento alle librerie avviene a tempo
+            di esecuzione, usando uno stub che carica e collega la routine solo
+            quando serve.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cos'è l'allocazione contigua della memoria?
+          </div>
+          <div class="answer">
+            È una tecnica in cui ogni processo occupa una singola partizione
+            continua della memoria fisica. È semplice ma soggetta a
+            frammentazione esterna.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa si intende per allocazione a partizioni variabili?
+          </div>
+          <div class="answer">
+            È un metodo che adatta dinamicamente la dimensione delle partizioni
+            alle esigenze dei processi, riducendo la frammentazione interna ma
+            non quella esterna.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono gli algoritmi di allocazione più comuni?
+          </div>
+          <div class="answer">
+            Best-fit, First-fit e Worst-fit. I primi due sono generalmente
+            migliori in termini di utilizzo dello spazio e velocità.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come si può ridurre la frammentazione esterna?
+          </div>
+          <div class="answer">
+            Attraverso la compattazione, che consiste nel rimescolare la memoria
+            per ottenere un unico blocco libero contiguo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cos'è la paginazione nella gestione della memoria?
+          </div>
+          <div class="answer">
+            È una tecnica che divide la memoria logica e fisica in blocchi di
+            dimensione fissa (pagine e frame) per eliminare la frammentazione
+            esterna.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come si ottiene l'indirizzo fisico a partire da f e d nella
+            paginazione?
+          </div>
+          <div class="answer">
+            I bit meno significativi dell'indirizzo fisico coincidono con
+            l'offset d, mentre i più significativi con l'indice del frame f
+            trovato nella page table.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cos'è la frammentazione interna nella paginazione?
+          </div>
+          <div class="answer">
+            È lo spazio inutilizzato nell'ultima pagina allocata a un processo.
+            In media, ammonta a mezzo frame.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa contiene una riga della page table oltre al numero del frame?
+          </div>
+          <div class="answer">
+            Bit di validità, protezione, modifica, riferimento, e cache
+            disabled.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali registri gestiscono la page table nella CPU?
+          </div>
+          <div class="answer">
+            Il Page Table Base Register (PTBR) e il Page Table Length Register
+            (PTLR).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">A cosa serve la TLB?</div>
+          <div class="answer">
+            La TLB è una cache veloce nella CPU che memorizza traduzioni recenti
+            da indirizzi logici a fisici, riducendo i tempi di accesso.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un TLB hit e un TLB miss?</div>
+          <div class="answer">
+            Un TLB hit avviene quando la pagina cercata è nella TLB, un miss
+            quando non lo è e si deve accedere alla page table.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è l'EAT (Effective Access Time)?</div>
+          <div class="answer">
+            È il tempo medio di accesso alla memoria, considerando il tasso di
+            hit nel TLB e il tempo di accesso in caso di miss.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come viene implementata la protezione della memoria nella
+            paginazione?
+          </div>
+          <div class="answer">
+            Attraverso bit di protezione associati a ciascun frame e bit di
+            validità nelle voci della page table.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa sono le pagine condivise?</div>
+          <div class="answer">
+            Pagine mappate sullo stesso frame per più processi, usate per codice
+            rientrante e condivisibile (es. librerie).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come si struttura una page table gerarchica?
+          </div>
+          <div class="answer">
+            È una struttura ad albero: un indirizzo logico è diviso in p1
+            (outer), p2 (inner) e offset. Si passa dalla outer table alla inner
+            table per trovare il frame.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Perché si usano più livelli di paginazione?
+          </div>
+          <div class="answer">
+            Per gestire grandi spazi di indirizzi logici evitando tabelle delle
+            pagine enormi, suddividendole in più livelli (2, 3 o più).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è una tabella delle pagine hash?</div>
+          <div class="answer">
+            Una struttura in cui il numero di pagina virtuale è usato come
+            chiave di hash per accedere rapidamente alla corrispondente entry
+            con numero di frame.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">A cosa servono le page table clustered?</div>
+          <div class="answer">
+            A mappare più pagine (es. 16) per ogni voce, migliorando
+            l'efficienza con spazi di indirizzi sparsi.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è una tabella delle pagine invertita?</div>
+          <div class="answer">
+            Una tabella con una voce per ogni frame fisico, che contiene il
+            numero di pagina virtuale e il processo proprietario.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il vantaggio della tabella delle pagine invertita?
+          </div>
+          <div class="answer">
+            Riduce l'uso di memoria per le tabelle delle pagine, ma richiede una
+            ricerca più lenta (spesso hash).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa contiene la tabella delle pagine?</div>
+          <div class="answer">
+            Contiene le corrispondenze tra pagine virtuali e frame fisici. Serve
+            a tradurre gli indirizzi logici in indirizzi fisici durante
+            l'accesso alla memoria.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come si struttura un indirizzo virtuale nella paginazione?
+          </div>
+          <div class="answer">
+            È diviso in due parti: il numero di pagina (page number) e l'offset
+            all'interno della pagina.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è il resident set?</div>
+          <div class="answer">
+            È l'insieme delle pagine di memoria virtuale di un processo
+            attualmente caricate in RAM.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Perché la RAM è necessaria per l'esecuzione di un processo?
+          </div>
+          <div class="answer">
+            Perché la CPU può accedere solo alla RAM e ai registri, quindi il
+            programma deve essere caricato lì per essere eseguito.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il ruolo della cache nella gestione della memoria?
+          </div>
+          <div class="answer">
+            La cache si trova tra CPU e RAM e serve a ridurre la latenza di
+            accesso, velocizzando l'esecuzione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è la funzione dei registri base e limite?
+          </div>
+          <div class="answer">
+            Proteggere la memoria: il registro base indica l'inizio dell'area di
+            memoria di un processo, il limite indica la dimensione dell'area.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa accade se due processi sono caricati all'indirizzo 0?
+          </div>
+          <div class="answer">
+            Non possono convivere senza rilocazione: uno dei due deve essere
+            spostato, e i suoi riferimenti aggiornati.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">A cosa serve la rilocazione automatica?</div>
+          <div class="answer">
+            A permettere che i programmi credano di essere all'indirizzo 0, ma
+            vengano eseguiti da un'altra parte della memoria.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono le fasi di binding degli indirizzi?
+          </div>
+          <div class="answer">
+            A tempo di compilazione, a tempo di caricamento e a tempo di
+            esecuzione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è l'indirizzo logico?</div>
+          <div class="answer">
+            È l'indirizzo generato dalla CPU, visibile al programma. È anche
+            detto indirizzo virtuale.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è l'indirizzo fisico?</div>
+          <div class="answer">
+            È l'indirizzo effettivo usato dalla RAM, calcolato dalla MMU in fase
+            di esecuzione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            In quali casi gli indirizzi logici e fisici coincidono?
+          </div>
+          <div class="answer">
+            Quando il binding avviene a tempo di compilazione o caricamento.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è la MMU (Memory Management Unit)?</div>
+          <div class="answer">
+            È l'unità hardware che traduce gli indirizzi logici in indirizzi
+            fisici durante l'esecuzione del programma.
           </div>
         </div>
         <div class="card">
@@ -161,6 +508,43 @@
           </div>
         </div>
         <div class="card">
+          <div class="question">Cos'è lo swapping?</div>
+          <div class="answer">
+            Tecnica che sposta temporaneamente un processo dalla RAM al backing
+            store (disco) per liberare memoria fisica.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Qual è il tempo tipico di uno swap in/out?</div>
+          <div class="answer">
+            Per 100MB su disco a 50MB/s: 2s per lo swap out, 2s per lo swap in,
+            totale 4s per lo switch di contesto.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è il double buffering nello swapping?</div>
+          <div class="answer">
+            Tecnica che copia prima i dati in memoria kernel, poi permette lo
+            swap, infine trasferisce all'I/O. Utile quando c'è I/O sospeso.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quando non è possibile fare swap-out di un processo?
+          </div>
+          <div class="answer">
+            Quando è in stato di wait per un'I/O in corso, poiché l'I/O verrebbe
+            eseguito su un processo sbagliato.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è lo swapping with paging?</div>
+          <div class="answer">
+            Tecnica che swap-out solo alcune pagine del processo, generalmente
+            quelle non attive, riducendo il tempo di swap.
+          </div>
+        </div>
+        <div class="card">
           <div class="question">
             Come si gestiscono i blocchi liberi nella memoria fisica?
           </div>
@@ -198,6 +582,16 @@
           </div>
         </div>
         <div class="card">
+          <div class="question">Cos'è lo slab allocator e a cosa serve?</div>
+          <div class="answer">
+            È un sistema di allocazione della memoria usato nel kernel per
+            gestire oggetti piccoli e frequenti in modo efficiente. Prealloca
+            blocchi (slab) contenenti oggetti dello stesso tipo, pronti all’uso
+            e riutilizzabili, riducendo la frammentazione e migliorando le
+            prestazioni.
+          </div>
+        </div>
+        <div class="card">
           <div class="question">
             In che modo la memoria virtuale aumenta efficienza e flessibilità?
           </div>
@@ -207,10 +601,593 @@
             fisiche.
           </div>
         </div>
+        <div class="card">
+          <div class="question">Cos'è la memoria virtuale?</div>
+          <div class="answer">
+            È la separazione tra indirizzi logici e fisici: permette che lo
+            spazio di indirizzi di un processo sia più grande della RAM fisica
+            disponibile.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Quali vantaggi offre la memoria virtuale?</div>
+          <div class="answer">
+            Spazio di indirizzamento più ampio, creazione processi più
+            efficiente, più processi concorrenti, meno I/O per
+            caricare/swappare.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è il virtual address space?</div>
+          <div class="answer">
+            È l'insieme degli indirizzi logici che un processo può usare,
+            solitamente contiguo e separato dallo spazio fisico.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cos'è la paginazione su richiesta (demand paging)?
+          </div>
+          <div class="answer">
+            È una tecnica che carica le pagine in memoria solo quando sono
+            effettivamente richieste da un processo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un page fault?</div>
+          <div class="answer">
+            Un errore che si verifica quando si tenta di accedere a una pagina
+            non residente in memoria (bit valido = i nella page table).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono i vantaggi della paginazione su richiesta?
+          </div>
+          <div class="answer">
+            Meno I/O, meno memoria necessaria, risposta più rapida e più
+            processi supportati contemporaneamente.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è la pura paginazione a richiesta?</div>
+          <div class="answer">
+            È il caso estremo dove ogni accesso a pagina causa un page fault,
+            poiché nessuna pagina è inizialmente residente in RAM.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è la località di riferimento?</div>
+          <div class="answer">
+            Concetto secondo cui un'istruzione può accedere a più pagine
+            contigue, riducendo il numero complessivo di page fault.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">A cosa serve la lista dei frame liberi?</div>
+          <div class="answer">
+            Permette di trovare rapidamente un frame libero da usare in caso di
+            page fault, ottimizzando la gestione della memoria.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono le fasi di gestione di un page fault?
+          </div>
+          <div class="answer">
+            1. Trap, 2. Salvataggio stato, 3. Verifica errore, 4. Controllo
+            legalità, 5. Lettura disco, 6. Aggiornamento tabelle, 7. Riavvio
+            istruzione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono i principali schemi di allocazione dei frame?
+          </div>
+          <div class="answer">Allocazione fissa e allocazione prioritaria.</div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è l'allocazione proporzionale?</div>
+          <div class="answer">
+            Frame assegnati in base alla dimensione dell'address space del
+            processo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è la differenza tra rimpiazzamento globale e locale?
+          </div>
+          <div class="answer">
+            Il rimpiazzamento globale sceglie frame da qualsiasi processo,
+            quello locale solo dal processo corrente.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è la strategia Reclaiming Pages?</div>
+          <div class="answer">
+            Attiva il page replacement quando i frame liberi scendono sotto una
+            soglia prestabilita.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cos'è l'accesso alla memoria non uniforme (NUMA)?
+          </div>
+          <div class="answer">
+            In architetture multicore la RAM è divisa in partizioni locali per
+            ogni CPU, con tempi di accesso variabili.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è il thrashing?</div>
+          <div class="answer">
+            Condizione in cui il sistema passa più tempo a swappare pagine che a
+            eseguire il codice.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è il modello Working Set?</div>
+          <div class="answer">
+            Modello che identifica l'insieme di pagine su cui un processo lavora
+            attivamente entro una finestra temporale &Delta;.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come funziona il metodo Page Fault Frequency?
+          </div>
+          <div class="answer">
+            Aggiunge o rimuove frame a un processo in base alla distanza
+            temporale tra due page fault (&tau;).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come viene gestita la memoria del kernel?</div>
+          <div class="answer">
+            Con metodi specifici come allocazione contigua, Buddy System o Slab
+            Allocator per evitare frammentazione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come funziona il Buddy System?</div>
+          <div class="answer">
+            Alloca memoria in potenze di 2; i blocchi possono essere divisi o
+            uniti in "buddy" per ridurre frammentazione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è lo Slab Allocator?</div>
+          <div class="answer">
+            Sistema che gestisce oggetti di dimensione fissa in slab per ridurre
+            la frammentazione e velocizzare l'allocazione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è il prepaging?</div>
+          <div class="answer">
+            Tecnica che pre-carica alcune pagine prima che vengano referenziate,
+            per ridurre i page fault all'avvio.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa succede dopo che si riceve un interrupt di I/O completato
+            durante un page fault?
+          </div>
+          <div class="answer">
+            Il sistema corregge le tabelle, attende che la CPU sia riassegnata,
+            ripristina lo stato del processo e riprende l'esecuzione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cos'è l'EAT (Effective Access Time) in presenza di page fault?
+          </div>
+          <div class="answer">
+            EAT = (1 – p) x tempo accesso memoria + p x (overhead page fault +
+            swap out + swap in)
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è la Copy-on-Write (COW)?</div>
+          <div class="answer">
+            Una tecnica in cui padre e figlio condividono inizialmente pagine;
+            quando una viene modificata, viene copiata solo allora.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quando si usa la tecnica 'zero-fill-on-demand'?
+          </div>
+          <div class="answer">
+            Quando si vogliono allocare frame liberi già azzerati, pronti
+            all'uso, provenienti da un pool dedicato.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quando viene attivata la sostituzione delle pagine?
+          </div>
+          <div class="answer">
+            Quando non ci sono frame liberi, bisogna scegliere una pagina da
+            rimpiazzare per fare spazio.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il compito dell'algoritmo di sostituzione delle pagine?
+          </div>
+          <div class="answer">
+            Minimizzare i page fault scegliendo una pagina che difficilmente
+            verrà riutilizzata a breve.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come funziona l'algoritmo FIFO per il page replacement?
+          </div>
+          <div class="answer">
+            Sostituisce la pagina da più tempo in memoria, con struttura a coda
+            circolare.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è l'anomalia di Belady?</div>
+          <div class="answer">
+            Fenomeno per cui aggiungendo più frame con l'algoritmo FIFO si
+            possono avere più page fault.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come funziona l'algoritmo ottimo di page replacement?
+          </div>
+          <div class="answer">
+            Sostituisce la pagina che non verrà usata per più tempo in futuro; è
+            teorico e usato come benchmark.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come funziona l'algoritmo LRU?</div>
+          <div class="answer">
+            Sostituisce la pagina meno recentemente usata, usando contatori o
+            stack per tenere traccia.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è l'algoritmo second-chance?</div>
+          <div class="answer">
+            Versione approssimata di LRU che dà una seconda possibilità alle
+            pagine con bit di riferimento a 1.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è l'algoritmo Enhanced Second-Chance?</div>
+          <div class="answer">
+            Usa sia il bit di riferimento sia il bit di modifica per rimpiazzare
+            le pagine più 'leggere'.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Differenza tra LFU e MFU?</div>
+          <div class="answer">
+            LFU sostituisce la pagina usata meno frequentemente, MFU quella
+            usata più frequentemente.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è il page buffering?</div>
+          <div class="answer">
+            Mantiene le pagine vittima in un pool per poterle riutilizzare
+            rapidamente senza rilettura da disco.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cos'è il doppio buffering nelle applicazioni?
+          </div>
+          <div class="answer">
+            È quando sia il sistema operativo che l'applicazione mantengono una
+            copia della pagina in memoria.
+          </div>
+        </div>
       </div>
 
       <!-- Sezione Dischi -->
       <div id="dischi" class="section-cards" style="display: none">
+        <div class="card">
+          <div class="question">
+            Quali sono le componenti principali e i tempi caratteristici degli
+            HDD?
+          </div>
+          <div class="answer">
+            Piatti rotanti, testine mobili. Tempo di posizionamento = seek +
+            latenza rotazionale. Transfer rate lento (~1 Gbit/s). Access latency
+            = tempo medio di accesso. Rischio di head crash.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come funziona lo scheduler di deadline in Linux per evitare la
+            starvation?
+          </div>
+          <div class="answer">
+            Mantiene code separate per lettura e scrittura, assegna priorità
+            alla lettura e gestisce richieste in batch. Usa 4 code: 2 LBA (tipo
+            C-SCAN) e 2 FCFS, selezionando la più vecchia se supera i 500ms.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali algoritmi di scheduling disco sono disponibili in RHEL 7?
+          </div>
+          <div class="answer">
+            CFQ (equità tra processi), NOOP (coda FIFO, nessun riordinamento,
+            utile per SSD con controller autonomo).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Perché gli SSD preferiscono accessi casuali e NOOP?
+          </div>
+          <div class="answer">
+            Non hanno testine meccaniche, quindi il seek non incide. Accessi
+            casuali sono più efficienti e NOOP evita riordinamenti inutili.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cos'è il fenomeno della write amplification negli SSD?
+          </div>
+          <div class="answer">
+            È l'effetto per cui una singola scrittura può causare molte
+            letture/scritture a causa della garbage collection, rallentando le
+            prestazioni.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali tecniche si usano per rilevare e correggere errori nei dischi?
+          </div>
+          <div class="answer">
+            Bit di parità, checksum, CRC (Cyclic Redundancy Check), ECC (Error
+            Correction Code).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è la differenza tra errori "soft" e "hard" nei dischi?
+          </div>
+          <div class="answer">
+            Soft: temporanei e correggibili. Hard: fisici e permanenti, possono
+            essere rilevati ma non sempre corretti.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            In cosa consiste la formattazione di un disco?
+          </div>
+          <div class="answer">
+            Formattazione fisica (creazione settori con ECC) e logica (creazione
+            file system, strutture dati, cluster).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa succede durante il montaggio (mount) di una partizione?
+          </div>
+          <div class="answer">
+            Il sistema verifica il file system e, se corretto, lo aggancia al
+            sistema operativo. La root viene montata all’avvio.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è il boot block e qual è il suo ruolo?</div>
+          <div class="answer">
+            Contiene il bootstrap loader, il codice che carica il kernel in RAM.
+            Nei sistemi multi-boot può essere un boot manager.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è l’accesso raw e perché è utile?</div>
+          <div class="answer">
+            È l’accesso diretto al disco senza passare dal file system, usato ad
+            esempio dai database per maggiore efficienza.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Qual è il ruolo dello spazio di swap?</div>
+          <div class="answer">
+            Estende la RAM sul disco, usato per swapping e paging. Può risiedere
+            su partizioni raw o file. Linux usa bitmap o tabelle per gestirlo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono le tre architetture principali di collegamento dello
+            storage?
+          </div>
+          <div class="answer">
+            Host-attached (es. SATA, USB), NAS (file system remoto via rete),
+            SAN (accesso a blocchi via rete, es. Fibre Channel, iSCSI).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cos'è un RAID e quali sono i suoi obiettivi?
+          </div>
+          <div class="answer">
+            È un insieme di dischi per aumentare affidabilità, prestazioni e
+            disponibilità continua attraverso ridondanza e accesso parallelo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono le principali metriche di affidabilità nei sistemi RAID?
+          </div>
+          <div class="answer">
+            MTTF (tempo medio al guasto), MTTR (tempo di riparazione), MTTDL
+            (tempo medio alla perdita dati irreversibile).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Perché la NVRAM viene usata nei sistemi RAID?
+          </div>
+          <div class="answer">
+            Agisce da buffer veloce e sicuro per scritture. I dati non si
+            perdono in caso di interruzione di corrente.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa caratterizza RAID 0 (striping)?</div>
+          <div class="answer">
+            Distribuisce i dati in blocchi su più dischi. Migliora le
+            prestazioni ma non offre ridondanza. Il guasto di un solo disco
+            causa la perdita totale dei dati.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa caratterizza RAID 1 (mirroring)?</div>
+          <div class="answer">
+            Ogni disco ha un duplicato esatto. Fornisce alta affidabilità, ma
+            dimezza la capacità effettiva.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa caratterizza RAID 4?</div>
+          <div class="answer">
+            Usa striping con un disco di parità dedicato. Buono per letture
+            sequenziali, ma inefficiente per scritture casuali.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa caratterizza RAID 5?</div>
+          <div class="answer">
+            Usa striping con parità distribuita. Buon compromesso tra spazio,
+            prestazioni e affidabilità. Tollera il guasto di un disco.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa caratterizza RAID 6?</div>
+          <div class="answer">
+            Come RAID 5, ma con doppia parità. Tollera il guasto di due dischi
+            contemporaneamente.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa caratterizza RAID 0+1 e RAID 1+0 (RAID 10)?
+          </div>
+          <div class="answer">
+            Combinano mirroring e striping. Offrono alte prestazioni e
+            ridondanza, richiedono almeno quattro dischi.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa sono i dischi hot spare nei RAID?</div>
+          <div class="answer">
+            Dischi inattivi pronti a sostituire automaticamente un disco guasto,
+            riducendo il tempo di riparazione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è uno snapshot nel contesto RAID?</div>
+          <div class="answer">
+            Un'immagine istantanea del file system, utile per backup o rollback.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è la replication nei RAID?</div>
+          <div class="answer">
+            Copia automatica dei dati su un altro array o sito. Può essere
+            sincrona o asincrona.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è il thin provisioning?</div>
+          <div class="answer">
+            Allocazione dinamica dello spazio su disco in base all’uso reale.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos’è l’indirizzamento LBA?</div>
+          <div class="answer">
+            L’LBA (Logical Block Addressing) mappa ogni blocco logico a una
+            posizione fisica. Il settore 0 è nella traccia più esterna del
+            cilindro esterno.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono i vantaggi e svantaggi delle SSD rispetto agli HDD?
+          </div>
+          <div class="answer">
+            Pro: accesso rapido, affidabilità, silenziosità. Contro: capacità
+            inferiore, usura limitata delle celle (max ~100.000 cicli), no
+            sovrascrittura diretta.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali algoritmi migliorano l’efficienza e la durata delle SSD?
+          </div>
+          <div class="answer">
+            FTL: mappa logica dei blocchi. Garbage collection: recupera spazio.
+            Wear leveling: distribuisce l’usura.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un RAM Disk e quando si usa?</div>
+          <div class="answer">
+            È una porzione di DRAM usata come disco ad alta velocità, utile per
+            elaborazioni temporanee ad alte prestazioni.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Perché si usano ancora i nastri magnetici?</div>
+          <div class="answer">
+            Per backup e archiviazione a lungo termine: sono economici e
+            capienti, ma lenti.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è lo scopo degli algoritmi di disk scheduling?
+          </div>
+          <div class="answer">
+            Minimizzare il tempo di seek e massimizzare la larghezza di banda
+            del disco.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Pro e contro dell’algoritmo FCFS?</div>
+          <div class="answer">
+            Pro: semplice, nessuna starvation. Contro: inefficiente in termini
+            di seek.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Qual è il rischio principale con SSTF?</div>
+          <div class="answer">
+            Starvation per le richieste lontane, anche se minimizza i singoli
+            tempi di seek.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come funziona l’algoritmo SCAN?</div>
+          <div class="answer">
+            La testina serve richieste in una direzione fino a un’estremità, poi
+            inverte. Evita starvation.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come differisce C-SCAN da SCAN?</div>
+          <div class="answer">
+            Dopo aver raggiunto un'estremità, la testina torna all’inizio senza
+            servire richieste. Offre tempi di attesa più uniformi.
+          </div>
+        </div>
         <div class="card">
           <div class="question">Cos'è un HDD e come funziona?</div>
           <div class="answer">
@@ -346,6 +1323,365 @@
 
       <!-- Sezione OS161 -->
       <div id="os161" class="section-cards" style="display: none">
+        <div class="card">
+          <div class="question">Cos'è un mutex lock in OS161?</div>
+          <div class="answer">
+            Un meccanismo per proteggere sezioni critiche. Usa acquire() e
+            release() per garantire mutua esclusione. Può essere implementato
+            con spinlock.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è uno spinlock?</div>
+          <div class="answer">
+            Un lock che attende attivamente (busy waiting) finché non diventa
+            disponibile. Efficiente solo per sezioni critiche brevi.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un semaforo in OS161?</div>
+          <div class="answer">
+            Variabile intera con operazioni P (wait) e V (signal), usata per
+            sincronizzare thread. Implementa blocco e risveglio dei thread.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come funziona la funzione P() di un semaforo?
+          </div>
+          <div class="answer">
+            Eleva gli interrupt con splhigh(), controlla se valore semaforo è 0,
+            se sì blocca il thread con thread_sleep(), altrimenti decrementa e
+            continua.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come funziona la funzione V() di un semaforo?
+          </div>
+          <div class="answer">
+            Eleva gli interrupt, incrementa il valore del semaforo e chiama
+            thread_wakeup() per sbloccare i thread in attesa.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un lock in OS161?</div>
+          <div class="answer">
+            Meccanismo per mutua esclusione tra thread. Solo chi ha acquisito un
+            lock può rilasciarlo. Basato su semaforo binario.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Perché si preferiscono i lock ai semafori per sezioni critiche?
+          </div>
+          <div class="answer">
+            Per ownership garantita, maggiore sicurezza, flessibilità e assenza
+            di busy waiting con thread_sleep.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è una condition variable (CV)?</div>
+          <div class="answer">
+            Struttura di sincronizzazione usata con i lock. Offre cv_wait(),
+            cv_signal() e cv_broadcast().
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come funziona cv_wait() in OS161?</div>
+          <div class="answer">
+            Il thread si blocca e rilascia il lock. Al risveglio, riacquisisce
+            automaticamente il lock associato.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fanno cv_signal() e cv_broadcast()?</div>
+          <div class="answer">
+            cv_signal() sveglia un solo thread in attesa. cv_broadcast() sveglia
+            tutti i thread in attesa sulla stessa condition variable.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un monitor?</div>
+          <div class="answer">
+            Un'astrazione per sincronizzazione che include mutua esclusione e
+            variabili condition. Solo un processo alla volta può entrare.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono le due politiche di scheduling nei monitor?
+          </div>
+          <div class="answer">
+            signal-and-wait (il chiamante si blocca) e signal-and-continue (il
+            chiamante continua, il risvegliato aspetta).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un wait channel (wchan) in OS161?</div>
+          <div class="answer">
+            Strumento del kernel per bloccare e risvegliare thread. Basato su
+            spinlock. Funzioni: wchan_sleep() e wchan_wakeone().
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa wchan_sleep()?</div>
+          <div class="answer">
+            Sospende il thread con thread_switch(), rilascia lo spinlock, e lo
+            riacquisisce al risveglio.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa wchan_wakeone()?</div>
+          <div class="answer">
+            Risveglia un singolo thread bloccato su un wait channel e lo rende
+            runnable.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il compito della funzione mips_trap in OS161?
+          </div>
+          <div class="answer">
+            Gestisce eccezioni, interrupt e chiamate di sistema. Legge il codice
+            del motivo dal trapframe e chiama il gestore appropriato.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa syscall() in OS161?</div>
+          <div class="answer">
+            Gestisce le chiamate di sistema: legge il numero di syscall da v0,
+            esegue la funzione appropriata, gestisce retval/err, aggiorna epc
+            per evitare ripetizione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa succede se la TLB MIPS non trova una corrispondenza?
+          </div>
+          <div class="answer">
+            Solleva una page fault exception. OS161 gestisce l’errore con
+            vm_fault, che carica una voce TLB per la pagina richiesta.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il compito della funzione vm_fault() in dumbvm?
+          </div>
+          <div class="answer">
+            Gestisce l’eccezione da page fault. Crea una voce TLB con i dati
+            corretti dallo spazio di indirizzamento e la carica.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa execv() in OS161?</div>
+          <div class="answer">
+            Rimpiazza lo spazio di indirizzamento di un processo con uno nuovo e
+            carica un file ELF da eseguire, configurando anche gli argomenti.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un file ELF?</div>
+          <div class="answer">
+            Contiene segmenti con codice e dati. Specifica dove caricare il
+            codice nello spazio degli indirizzi virtuali e l'indirizzo iniziale
+            d'esecuzione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa rappresenta il problema della sezione critica?
+          </div>
+          <div class="answer">
+            È il problema di garantire che solo un processo per volta acceda a
+            una sezione di codice che usa risorse condivise.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono le tre condizioni fondamentali per risolvere la sezione
+            critica?
+          </div>
+          <div class="answer">
+            Mutua esclusione, progresso e attesa limitata (bounded waiting).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa l'istruzione test_and_set?</div>
+          <div class="answer">
+            Imposta un lock a true e restituisce il valore precedente. È
+            atomica, usata per acquisire lock evitando race condition.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa compare_and_swap (CAS)?</div>
+          <div class="answer">
+            Confronta il valore corrente con uno atteso e, se coincide, lo
+            sostituisce con uno nuovo. Altrimenti non fa nulla. Ritorna il
+            valore letto.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa getppages in OS161?</div>
+          <div class="answer">
+            Alloca pagine fisiche. Cerca prima tra le pagine libere nella bitmap
+            e, se non ne trova, chiama ram_stealmem per ottenere memoria
+            contigua.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa getfreeppages?</div>
+          <div class="answer">
+            Cerca un blocco contiguo di pagine libere nella bitmap per
+            l'allocazione di memoria fisica.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa freeppages?</div>
+          <div class="answer">
+            Marca le pagine come libere nella bitmap, permettendone il
+            riutilizzo futuro.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa consente il paging nello user space in OS161?
+          </div>
+          <div class="answer">
+            Permette l'allocazione non contigua della memoria utente,
+            migliorando la gestione della memoria e supportando spazi di
+            indirizzamento virtuali più grandi.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il ruolo dei registri MIPS in OS161?
+          </div>
+          <div class="answer">
+            Vengono utilizzati per memorizzare dati e indirizzi durante
+            l'esecuzione. Alcuni sono temporanei, altri devono essere
+            salvati/ripristinati durante il context switch.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Dove avviene il salvataggio/ripristino dei registri MIPS in OS161?
+          </div>
+          <div class="answer">
+            Nel file switch.S, durante il dispatching tra thread.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è la struttura 'proc' in OS161?</div>
+          <div class="answer">
+            Rappresenta un processo. Contiene nome, numero di thread, spazio di
+            indirizzamento e directory di lavoro.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Ogni thread ha uno stack utente e uno kernel?
+          </div>
+          <div class="answer">
+            Sì. Ogni thread ha uno stack per l'esecuzione utente e uno per
+            l'esecuzione kernel, per protezione e gestione separata.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Qual è il ruolo di runprogram()?</div>
+          <div class="answer">
+            Avvia un processo utente: apre il file, crea lo spazio
+            d'indirizzamento, carica l'eseguibile, prepara lo stack, entra in
+            user mode.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa enter_new_process()?</div>
+          <div class="answer">
+            È l'ultima funzione eseguita dal kernel prima di passare il
+            controllo all’eseguibile utente. Imposta il contesto iniziale e
+            invoca mips_usermode().
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un processo in OS161?</div>
+          <div class="answer">
+            Un processo è un programma in esecuzione. Include codice (text),
+            stato (program counter, registri), stack (parametri e variabili
+            locali), sezione dati (variabili globali) e heap (memoria dinamica).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è la differenza tra programma e processo?
+          </div>
+          <div class="answer">
+            Il programma è un'entità passiva (file su disco), il processo è
+            attivo (programma in esecuzione in memoria).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un thread in OS161?</div>
+          <div class="answer">
+            Un thread è un'unità di esecuzione di un processo, con il proprio
+            contesto (PC, SP, registri), stack privato, ma condivide codice e
+            dati con altri thread del processo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Qual è la struttura 'thread' in OS161?</div>
+          <div class="answer">
+            È una struttura dati che rappresenta un thread kernel. Contiene
+            nome, stato, stack, contesto dei registri, CPU assegnata, e
+            riferimento al processo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            A cosa serve la funzione thread_fork in OS161?
+          </div>
+          <div class="answer">
+            Crea un nuovo thread kernel, specificando nome, processo, funzione
+            di entrypoint e dati. Lo rende schedulabile inserendolo nella
+            runqueue.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa thread_exit in OS161?</div>
+          <div class="answer">
+            Termina il thread corrente, rimuovendolo dal sistema. Libera
+            risorse, disabilita interruzioni e invoca lo scheduler per un
+            context switch.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Qual è lo scopo di thread_yield?</div>
+          <div class="answer">
+            Permette al thread corrente di cedere volontariamente la CPU pur
+            rimanendo eseguibile. Viene reinserito nella runqueue.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa thread_switch?</div>
+          <div class="answer">
+            Esegue il context switch: salva il contesto del thread corrente e
+            passa al successivo dalla runqueue della CPU.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Che ruolo ha getppages in OS161?</div>
+          <div class="answer">
+            Alloca pagine fisiche (multipli di 4 KB) chiamando ram_stealmem, con
+            protezione tramite lock per ambienti multithreaded.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa ram_stealmem?</div>
+          <div class="answer">
+            Alloca memoria fisica contigua a partire da firstpaddr. Usata nella
+            fase iniziale del kernel prima che la VM sia attiva.
+          </div>
+        </div>
         <div class="card">
           <div class="question">Cos'è OS161?</div>
           <div class="answer">
@@ -1404,6 +2740,246 @@
 
       <!-- Sezione I/O -->
       <div id="io" class="section-cards" style="display: none">
+        <div class="card">
+          <div class="question">
+            Quali sono le principali categorie di dispositivi di I/O?
+          </div>
+          <div class="answer">
+            Dispositivi di memorizzazione (dischi, SSD), dispositivi di
+            trasmissione (schede di rete), interfacce utente (tastiere, mouse,
+            schermi).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è il memory-mapped I/O?</div>
+          <div class="answer">
+            È una tecnica in cui i registri dei dispositivi di I/O sono mappati
+            nello spazio di indirizzamento della memoria, rendendoli accessibili
+            tramite normali istruzioni di load/store.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come funziona il polling per l'I/O?</div>
+          <div class="answer">
+            La CPU interroga ripetutamente il registro di stato del dispositivo.
+            È semplice ma inefficiente per dispositivi lenti perché causa busy
+            waiting.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cos'è un interrupt e come migliora il polling?
+          </div>
+          <div class="answer">
+            Un interrupt è un segnale inviato al processore da un dispositivo
+            pronto. La CPU risponde eseguendo una routine di servizio, evitando
+            l’attesa attiva del polling.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa il controller DMA?</div>
+          <div class="answer">
+            Permette ai dispositivi di trasferire dati direttamente in memoria
+            senza coinvolgere la CPU. Migliora le prestazioni usando il bus
+            mastering e riduce il carico sulla CPU.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Qual è il ruolo del device driver?</div>
+          <div class="answer">
+            È un modulo software che fornisce un'interfaccia standard al kernel,
+            nascondendo le peculiarità hardware dei dispositivi e implementando
+            le system call di I/O.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è la differenza tra dispositivi a blocchi e a caratteri?
+          </div>
+          <div class="answer">
+            A blocchi (dischi): accesso a blocchi di dati con DMA. A caratteri
+            (tastiere): accesso byte per byte con funzioni come get() e put().
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Che differenza c’è tra I/O bloccante, non bloccante e asincrono?
+          </div>
+          <div class="answer">
+            Bloccante: il processo aspetta. Non bloccante: continua l’esecuzione
+            e verifica lo stato. Asincrono: una callback o evento segnala la
+            fine dell’I/O.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è l'I/O vettorizzato?</div>
+          <div class="answer">
+            Permette di effettuare più operazioni di I/O con una sola system
+            call. Riduce il numero di chiamate, migliora performance e può
+            offrire atomicità.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa il buffering nell'I/O?</div>
+          <div class="answer">
+            Utilizza aree di memoria tampone per gestire differenze di velocità
+            e dimensioni tra dispositivi. Permette doppio buffering per
+            efficienza e coerenza.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è l'allocazione a lista concatenata?</div>
+          <div class="answer">
+            Ogni file è memorizzato in blocchi non contigui collegati tra loro.
+            Ogni blocco contiene un puntatore al successivo. Vantaggi: elimina
+            frammentazione esterna. Svantaggi: accesso diretto lento e fragilità
+            in caso di perdita di link.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come funziona la FAT (File Allocation Table)?
+          </div>
+          <div class="answer">
+            È una tabella che tiene traccia della sequenza dei blocchi di un
+            file. Migliora fault tolerance e accesso diretto, memorizzata in RAM
+            per velocità. Ogni blocco ha un puntatore nella FAT.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è l'allocazione a indice?</div>
+          <div class="answer">
+            Ogni file ha un blocco indice che contiene gli indirizzi dei blocchi
+            dati. Vantaggi: accesso diretto ed eliminazione frammentazione
+            esterna. Svantaggi: limite dimensione file e necessità di livelli
+            multipli d’indice per file grandi.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come gestisce Unix l'allocazione a indice?</div>
+          <div class="answer">
+            Usa I-node con indici diretti, indiretti, doppi e tripli. Permette
+            scalabilità dei file: pochi livelli per file piccoli, più livelli
+            per file grandi.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali tecniche esistono per la gestione dello spazio libero?
+          </div>
+          <div class="answer">
+            Bitmap, liste concatenate, grouping, counting. Bitmap è efficiente
+            per trovare blocchi; grouping e counting migliorano efficienza della
+            lista concatenata.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come si ottimizzano le prestazioni del file system?
+          </div>
+          <div class="answer">
+            Tecniche: preallocazione dei metadati, collocazione dati/metadati,
+            buffer cache, scritture asincrone, free-behind e read-ahead.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cos'è la Page Cache e la Unified Buffer Cache?
+          </div>
+          <div class="answer">
+            Page Cache mappa i blocchi su pagine di memoria (memory-mapped I/O).
+            Unified Buffer Cache evita doppio caching unificando page cache e
+            buffer cache.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come avviene il recovery del file system?</div>
+          <div class="answer">
+            Attraverso log structured (journal) e backup. I log salvano lo stato
+            e le operazioni in corso, permettendo il recupero dopo un crash.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa caratterizza la Directory a due livelli (Two-Level Directory)?
+          </div>
+          <div class="answer">
+            Ogni utente ha una propria directory. La root contiene una directory
+            per ogni utente. Risolve i problemi di naming e grouping, ma non
+            consente sottogruppi logici all’interno della directory utente.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa caratterizza la Directory ad albero (Tree-Structured
+            Directory)?
+          </div>
+          <div class="answer">
+            Struttura gerarchica con directory e sottodirectory. Supporta path
+            assoluti e relativi. Utile per organizzazione logica e comandi come
+            cd, mkdir, rm.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa caratterizza la Directory a grafo aciclico (Acyclic-Graph
+            Directory)?
+          </div>
+          <div class="answer">
+            Permette la condivisione di file o directory tramite link. Gestisce
+            aliasing. Richiede soluzioni per evitare dangling pointers come
+            backpointers o reference counting.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa caratterizza la Directory a grafo generale (General Graph
+            Directory)?
+          </div>
+          <div class="answer">
+            Estensione del grafo aciclico che consente cicli. Il sistema deve
+            rilevare i cicli e usare garbage collection o restrizioni per
+            evitarli.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa significa montare un file system (Mounting)?
+          </div>
+          <div class="answer">
+            Collega un file system fisico a una directory esistente nel file
+            system corrente. Può essere fatto all’avvio o dinamicamente. Un file
+            system non montato non è accessibile.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come funziona la condivisione dei file nei sistemi multiutente?
+          </div>
+          <div class="answer">
+            Tramite ID utente e di gruppo, permessi RWX, ACL, e protocolli di
+            rete. File e directory hanno proprietario e gruppo. La protezione è
+            fondamentale per coerenza e sicurezza.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono i permessi di accesso ai file nei sistemi Unix-like?
+          </div>
+          <div class="answer">
+            Read (R), Write (W), Execute (X). Ogni file ha permessi assegnati a
+            Owner, Group, Others. Esempio: rw-rw-r-- → Proprietario e gruppo
+            possono leggere e scrivere, altri solo leggere.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un ACL (Access Control List)?</div>
+          <div class="answer">
+            Struttura che specifica permessi granulari per utenti o gruppi.
+            Permette di definire eccezioni o regole dettagliate rispetto ai
+            permessi standard RWX.
+          </div>
+        </div>
         <div class="card">
           <div class="question">
             Cos'è la gestione I/O nei sistemi operativi?
