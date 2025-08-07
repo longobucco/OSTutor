@@ -2,3 +2,4 @@ progress.json
 /.history
 /.vscode
 .venv/
+/src/OSTutor/

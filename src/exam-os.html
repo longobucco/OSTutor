@@ -73,6 +73,7 @@
     <select id="scheda-select" style="margin-bottom: 2rem">
       <option value="giugno">Appello Giugno 2024</option>
       <option value="settembre">Appello Settembre 2024</option>
+      <option value="gennaio-inglese">Gennaio 2025 Inglese</option>
     </select>
     <div id="esercizi-list"></div>
     <noscript>
@@ -196,6 +197,147 @@
         },
       ];
       // Esercizi settembre 2024 (tutti gli altri)
+
+      // Esercizi Gennaio 2025 Inglese
+      const eserciziGennaioInglese = [
+        {
+          domanda:
+            "[EN] Example: What is the main advantage of demand paging in virtual memory systems?",
+          risposta:
+            "It allows programs to use more memory than physically available, loading pages only when needed.",
+          spiegazione:
+            "Demand paging improves memory utilization and enables running large programs by loading only the required pages into RAM, reducing memory waste.",
+        },
+        {
+          domanda:
+            "[EN] Comparison between standard Page Table and Inverted Page Table (IPT)",
+          risposta: "See details below.",
+          spiegazione: `
+            <strong>System:</strong><br>
+            Architecture: 64 bit<br>
+            Total RAM: 16GB (Kernel: 4GB, User: 12GB)<br>
+            Page size: 4KB<br>
+            Virtual address space per process: 48GB<br>
+            PID bits: 12<br>
+            Page index bits: 28<br><br>
+            <strong>Advantages of IPT:</strong><br>
+            <ul>
+              <li>"Always saves memory": <span style="color:red;">False</span> – With few processes and small address space, PT can be smaller.</li>
+              <li>"Depends on RAM size, number of processes, and their virtual address space": <span style="color:green;">True</span> – Memory saving with IPT depends on context.</li>
+              <li>"Always saves memory when process address space > RAM size": <span style="color:green;">True</span> – PT grows with virtual space, IPT is fixed size.</li>
+              <li>"Can save memory even if process address space < RAM size": <span style="color:green;">True</span> – IPT is unique for all processes, PTs are many.</li>
+            </ul>
+            <strong>Disadvantages of IPT:</strong><br>
+            <ul>
+              <li>"Search key is (pid,frame)": <span style="color:red;">False</span> – Frame is the index, not the search key.</li>
+              <li>"Search key is (pid,page)": <span style="color:green;">True</span> – IPT is accessed via (pid, page number).</li>
+              <li>"To improve performance, replace IPT with a hash table": <span style="color:red;">False</span> – That is a different approach.</li>
+              <li>"To improve performance, add a hash table to IPT": <span style="color:green;">True</span> – Standard technique to speed up IPT access.</li>
+            </ul>
+            <strong>Calculations:</strong><br>
+            <u>Standard Page Table:</u><br>
+            Number of pages: 12,582,912<br>
+            Cell size: 4B<br>
+            Total size: 48MB<br>
+            <u>IPT:</u><br>
+            Number of frames: 3,145,728<br>
+            Cell size: 8B (PID: 12 bits, Page: 28 bits)<br>
+            Total size: 24MB<br>
+            <strong>Maximum virtual address space with IPT:</strong><br>
+            Page index bits: 28 → Max pages: 268,435,456<br>
+            Page size: 4KB<br>
+            Max virtual space: 1TB<br>
+            Reason: 28 bits = 256M pages × 4KB = 1TB<br>
+            <strong>Conclusions:</strong><br>
+            <ul>
+              <li>Memory advantage: IPT is more compact (24MB vs 48MB)</li>
+              <li>Virtual address space limit: 1TB per process (with 28 page index bits)</li>
+              <li>IPT performance: Slower, improved with hash table</li>
+              <li>PT flexibility: Can support larger virtual spaces if hierarchical</li>
+            </ul>
+          `,
+        },
+        {
+          domanda: "[IT] Link/Load, Inverted Page Table (IPT) e TLB (JSON)",
+          risposta: "Vedi dettagli sotto.",
+          spiegazione: `
+            <strong>Titolo:</strong> Link/Load, Inverted Page Table (IPT) e TLB<br><br>
+            <u>Sezione A</u><br>
+            <strong>1. È possibile caricare dinamicamente un programma senza che sia necessario il dynamic linking?</strong><br>
+            <span style='color:green;'>Risposta: Sì</span><br>
+            <em>Motivazione:</em> Il caricamento dinamico (dynamic loading) consiste nel caricare parti del programma solo quando necessarie. Può essere usato anche con linking statico, ad esempio caricando moduli opzionali in runtime senza doverli linkare dinamicamente.<br><br>
+            <strong>2. Il dynamic linking richiede che un programma sia anche caricabile dinamicamente?</strong><br>
+            <span style='color:red;'>Risposta: No</span><br>
+            <em>Motivazione:</em> Il linking dinamico (dynamic linking) può avvenire anche con moduli già presenti in memoria (come librerie condivise), senza caricare il programma in modo incrementale. Sono due concetti separati e indipendenti.<br><br>
+            <u>Sezione B</u><br>
+            <strong>Perché un'Inverted Page Table necessita di una tabella di hash e in che cosa differisce da una Page Table basata su hash?</strong><br>
+            <ul>
+              <li><strong>PID nella IPT:</strong> Ogni entry della IPT deve contenere il PID per distinguere tra le pagine di processi diversi. Questo non è necessario nella PT classica, perché ogni processo ha la propria tabella delle pagine.</li>
+              <li><strong>Necessità hash:</strong> Una ricerca nella IPT senza hash sarebbe lineare: si deve cercare la coppia (PID, numero di pagina virtuale) per trovare il frame.</li>
+              <li><strong>Differenza hash IPT vs PT hash:</strong> Con la IPT + hash table, le entry della IPT sono referenziate direttamente tramite le liste della hash table (più efficiente), mentre in una PT hash-based si allocano dinamicamente nuove entry, con maggiore overhead di memoria e gestione.</li>
+              <li><strong>Nota:</strong> La IPT è globale per tutto il sistema, mentre le PT (anche se hash-based) sono per singolo processo.</li>
+            </ul>
+            <u>Sezione C</u><br>
+            <strong>1. La TLB può contenere entry di più processi simultaneamente?</strong><br>
+            <span style='color:green;'>Risposta: Sì, ma dipende dall'architettura</span><br>
+            <em>Motivazione:</em> Esistono TLB con campo ASID (Address Space Identifier), che permettono di distinguere tra processi e mantenere entry multiple. Se assente, la TLB è monoprocesso e deve essere azzerata a ogni context switch.<br><br>
+            <strong>2. Il valid bit della TLB è una semplice copia del valid bit della Page Table?</strong><br>
+            <span style='color:red;'>Risposta: No</span><br>
+            <em>Motivazione:</em> Il significato è diverso: nella TLB il 'valid' indica se l'entry è attiva o può essere riutilizzata; nella Page Table indica se la pagina è effettivamente mappata in un frame di memoria fisica.<br>
+          `,
+        },
+        {
+          domanda:
+            "[IT] Organizzazione di un disco: calcoli e rapporti tra blocchi, bitmap e FCB",
+          risposta: "Vedi dettagli sotto.",
+          spiegazione: `
+            <strong>Specifiche disco:</strong><br>
+            Dimensione blocco: <strong>8KB</strong><br>
+            Partizione: <strong>A</strong><br>
+            NB: numero totale di blocchi<br>
+            NM: numero blocchi metadati<br>
+            ND: numero blocchi dati<br>
+            Bitmap blocchi: <strong>NM/4</strong><br>
+            Bitmap note: 1 bit per ogni blocco dati<br><br>
+            <strong>Sezione A:</strong><br>
+            <u>Domanda:</u> Calcolare il rapporto ND/NM<br>
+            <u>Calcoli:</u><br>
+            Dimensione bitmap (bit): NM/4 × 8KB × 8 = 16K × NM bit<br>
+            ND = 16K × NM<br>
+            <u>Risultato:</u><br>
+            ND/NM = <strong>16K</strong><br><br>
+            <strong>Sezione B:</strong><br>
+            <u>Domanda:</u> Dimensione massima di un intervallo contiguo di blocchi liberi, in base alla configurazione della bitmap<br>
+            <u>Ipotesi:</u> 1 blocco libero ogni 3 usati (33.33%)<br>
+            <u>Calcoli:</u><br>
+            Nbit totali = 16K × NM<br>
+            Nfree = 0.25 × Nbit totali = 4K × NM<br>
+            <u>Risultato:</u><br>
+            Più favorevole: <strong>4K × NM blocchi liberi contigui</strong><br>
+            Meno favorevole: <strong>1 blocco libero contiguo massimo</strong><br><br>
+            <strong>Sezione C:</strong><br>
+            <u>Domanda:</u> Calcolo di ND, NM, NB e dimensione partizione A, dati FCB da 256B e 16K file massimi<br>
+            <u>Dati:</u><br>
+            Dimensione FCB: 256B<br>
+            FCB per blocco: 32<br>
+            Blocchi FCB: NM/4<br>
+            Max file: 16K<br>
+            <u>Calcoli:</u><br>
+            FCB totali: 32 × NM/4 = 8 × NM<br>
+            Equazione: 8 × NM = 16K ⇒ NM = 2K<br>
+            ND = 16K × NM = 32M<br>
+            NB = ND + NM = 32M + 2K<br>
+            Dimensione bitmap: NM/4 × 8KB = 512 × 8KB = 4MB<br>
+            Dimensione partizione A: (32M + 2K) × 8KB = 256GB + 16MB<br>
+            <u>Risultato:</u><br>
+            NM: <strong>2K blocchi</strong><br>
+            ND: <strong>32M blocchi</strong><br>
+            NB: <strong>32M + 2K blocchi</strong><br>
+            Bitmap: <strong>4MB</strong><br>
+            Dimensione partizione A: <strong>256GB + 16MB</strong><br>
+          `,
+        },
+      ];
       const eserciziSettembre = [
         {
           domanda:
@@ -309,8 +451,10 @@
       function updateScheda() {
         if (schedaSelect.value === "giugno") {
           renderEsercizi(eserciziGiugno);
-        } else {
+        } else if (schedaSelect.value === "settembre") {
           renderEsercizi(eserciziSettembre);
+        } else if (schedaSelect.value === "gennaio-inglese") {
+          renderEsercizi(eserciziGennaioInglese);
         }
       }
       schedaSelect.addEventListener("change", updateScheda);

@@ -70,6 +70,7 @@
     >
     <select id="esame-select" style="margin-bottom: 2rem">
       <option value="settembre2024">Appello Settembre 2024</option>
+      <option value="gennaio2025">Appello Gennaio 2025</option>
       <option value="giugno2024">Appello Giugno 2024</option>
     </select>
     <div id="esercizi-list"></div>
@@ -150,6 +151,37 @@
         },
       ];
       const eserciziSettembre2024 = esercizi.slice(0, 10);
+      // Nuova sezione Gennaio 2025
+      const eserciziGennaio2025 = [
+        {
+          domanda:
+            "Le modifiche a conf.kern + esecuzione di ./config PROJECT sono sufficienti per compilare syscall/project.c con bmake depend + bmake?",
+          risposta: "No",
+          spiegazione:
+            "Le modifiche definiscono l'opzione e il file opzionale, ma affinché il file venga effettivamente compilato, l'opzione deve essere abilitata esplicitamente nel file PROJECT con la direttiva 'options project'.",
+        },
+        {
+          domanda:
+            "Quale file viene generato da ./config PROJECT? È sempre generato o solo se 'options project' è presente in PROJECT?",
+          risposta: "opt-project.h (sempre generato)",
+          spiegazione:
+            "Il file viene generato automaticamente se 'conf.kern' contiene 'defoption project', anche se 'options project' non è presente nel file PROJECT.",
+        },
+        {
+          domanda: "Cosa contiene il file opt-project.h?",
+          risposta: "#define OPT_PROJECT 1 oppure #define OPT_PROJECT 0",
+          spiegazione:
+            "Include anche la protezione contro inclusioni multiple. Il valore 1 o 0 dipende dalla presenza o assenza della riga 'options project' nel file PROJECT.",
+        },
+        {
+          domanda:
+            "Come si può compilare project_init() in main.c solo se l’opzione project è attiva?",
+          risposta:
+            '#include "opt-project.h" seguito da #if OPT_PROJECT project_init(); #endif',
+          spiegazione:
+            "La macro OPT_PROJECT, definita in opt-project.h, consente di includere codice solo quando l’opzione è abilitata.",
+        },
+      ];
       const eserciziGiugno2024 = [
         {
           domanda:
@@ -199,6 +231,9 @@
         if (esame === "settembre2024") {
           titolo = "Appello Settembre 2024";
           eserciziDaMostrare = eserciziSettembre2024;
+        } else if (esame === "gennaio2025") {
+          titolo = "Appello Gennaio 2025";
+          eserciziDaMostrare = eserciziGennaio2025;
         } else {
           titolo = "Appello Giugno 2024";
           eserciziDaMostrare = eserciziGiugno2024;
@@ -209,16 +244,15 @@
           const card = document.createElement("div");
           card.className = "esercizio-card";
           card.innerHTML = `
-          <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"false\">
-            <span>ESERCIZIO ${idx + 1}</span>
-            <span class=\"arrow\">&#9654;</span>
-          </div>
-          <div class=\"esercizio-content\">
-            <div class=\"domanda\">${ex.domanda}</div>
-            <div class=\"risposta\">Risposta: ${ex.risposta}</div>
-            <div class=\"spiegazione\">${ex.spiegazione}</div>
-          </div>
-        `;
+          <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"false\">\n      <span>ESERCIZIO ${
+            idx + 1
+          }</span>\n      <span class=\"arrow\">&#9654;</span>\n    </div>\n    <div class=\"esercizio-content\">\n      <div class=\"domanda\">${
+            ex.domanda
+          }</div>\n      <div class=\"risposta\">Risposta: ${
+            ex.risposta
+          }</div>\n      <div class=\"spiegazione\">${
+            ex.spiegazione
+          }</div>\n    </div>\n  `;
           const header = card.querySelector(".esercizio-header");
           const content = card.querySelector(".esercizio-content");
           const arrow = card.querySelector(".arrow");
