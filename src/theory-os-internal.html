@@ -1324,6 +1324,365 @@
       <!-- Sezione OS161 -->
       <div id="os161" class="section-cards" style="display: none">
         <div class="card">
+          <div class="question">Cos'è un mutex lock in OS161?</div>
+          <div class="answer">
+            Un meccanismo per proteggere sezioni critiche. Usa acquire() e
+            release() per garantire mutua esclusione. Può essere implementato
+            con spinlock.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è uno spinlock?</div>
+          <div class="answer">
+            Un lock che attende attivamente (busy waiting) finché non diventa
+            disponibile. Efficiente solo per sezioni critiche brevi.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un semaforo in OS161?</div>
+          <div class="answer">
+            Variabile intera con operazioni P (wait) e V (signal), usata per
+            sincronizzare thread. Implementa blocco e risveglio dei thread.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come funziona la funzione P() di un semaforo?
+          </div>
+          <div class="answer">
+            Eleva gli interrupt con splhigh(), controlla se valore semaforo è 0,
+            se sì blocca il thread con thread_sleep(), altrimenti decrementa e
+            continua.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Come funziona la funzione V() di un semaforo?
+          </div>
+          <div class="answer">
+            Eleva gli interrupt, incrementa il valore del semaforo e chiama
+            thread_wakeup() per sbloccare i thread in attesa.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un lock in OS161?</div>
+          <div class="answer">
+            Meccanismo per mutua esclusione tra thread. Solo chi ha acquisito un
+            lock può rilasciarlo. Basato su semaforo binario.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Perché si preferiscono i lock ai semafori per sezioni critiche?
+          </div>
+          <div class="answer">
+            Per ownership garantita, maggiore sicurezza, flessibilità e assenza
+            di busy waiting con thread_sleep.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è una condition variable (CV)?</div>
+          <div class="answer">
+            Struttura di sincronizzazione usata con i lock. Offre cv_wait(),
+            cv_signal() e cv_broadcast().
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Come funziona cv_wait() in OS161?</div>
+          <div class="answer">
+            Il thread si blocca e rilascia il lock. Al risveglio, riacquisisce
+            automaticamente il lock associato.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fanno cv_signal() e cv_broadcast()?</div>
+          <div class="answer">
+            cv_signal() sveglia un solo thread in attesa. cv_broadcast() sveglia
+            tutti i thread in attesa sulla stessa condition variable.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un monitor?</div>
+          <div class="answer">
+            Un'astrazione per sincronizzazione che include mutua esclusione e
+            variabili condition. Solo un processo alla volta può entrare.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono le due politiche di scheduling nei monitor?
+          </div>
+          <div class="answer">
+            signal-and-wait (il chiamante si blocca) e signal-and-continue (il
+            chiamante continua, il risvegliato aspetta).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un wait channel (wchan) in OS161?</div>
+          <div class="answer">
+            Strumento del kernel per bloccare e risvegliare thread. Basato su
+            spinlock. Funzioni: wchan_sleep() e wchan_wakeone().
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa wchan_sleep()?</div>
+          <div class="answer">
+            Sospende il thread con thread_switch(), rilascia lo spinlock, e lo
+            riacquisisce al risveglio.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa wchan_wakeone()?</div>
+          <div class="answer">
+            Risveglia un singolo thread bloccato su un wait channel e lo rende
+            runnable.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il compito della funzione mips_trap in OS161?
+          </div>
+          <div class="answer">
+            Gestisce eccezioni, interrupt e chiamate di sistema. Legge il codice
+            del motivo dal trapframe e chiama il gestore appropriato.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa syscall() in OS161?</div>
+          <div class="answer">
+            Gestisce le chiamate di sistema: legge il numero di syscall da v0,
+            esegue la funzione appropriata, gestisce retval/err, aggiorna epc
+            per evitare ripetizione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa succede se la TLB MIPS non trova una corrispondenza?
+          </div>
+          <div class="answer">
+            Solleva una page fault exception. OS161 gestisce l’errore con
+            vm_fault, che carica una voce TLB per la pagina richiesta.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il compito della funzione vm_fault() in dumbvm?
+          </div>
+          <div class="answer">
+            Gestisce l’eccezione da page fault. Crea una voce TLB con i dati
+            corretti dallo spazio di indirizzamento e la carica.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa execv() in OS161?</div>
+          <div class="answer">
+            Rimpiazza lo spazio di indirizzamento di un processo con uno nuovo e
+            carica un file ELF da eseguire, configurando anche gli argomenti.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un file ELF?</div>
+          <div class="answer">
+            Contiene segmenti con codice e dati. Specifica dove caricare il
+            codice nello spazio degli indirizzi virtuali e l'indirizzo iniziale
+            d'esecuzione.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa rappresenta il problema della sezione critica?
+          </div>
+          <div class="answer">
+            È il problema di garantire che solo un processo per volta acceda a
+            una sezione di codice che usa risorse condivise.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Quali sono le tre condizioni fondamentali per risolvere la sezione
+            critica?
+          </div>
+          <div class="answer">
+            Mutua esclusione, progresso e attesa limitata (bounded waiting).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa l'istruzione test_and_set?</div>
+          <div class="answer">
+            Imposta un lock a true e restituisce il valore precedente. È
+            atomica, usata per acquisire lock evitando race condition.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa compare_and_swap (CAS)?</div>
+          <div class="answer">
+            Confronta il valore corrente con uno atteso e, se coincide, lo
+            sostituisce con uno nuovo. Altrimenti non fa nulla. Ritorna il
+            valore letto.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa getppages in OS161?</div>
+          <div class="answer">
+            Alloca pagine fisiche. Cerca prima tra le pagine libere nella bitmap
+            e, se non ne trova, chiama ram_stealmem per ottenere memoria
+            contigua.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa getfreeppages?</div>
+          <div class="answer">
+            Cerca un blocco contiguo di pagine libere nella bitmap per
+            l'allocazione di memoria fisica.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa freeppages?</div>
+          <div class="answer">
+            Marca le pagine come libere nella bitmap, permettendone il
+            riutilizzo futuro.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Cosa consente il paging nello user space in OS161?
+          </div>
+          <div class="answer">
+            Permette l'allocazione non contigua della memoria utente,
+            migliorando la gestione della memoria e supportando spazi di
+            indirizzamento virtuali più grandi.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è il ruolo dei registri MIPS in OS161?
+          </div>
+          <div class="answer">
+            Vengono utilizzati per memorizzare dati e indirizzi durante
+            l'esecuzione. Alcuni sono temporanei, altri devono essere
+            salvati/ripristinati durante il context switch.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Dove avviene il salvataggio/ripristino dei registri MIPS in OS161?
+          </div>
+          <div class="answer">
+            Nel file switch.S, durante il dispatching tra thread.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è la struttura 'proc' in OS161?</div>
+          <div class="answer">
+            Rappresenta un processo. Contiene nome, numero di thread, spazio di
+            indirizzamento e directory di lavoro.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Ogni thread ha uno stack utente e uno kernel?
+          </div>
+          <div class="answer">
+            Sì. Ogni thread ha uno stack per l'esecuzione utente e uno per
+            l'esecuzione kernel, per protezione e gestione separata.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Qual è il ruolo di runprogram()?</div>
+          <div class="answer">
+            Avvia un processo utente: apre il file, crea lo spazio
+            d'indirizzamento, carica l'eseguibile, prepara lo stack, entra in
+            user mode.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa enter_new_process()?</div>
+          <div class="answer">
+            È l'ultima funzione eseguita dal kernel prima di passare il
+            controllo all’eseguibile utente. Imposta il contesto iniziale e
+            invoca mips_usermode().
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un processo in OS161?</div>
+          <div class="answer">
+            Un processo è un programma in esecuzione. Include codice (text),
+            stato (program counter, registri), stack (parametri e variabili
+            locali), sezione dati (variabili globali) e heap (memoria dinamica).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            Qual è la differenza tra programma e processo?
+          </div>
+          <div class="answer">
+            Il programma è un'entità passiva (file su disco), il processo è
+            attivo (programma in esecuzione in memoria).
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cos'è un thread in OS161?</div>
+          <div class="answer">
+            Un thread è un'unità di esecuzione di un processo, con il proprio
+            contesto (PC, SP, registri), stack privato, ma condivide codice e
+            dati con altri thread del processo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Qual è la struttura 'thread' in OS161?</div>
+          <div class="answer">
+            È una struttura dati che rappresenta un thread kernel. Contiene
+            nome, stato, stack, contesto dei registri, CPU assegnata, e
+            riferimento al processo.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            A cosa serve la funzione thread_fork in OS161?
+          </div>
+          <div class="answer">
+            Crea un nuovo thread kernel, specificando nome, processo, funzione
+            di entrypoint e dati. Lo rende schedulabile inserendolo nella
+            runqueue.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa thread_exit in OS161?</div>
+          <div class="answer">
+            Termina il thread corrente, rimuovendolo dal sistema. Libera
+            risorse, disabilita interruzioni e invoca lo scheduler per un
+            context switch.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Qual è lo scopo di thread_yield?</div>
+          <div class="answer">
+            Permette al thread corrente di cedere volontariamente la CPU pur
+            rimanendo eseguibile. Viene reinserito nella runqueue.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa thread_switch?</div>
+          <div class="answer">
+            Esegue il context switch: salva il contesto del thread corrente e
+            passa al successivo dalla runqueue della CPU.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Che ruolo ha getppages in OS161?</div>
+          <div class="answer">
+            Alloca pagine fisiche (multipli di 4 KB) chiamando ram_stealmem, con
+            protezione tramite lock per ambienti multithreaded.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">Cosa fa ram_stealmem?</div>
+          <div class="answer">
+            Alloca memoria fisica contigua a partire da firstpaddr. Usata nella
+            fase iniziale del kernel prima che la VM sia attiva.
+          </div>
+        </div>
+        <div class="card">
           <div class="question">Cos'è OS161?</div>
           <div class="answer">
             Un sistema operativo didattico che gira su architettura MIPS
