@@ -196,8 +196,6 @@
             "Le free list non contengono dati, ma solo riferimenti a pagine libere. Quindi non introducono frammentazione interna: rappresentano solo spazio disponibile.",
         },
       ];
-      // Esercizi settembre 2024 (tutti gli altri)
-
       // Esercizi Gennaio 2025 Inglese
       const eserciziGennaioInglese = [
         {
@@ -338,6 +336,7 @@
           `,
         },
       ];
+      // Appello Settembre 2024
       const eserciziSettembre = [
         {
           domanda:
@@ -345,6 +344,27 @@
           risposta: "YES",
           spiegazione:
             "Il thrashing può comunque verificarsi se l'algoritmo di sostituzione delle pagine non tiene conto dei working set o causa sostituzioni frequenti e non necessarie. Anche con memoria sufficiente, un cattivo algoritmo può degradare le prestazioni.",
+        },
+        {
+          domanda:
+            "Calcola il numero di blocchi su disco necessari per memorizzare un file da 5 MB in un file system con allocazione collegata, blocchi da 4 KB e puntatore di 4 byte in ogni blocco.",
+          risposta: "1280 blocchi",
+          spiegazione:
+            "Dimensione file = 5 MB = 5,242,880 byte. Ogni blocco è di 4 KB (4096 byte) ma 4 byte sono occupati dal puntatore → 4092 byte disponibili per dati. Numero di blocchi = 5,242,880 / 4092 ≈ 1280.",
+        },
+        {
+          domanda:
+            "Se la dimensione del puntatore fosse ridotta a 2 byte, quanti blocchi sarebbero necessari e ciò renderebbe lo storage più efficiente?",
+          risposta: "1280 blocchi; sì, è più efficiente",
+          spiegazione:
+            "Con puntatore di 2 byte, ogni blocco ha 4094 byte disponibili per dati. Numero di blocchi = 5,242,880 / 4094 ≈ 1280,63 → arrotondato a 1280. Si risparmia 1 blocco rispetto al caso con puntatore a 4 byte, migliorando leggermente l'efficienza.",
+        },
+        {
+          domanda:
+            "Confronta l'overhead introdotto dai puntatori nei due casi come percentuale dello storage totale.",
+          risposta: "4-byte pointer: 0,098% — 2-byte pointer: 0,049%",
+          spiegazione:
+            "Con puntatore a 4 byte: overhead totale = 1282 × 4 = 5128 byte → 5128 / 5,242,880 × 100 ≈ 0,098%. Con puntatore a 2 byte: overhead = 1281 × 2 = 2562 byte → 2562 / 5,242,880 × 100 ≈ 0,049%. L'overhead si dimezza passando a puntatori da 2 byte.",
         },
         {
           domanda:
@@ -398,6 +418,49 @@
             "Prendere in considerazione un'unità disco rigido (HDD) con le seguenti specifiche:<br>· Dimensione del settore: 512 byte<br>· Numero di tracce per faccia: 5.000<br>· Numero di settori per traccia: 300<br>· Numero di piatti a doppia faccia: 6<br>· Velocità di rotazione del piatto: 7.200 giri/min (giri al minuto)<br><ol><li>Calcolare la velocità di trasferimento dati massima possibile in megabyte al secondo (MB/s), supponendo che sia possibile trasferire una traccia di dati per giro.</li><li>Se il disco subisce un arresto anomalo della testina su un piatto, in che modo ciò influisce sulla capacità totale e sulla disponibilità dei dati supponendo che non siano in atto meccanismi RAID o di backup?</li><li>Se il disco ha un tempo di ricerca medio di 4 ms e deve leggere un file da 1 GB suddiviso in 200 tracce non contigue, calcolare il tempo totale necessario per leggere il file. Includi il tempo per la ricerca, la latenza rotazionale e il trasferimento dei dati. Si supponga che la latenza rotazionale media sia di 4,165 ms e che sia possibile leggere una traccia per giro.</li></ol>",
           risposta: `1) 17.58 MB/s<br>2) Capacità ridotta a 7.87 GB<br>3) Tempo totale ≈ 8.25 s`,
           spiegazione: `<strong>1. Velocità di trasferimento:</strong><br>Ogni traccia contiene 512B × 300 = 150 KB.<br>Velocità di rotazione: 7.200 giri/min = 120 giri/s dunque 1 giro in 1/120 s = 8.33 ms.<br>150 KB × 120 = <strong>18.000 KB/s</strong> = <strong>17.58 MB/s</strong>.<br><br><strong>2. Arresto testina su un piatto:</strong><br>1 piatto = 150 KB × 5.000 tracce = 732.4 MB.<br>Capacità totale iniziale = 8.58 GB.<br>Capacità ridotta = 8.58 GB - 732.4 MB = <strong>7.87 GB</strong>.<br><br><strong>3. Tempo di lettura file 1 GB su 200 tracce:</strong><br>Tempo di ricerca medio = 4 ms.<br>Latenza rotazionale media = 4.165 ms.<br>Tempo per giro = 8.33 ms.<br>Tempo totale = 200 × (4 + 4.165 + 8.33) = 3.299 s.<br>Nota: 1 GB non può stare in sole 200 tracce, servono circa 583 tracce.<br>Tempo totale per 583 tracce = 583 × (4 + 4.165 + 8.33) ≈ <strong>8.25 s</strong>.<br>Se si leggessero solo 200 tracce: <strong>3.3 s</strong>.<br>La stima dipende dalla reale distribuzione del file sulle tracce.`,
+        },
+        {
+          domanda:
+            "In un sistema con più dispositivi I/O e una singola CPU, le operazioni di I/O possono avvenire in parallelo se la CPU è occupata a eseguire un processo?",
+          risposta: "Sì",
+          spiegazione:
+            "Le operazioni di I/O possono essere gestite da controller I/O dedicati, permettendo loro di procedere indipendentemente dalla CPU. La CPU può continuare a eseguire processi mentre le operazioni di I/O sono in corso.",
+        },
+        {
+          domanda:
+            "In un sistema con memoria virtuale a demand paging e DMA, può verificarsi un page fault durante un trasferimento DMA, causando il fallimento del trasferimento se non si prendono precauzioni?",
+          risposta: "Sì",
+          spiegazione:
+            "Il page fault non è causato direttamente dal trasferimento DMA, poiché il DMA usa indirizzi fisici e quindi memoria fisica contigua. Tuttavia, un page fault può essere generato da codice (dello stesso processo o di altri) in esecuzione in parallelo. Per evitare problemi, le pagine coinvolte nel DMA non devono essere scelte come vittime per la sostituzione: il sistema operativo deve bloccarle in memoria o gestire i page fault in modo da non interrompere il DMA.",
+        },
+        {
+          domanda:
+            "In un sistema che utilizza I/O basato su interrupt, è possibile perdere un interrupt se il controller è occupato a elaborarne un altro e il dispositivo che ha generato il secondo interrupt non supporta la messa in coda degli interrupt?",
+          risposta: "Sì",
+          spiegazione:
+            "Se il controller di interrupt è impegnato a gestire un interrupt e il dispositivo che genera un secondo interrupt non supporta la messa in coda, il secondo interrupt può essere perso. Questo accade perché il controller potrebbe non registrare il nuovo interrupt durante l'elaborazione di quello corrente, e senza messa in coda il dispositivo non può trattenere la richiesta fino a quando il controller è libero.",
+        },
+        {
+          domanda:
+            "Calcola il massimo tasso di trasferimento dati in MB/s per un HDD con settore da 512 B, 300 settori per traccia, 5000 tracce per superficie, 6 piatti a doppia faccia e velocità di rotazione di 7200 rpm, assumendo che per ogni rivoluzione si possa trasferire una traccia.",
+          risposta: "≈17,57 MB/s",
+          spiegazione:
+            "Capacità traccia = 300 × 512 B = 153.600 B = 0,1465 MB. Tempo per rivoluzione = 60.000 ms / 7200 ≈ 8,33 ms. Velocità = 0,1465 MB / 8,33 ms × 1000 ≈ 17,57 MB/s. Si assume che le tracce su un cilindro non vengano lette/scritte in parallelo.",
+        },
+        {
+          domanda:
+            "Se un piatto dell'HDD subisce un head crash, come cambia la capacità e la disponibilità dei dati senza RAID o backup?",
+          risposta:
+            "Capacità ridotta a 7,68 GB, dati persi sul piatto danneggiato",
+          spiegazione:
+            "Ogni piatto ha due superfici. Perdita di un piatto = perdita di 2 superfici su 12 totali → capacità ridotta di 2/12. Capacità nuova = 9,216 GB × (10/12) = 7,68 GB. I dati sul piatto guasto non sono recuperabili senza backup.",
+        },
+        {
+          domanda:
+            "Calcola il tempo totale per leggere un file da 1 GB diviso in 200 tracce non contigue, dato che il tempo medio di seek è 4 ms, la latenza rotazionale media è 4,165 ms e si può leggere una traccia per rivoluzione.",
+          risposta: "≈59,8 secondi",
+          spiegazione:
+            "Trasferimento: 1 GB = 1.073.741.824 B. Capacità per traccia = 153.600 B. Tempo di trasferimento totale = (1.073.741.824 / 153.600) × 8,33 ms ≈ 58,21 s. Seek totale = 200 × 4 ms = 0,8 s. Latenza totale = 200 × 4,165 ms = 0,833 s. Tempo totale ≈ 58,21 + 0,8 + 0,833 = 59,8 s. Nota: il calcolo ignora che 200 tracce non possono contenere 1 GB, come segnalato nel testo.",
         },
       ];
 

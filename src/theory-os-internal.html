@@ -327,6 +327,22 @@
         </div>
         <div class="card">
           <div class="question">
+            In un sistema con Inverted Page Table (IPT), una singola voce di
+            tabella può essere condivisa da più pagine virtuali di processi
+            diversi senza causare conflitti nella traduzione degli indirizzi?
+          </div>
+          <div class="answer">
+            Sì. Nella versione base di una IPT, dove ogni voce contiene solo il
+            numero di pagina e il PID, questo non sarebbe possibile poiché un
+            frame appartiene a un solo processo. Per supportare pagine o
+            librerie condivise, l’IPT può includere un puntatore usato per
+            mantenere una lista di pagine che condividono lo stesso frame. Ciò
+            richiede soluzioni software più complesse, poiché le liste di
+            collisione hash standard non basterebbero.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
             Qual è il vantaggio della tabella delle pagine invertita?
           </div>
           <div class="answer">
@@ -700,6 +716,20 @@
           <div class="answer">
             Il rimpiazzamento globale sceglie frame da qualsiasi processo,
             quello locale solo dal processo corrente.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            In un sistema che usa il page replacement locale, un processo con un
+            tasso molto alto di page fault può ridurre la memoria fisica
+            disponibile per altri processi?
+          </div>
+          <div class="answer">
+            No. Nel page replacement locale, a ogni processo è assegnato un
+            insieme fisso di frame fisici, e i suoi page fault causano
+            sostituzioni solo all’interno di quei frame. Questo significa che un
+            alto tasso di page fault in un processo non riduce direttamente la
+            memoria disponibile per altri processi.
           </div>
         </div>
         <div class="card">
