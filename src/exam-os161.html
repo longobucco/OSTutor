@@ -2,7 +2,7 @@
 <html lang="it">
   <head>
     <meta charset="UTF-8" />
-    <title>Esercizi - OS161</title>
+    <title>Esercizi OS161</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
       body {
@@ -64,23 +64,112 @@
     </style>
   </head>
   <body>
-    <h1>Esercizi OS/161 - Gestione Memoria</h1>
+    <h1>Esercizi OS161</h1>
     <label for="esame-select" style="font-weight: bold; margin-right: 1rem"
-      >Seleziona esame:</label
+      >Scegli scheda:</label
     >
     <select id="esame-select" style="margin-bottom: 2rem">
-      <option value="settembre2024">Appello Settembre 2024</option>
-      <option value="gennaio2025">Appello Gennaio 2025</option>
-      <option value="giugno2024">Appello Giugno 2024</option>
+      <option value="settembre2024">Settembre 2024</option>
+      <option value="gennaio2025">Gennaio 2025</option>
+      <option value="giugno2024">Giugno 2024</option>
+      <option value="luglio2016">Luglio 2016</option>
       <option value="lab2">Laboratorio #2</option>
     </select>
+    <span
+      id="completato-label"
+      style="margin-left: 1em; font-weight: bold; color: #27ae60; display: none"
+      >Completato</span
+    >
     <div id="esercizi-list"></div>
+    <button
+      id="completato-btn"
+      style="
+        margin-top: 2rem;
+        padding: 0.7rem 1.5rem;
+        background: #27ae60;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 1.1em;
+        cursor: pointer;
+      "
+    >
+      Completato
+    </button>
     <noscript>
       <p>
         Abilita JavaScript per visualizzare gli esercizi in modo interattivo.
       </p>
     </noscript>
     <script>
+      // Funzione per salvare il completamento dell'esame/lab su backend Python
+      function salvaCompletamento(nome) {
+        fetch("http://localhost:8080/completato", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nome }),
+        })
+          .then((res) => {
+            if (res.ok) {
+              aggiornaCompletatoLabel();
+            } else {
+              res.text().then((t) => alert("Errore: " + t));
+            }
+          })
+          .catch(() =>
+            alert("Errore di connessione col server completamento.")
+          );
+      }
+
+      // Funzione per rimuovere il completamento
+      function rimuoviCompletamento(nome) {
+        fetch("http://localhost:8080/rimuovi_completato", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ nome }),
+        })
+          .then((res) => {
+            if (res.ok) {
+              aggiornaCompletatoLabel();
+            } else {
+              res.text().then((t) => alert("Errore: " + t));
+            }
+          })
+          .catch(() =>
+            alert("Errore di connessione col server completamento.")
+          );
+      }
+
+      // Mostra o nasconde la scritta "Completato" accanto al select
+      function aggiornaCompletatoLabel() {
+        fetch("http://localhost:8080/completed.json")
+          .then((res) => res.json())
+          .then((data) => {
+            const completati = data.completati || [];
+            const select = document.getElementById("esame-select");
+            const label = document.getElementById("completato-label");
+            const btn = document.getElementById("completato-btn");
+            const nome = select.options[select.selectedIndex].text;
+            if (completati.includes(nome)) {
+              label.style.display = "";
+              btn.textContent = "Non completato";
+              btn.style.background = "#e74c3c";
+              btn.onclick = function () {
+                rimuoviCompletamento(nome);
+              };
+            } else {
+              label.style.display = "none";
+              btn.textContent = "Completato";
+              btn.style.background = "#27ae60";
+              btn.onclick = function () {
+                salvaCompletamento(nome);
+              };
+            }
+          })
+          .catch(() => {
+            document.getElementById("completato-label").style.display = "none";
+          });
+      }
       // Laboratorio #2
       const eserciziLab2 = [
         {
@@ -179,9 +268,58 @@
               soluzione:
                 "Per traccia, stdin/stdout/stderr sono fissi sulla console e non reindirizzabili a file; invocare file_write per stdout/stderr non rispetta il modello imposto.",
             },
+            {
+              domanda:
+                "Si supponga un sistema OS/161. Descrivere la struttura trapframe e il suo utilizzo durante le chiamate di sistema. In particolare, indicare la funzione del registro v0 dell'architettura MIPS.",
+              risposta:
+                "La trapframe salva lo stato del programma tramite i registri MIPS quando viene eseguita una chiamata di sistema.",
+              soluzione:
+                "In OS/161, la trapframe memorizza i registri del processore MIPS al momento dell'eccezione o chiamata di sistema, permettendo al kernel di ripristinare l'esecuzione utente. Nei registri a0, a1, a2 sono presenti i primi tre parametri della system call, in a3 un flag di successo/errore, e in v0 il codice identificativo della system call invocata. Dopo l'esecuzione, v0 viene aggiornato con il valore di ritorno della chiamata.",
+            },
+            {
+              domanda:
+                "Si supponga un sistema OS/161. È necessario l'utilizzo di una chiamata di sistema per la scrittura su stdin (es. sys_write) per un processo utente? È possibile utilizzare kprintf() invece? Motivare le risposte.",
+              risposta:
+                "Sì, per un processo utente è necessaria una system call; kprintf() è utilizzabile solo nel kernel.",
+              soluzione:
+                "Le chiamate di sistema consentono a un processo in user space di accedere a funzionalità del kernel. Per scrivere su dispositivi come stdin/stdout da un processo utente è necessario usare una system call come sys_write. La funzione kprintf(), invece, è parte del kernel e non può essere richiamata direttamente dall'user space, quindi non è alternativa per processi utente.",
+            },
           ],
         },
       ];
+
+      const eserciziLuglio2016 = [
+        {
+          domanda: "Che cosa è il trapframe? Quali dati vi vengono memorizzati?",
+          risposta:
+            "È una struttura che memorizza lo stato del processo durante un cambio di contesto.",
+          spiegazione:
+            "Il trapframe contiene i registri e altre informazioni di stato necessarie per ripristinare l'esecuzione del processo dopo un'eccezione o system call. Ad esempio, durante una syscall salva i valori dei registri MIPS del processo utente.",
+        },
+        {
+          domanda:
+            "Sia dato un puntatore a trapframe tf, che cosa sono i campi tf->tf_a0, tf->tf_a1, …?",
+          risposta: "Parametri della system call, corrispondenti ai registri MIPS a0, a1, …",
+          spiegazione:
+            "Questi campi rappresentano gli argomenti passati alla system call. Ad esempio, in read/write possono contenere il file descriptor, il puntatore al buffer e la dimensione del trasferimento.",
+        },
+        {
+          domanda:
+            "Perché la printf in OS/161 non viene realizzata chiamando direttamente kprintf?",
+          risposta: "Perché kprintf è una funzione del kernel e non è invocabile direttamente dall'user space.",
+          spiegazione:
+            "La printf di libreria C in OS/161 usa vprintf, che a sua volta chiama write per passare i dati al kernel. kprintf è accessibile solo dal codice kernel, quindi il codice utente deve passare tramite una system call.",
+        },
+        {
+          domanda:
+            "Perché, in OS/161, il menu non attende la fine del programma utente lanciato con p <file eseguibile>?",
+          risposta:
+            "Perché mancano la system call sys_exit e il meccanismo di attesa/sincronizzazione nel kernel.",
+          spiegazione:
+            "Attualmente, menu_execute avvia il programma ma il kernel non aspetta la sua terminazione. Servirebbe un'implementazione di sys_exit e un sistema di attesa basato su interrupt e sincronizzazione per bloccare il menu fino alla conclusione del processo.",
+        },
+      ];
+      
       const esercizi = [
         {
           domanda:
@@ -322,6 +460,11 @@
         },
       ];
 
+      // --- INIZIO INSERIMENTO SEZIONE LUGLIO 2016 (a riga 461) ---
+      const eserciziLuglio2016Section = [
+        ...eserciziLuglio2016
+      ];
+      // --- FINE INSERIMENTO SEZIONE LUGLIO 2016 ---
       const eserciziGennaio2025 = [
         {
           domanda:
@@ -435,6 +578,9 @@
         } else if (esame === "giugno2024") {
           titolo = "Appello Giugno 2024";
           eserciziDaMostrare = eserciziGiugno2024;
+        } else if (esame === "luglio2016") {
+          titolo = "Appello Luglio 2016";
+          eserciziDaMostrare = eserciziLuglio2016Section;
         } else if (esame === "lab2") {
           titolo = "Laboratorio #2";
         }
@@ -449,11 +595,46 @@
               const riassunto = document.createElement("div");
               riassunto.className = "esercizio-card";
               riassunto.innerHTML = `
-                <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"true\">\n      <span>Riassunto OS/161</span>\n      <span class=\"arrow\">&#9660;</span>\n    </div>\n    <div class=\"esercizio-content\" style=\"display:block;\">\n      <div style=\"padding:0.5em 0 0.5em 0.5em;\">\n        <b>Gestione memoria</b><ul style=\"margin-top:0.2em;\"><li><b>Traduzione e TLB:</b> ${item.riassunto.gestione_memoria.traduzione_e_tlb.spazio_indirizzi}. Zone kernel: ${item.riassunto.gestione_memoria.traduzione_e_tlb.zone_kernel.join(", ")}. TLB: ${item.riassunto.gestione_memoria.traduzione_e_tlb.tlb}.</li><li><b>dumbvm addrspace:</b> ${item.riassunto.gestione_memoria.dumbvm_addrspace.descrizione}. Segmenti: ${item.riassunto.gestione_memoria.dumbvm_addrspace.segmenti.join(", ")}. Stack: ${item.riassunto.gestione_memoria.dumbvm_addrspace.stack}.</li><li><b>Allocazione memoria:</b> ${item.riassunto.gestione_memoria.allocazione_memoria.funzioni.join('; ')}.</li><li><b>Rilascio memoria:</b> ${item.riassunto.gestione_memoria.rilascio_memoria.note}; Bitmap: freeRamFrames (${item.riassunto.gestione_memoria.rilascio_memoria.bitmap.freeRamFrames}), allocSize (${item.riassunto.gestione_memoria.rilascio_memoria.bitmap.allocSize}). Funzioni: ${item.riassunto.gestione_memoria.rilascio_memoria.funzioni.join('; ')}.</li></ul>
-        <b>System call</b><ul style=\"margin-top:0.2em;\"><li><b>Meccanismo:</b> ${item.riassunto.system_call.meccanismo.trap}, ${item.riassunto.system_call.meccanismo.trapframe}, ${item.riassunto.system_call.meccanismo.syscall_dispatch}.</li><li><b>Implementate:</b> ${item.riassunto.system_call.syscall_implementate.join('; ')}.</li></ul>
-        <b>Funzioni chiave:</b> ${item.riassunto.funzioni_chiave.join(', ')}.<br/>
-        <b>Sincronizzazione:</b> ${item.riassunto.sincronizzazione.join(', ')}.<br/>
-        <b>Strutture dati:</b> ${item.riassunto.strutture_dati.join(', ')}.
+                <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"true\">\n      <span>Riassunto OS/161</span>\n      <span class=\"arrow\">&#9660;</span>\n    </div>\n    <div class=\"esercizio-content\" style=\"display:block;\">\n      <div style=\"padding:0.5em 0 0.5em 0.5em;\">\n        <b>Gestione memoria</b><ul style=\"margin-top:0.2em;\"><li><b>Traduzione e TLB:</b> ${
+                  item.riassunto.gestione_memoria.traduzione_e_tlb
+                    .spazio_indirizzi
+                }. Zone kernel: ${item.riassunto.gestione_memoria.traduzione_e_tlb.zone_kernel.join(
+                ", "
+              )}. TLB: ${
+                item.riassunto.gestione_memoria.traduzione_e_tlb.tlb
+              }.</li><li><b>dumbvm addrspace:</b> ${
+                item.riassunto.gestione_memoria.dumbvm_addrspace.descrizione
+              }. Segmenti: ${item.riassunto.gestione_memoria.dumbvm_addrspace.segmenti.join(
+                ", "
+              )}. Stack: ${
+                item.riassunto.gestione_memoria.dumbvm_addrspace.stack
+              }.</li><li><b>Allocazione memoria:</b> ${item.riassunto.gestione_memoria.allocazione_memoria.funzioni.join(
+                "; "
+              )}.</li><li><b>Rilascio memoria:</b> ${
+                item.riassunto.gestione_memoria.rilascio_memoria.note
+              }; Bitmap: freeRamFrames (${
+                item.riassunto.gestione_memoria.rilascio_memoria.bitmap
+                  .freeRamFrames
+              }), allocSize (${
+                item.riassunto.gestione_memoria.rilascio_memoria.bitmap
+                  .allocSize
+              }). Funzioni: ${item.riassunto.gestione_memoria.rilascio_memoria.funzioni.join(
+                "; "
+              )}.</li></ul>
+        <b>System call</b><ul style=\"margin-top:0.2em;\"><li><b>Meccanismo:</b> ${
+          item.riassunto.system_call.meccanismo.trap
+        }, ${item.riassunto.system_call.meccanismo.trapframe}, ${
+                item.riassunto.system_call.meccanismo.syscall_dispatch
+              }.</li><li><b>Implementate:</b> ${item.riassunto.system_call.syscall_implementate.join(
+                "; "
+              )}.</li></ul>
+        <b>Funzioni chiave:</b> ${item.riassunto.funzioni_chiave.join(
+          ", "
+        )}.<br/>
+        <b>Sincronizzazione:</b> ${item.riassunto.sincronizzazione.join(
+          ", "
+        )}.<br/>
+        <b>Strutture dati:</b> ${item.riassunto.strutture_dati.join(", ")}.
       </div>\n    </div>\n  `;
               eserciziList.appendChild(riassunto);
             }
@@ -463,15 +644,23 @@
               card.className = "esercizio-card";
               card.innerHTML = `
                 <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"true\">\n      <span>Codice</span>\n      <span class=\"arrow\">&#9660;</span>\n    </div>\n    <div class=\"esercizio-content\" style=\"display:block;\">\n      <pre style=\"background:#f4f4f4;padding:1em;border-radius:4px;overflow-x:auto;\"><code>${item.codice
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")}</code></pre>\n    </div>\n  `;
+                  .replace(/</g, "&lt;")
+                  .replace(/>/g, "&gt;")}</code></pre>\n    </div>\n  `;
               eserciziList.appendChild(card);
               // Domande
               item.domande.forEach((ex, didx) => {
                 const domandaCard = document.createElement("div");
                 domandaCard.className = "esercizio-card";
                 domandaCard.innerHTML = `
-                  <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"false\">\n      <span>DOMANDA ${didx + 1}</span>\n      <span class=\"arrow\">&#9654;</span>\n    </div>\n    <div class=\"esercizio-content\">\n      <div class=\"domanda\">${ex.domanda}</div>\n      <div class=\"risposta\">Risposta: ${ex.risposta}</div>\n      <div class=\"spiegazione\">${ex.soluzione}</div>\n    </div>\n  `;
+                  <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"false\">\n      <span>DOMANDA ${
+                    didx + 1
+                  }</span>\n      <span class=\"arrow\">&#9654;</span>\n    </div>\n    <div class=\"esercizio-content\">\n      <div class=\"domanda\">${
+                  ex.domanda
+                }</div>\n      <div class=\"risposta\">Risposta: ${
+                  ex.risposta
+                }</div>\n      <div class=\"spiegazione\">${
+                  ex.soluzione
+                }</div>\n    </div>\n  `;
                 const header = domandaCard.querySelector(".esercizio-header");
                 const content = domandaCard.querySelector(".esercizio-content");
                 const arrow = domandaCard.querySelector(".arrow");
@@ -527,9 +716,15 @@
 
       esameSelect.addEventListener("change", function (e) {
         renderEsercizi(e.target.value);
+        aggiornaCompletatoLabel();
       });
       // Mostra di default settembre 2024
       renderEsercizi("settembre2024");
+      aggiornaCompletatoLabel();
+
+      // Bottone Completato
+      const completatoBtn = document.getElementById("completato-btn");
+      // L'handler del bottone viene gestito dinamicamente in aggiornaCompletatoLabel
     </script>
   </body>
 </html>
