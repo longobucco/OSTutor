@@ -2,7 +2,7 @@
 <html lang="it">
   <head>
     <meta charset="UTF-8" />
-    <title>Esercizi OS/161 - Gestione Memoria</title>
+    <title>Esercizi - OS161</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
       body {
@@ -72,6 +72,7 @@
       <option value="settembre2024">Appello Settembre 2024</option>
       <option value="gennaio2025">Appello Gennaio 2025</option>
       <option value="giugno2024">Appello Giugno 2024</option>
+      <option value="lab2">Laboratorio #2</option>
     </select>
     <div id="esercizi-list"></div>
     <noscript>
@@ -80,6 +81,107 @@
       </p>
     </noscript>
     <script>
+      // Laboratorio #2
+      const eserciziLab2 = [
+        {
+          riassunto: {
+            gestione_memoria: {
+              traduzione_e_tlb: {
+                spazio_indirizzi:
+                  "4GB totali, 2GB kernel (alto) + 2GB utente (basso)",
+                zone_kernel: [
+                  "Primo 0.5GB: no TLB, cached, relocation semplice",
+                  "Secondo 0.5GB: no TLB, uncached (I/O mappato in memoria)",
+                  "Ultimo 1GB: mappato in TLB (OS/161 non lo usa)",
+                ],
+                tlb: "64 voci, page number, frame number, ASID, flag valid/dirty",
+              },
+              dumbvm_addrspace: {
+                descrizione: "Gestisce traduzione su page fault",
+                segmenti: [".text", ".rodata", ".data", ".bss", ".sbss"],
+                stack: "12 pagine create a 0x7fffffff",
+              },
+              allocazione_memoria: {
+                funzioni: [
+                  "ram_bootstrap(): trova ultimo indirizzo fisico",
+                  "ram_stealmem(npages): alloca pagine contigue, aggiorna firstpaddr",
+                  "getppages(): wrapper con spinlock; prova getfreeppages(), poi ram_stealmem()",
+                ],
+              },
+              rilascio_memoria: {
+                note: "OS/161 base non libera memoria; aggiunto freeppages() con bitmap",
+                bitmap: {
+                  freeRamFrames: "1=libero, 0=occupato",
+                  allocSize: "numero di pagine allocate per blocco",
+                },
+                funzioni: [
+                  "free_kpages(): libera memoria kernel",
+                  "as_destroy(): libera spazio utente (codice, dati, stack)",
+                  "freeppages(): aggiorna bitmap e allocSize",
+                ],
+              },
+            },
+            system_call: {
+              meccanismo: {
+                trap: "passaggio user mode → kernel mode",
+                trapframe: "salva registri, PC, SP",
+                syscall_dispatch:
+                  "switch su tf_v0, parametri in tf_a0-tf_a2, risultato in tf_v0, errore in tf_a3, avanzamento tf_epc",
+              },
+              syscall_implementate: [
+                "sys_write(fd, buf_ptr, size): stdout/stderr via putch()",
+                "sys_read(fd, buf_ptr, size): stdin via getch()",
+                "sys__exit(status): distrugge address space, chiude thread",
+              ],
+            },
+            funzioni_chiave: [
+              "ram_stealmem(npages)",
+              "getppages(npages)",
+              "getfreeppages(npages)",
+              "free_kpages(vaddr)",
+              "as_destroy(addrspace)",
+              "freeppages(paddr, npages)",
+            ],
+            sincronizzazione: ["Spinlock: freemem_lock, stealmem_lock"],
+            strutture_dati: [
+              "freeRamFrames[]",
+              "allocSize[]",
+              "nRamFrames",
+              "allocTableActive",
+            ],
+          },
+        },
+        {
+          codice: `int sys_write(int fd, userptr_t buf_ptr, size_t size) {\n int i;\n char *p = (char *)buf_ptr;\n if (fd!=STDOUT_FILENO && fd!=STDERR_FILENO)\n return file_write(fd, buf_ptr, size);\n for (i=0; i<(int)size; i++)\n putch(p[i]);\n return (int)size;\n}`,
+          domande: [
+            {
+              domanda:
+                'Sostituire il ciclo con: for (i=0; i<(int)size; i++) kprintf("%c", p[i]);',
+              risposta: "Sì",
+              soluzione:
+                'Con stdout/stderr mappati sulla console, kprintf("%c", ...) invia caratteri alla stessa destinazione di putch; è funzionalmente equivalente al loop originale.',
+            },
+            {
+              domanda: 'Sostituire il ciclo con: kprintf("%s", p);',
+              risposta: "Sì",
+              soluzione:
+                "Il formato \"%s\" accetta un char* e stampa i byte fino a '\\0'. Con buffer terminato da null e console come sink, è compatibile. (Attenzione: se p non è null-terminated, non è sicuro.)",
+            },
+            {
+              domanda: 'Sostituire il ciclo con: kprintf("%s", &p);',
+              risposta: "No",
+              soluzione:
+                'Qui &p è di tipo char** (indirizzo del puntatore), non un char*. "%s" richiede un char*; passare un char** è tipo errato e produce comportamento indefinito.',
+            },
+            {
+              domanda: "Sostituire il ciclo con: file_write(fd, p, size);",
+              risposta: "No",
+              soluzione:
+                "Per traccia, stdin/stdout/stderr sono fissi sulla console e non reindirizzabili a file; invocare file_write per stdout/stderr non rispetta il modello imposto.",
+            },
+          ],
+        },
+      ];
       const esercizi = [
         {
           domanda:
@@ -150,7 +252,75 @@
             "L'indirizzo 0x805000B0 si trova nello spazio del kernel, poiché è maggiore di 0x80000000. In dumbvm, lo spazio del kernel è mappato 1:1, cioè l'indirizzo fisico corrisponde all'indirizzo logico meno 0x80000000. Calcolando: 0x805000B0 - 0x80000000 = 0x5000B0.",
         },
       ];
-      const eserciziSettembre2024 = esercizi.slice(0, 10);
+      const eserciziSettembre2024 = [
+        ...esercizi.slice(0, 10),
+        {
+          domanda:
+            "La funzione sys_getpid è necessaria per implementare sys_waitpid, perché serve il PID del processo in attesa?",
+          risposta: "No",
+          spiegazione:
+            "sys_waitpid riceve già come parametro il PID del processo da attendere, quindi non ha bisogno di chiamare sys_getpid per ottenerlo.",
+        },
+        {
+          domanda:
+            "La funzione sys_getpid è necessaria per implementare la system call getpid ed è chiamata direttamente da un processo utente?",
+          risposta: "No",
+          spiegazione:
+            "Il processo utente invoca getpid in userland, che genera una syscall; sys_getpid viene chiamata dal kernel, non direttamente dal processo utente.",
+        },
+        {
+          domanda:
+            "La funzione sys_getpid è necessaria per implementare la system call getpid ed è chiamata dal kernel nella funzione syscall?",
+          risposta: "Sì",
+          spiegazione:
+            "Quando la syscall getpid viene intercettata, il kernel invoca sys_getpid per ottenere il PID del processo corrente.",
+        },
+        {
+          domanda:
+            "La funzione sys_getpid restituisce il PID del processo corrente?",
+          risposta: "Sì",
+          spiegazione:
+            "sys_getpid restituisce sempre il PID del processo in esecuzione che l'ha invocata.",
+        },
+        {
+          domanda:
+            "La funzione sys_getpid è chiamata per ottenere il PID di un altro processo (quello da attendere)?",
+          risposta: "No",
+          spiegazione:
+            "sys_getpid restituisce il PID del processo corrente, non di altri processi.",
+        },
+        {
+          domanda:
+            "La funzione sys_getpid è chiamata da sys__exit per sapere quale processo segnalare?",
+          risposta: "No",
+          spiegazione:
+            "sys__exit non chiama sys_getpid; utilizza già le strutture del processo corrente per sapere il proprio PID.",
+        },
+        {
+          domanda:
+            "Perché è un errore chiamare cv_wait senza aver prima fatto lock_acquire?",
+          risposta:
+            "Perché il lock deve essere posseduto quando si chiama cv_wait.",
+          spiegazione:
+            "cv_wait rilascia e riacquisisce il lock internamente; se non lo possiedi all'inizio, l'uso è scorretto e può causare race condition.",
+        },
+        {
+          domanda:
+            "Perché è sbagliato fare un return condizionato prima di lock_release?",
+          risposta:
+            "Perché può causare deadlock e saltare operazioni di pulizia.",
+          spiegazione:
+            "Un return all'interno della sezione critica salta la proc_destroy e lascia il lock acquisito, bloccando eventuali altri thread che tentano di acquisirlo.",
+        },
+        {
+          domanda:
+            "Perché è un errore chiamare proc_destroy con curproc invece di proc?",
+          risposta:
+            "Perché si distruggerebbe il processo corrente invece di quello atteso.",
+          spiegazione:
+            "Il processo padre in attesa deve eliminare il processo figlio terminato (parametro proc), non se stesso, altrimenti verrebbe eliminato erroneamente.",
+        },
+      ];
 
       const eserciziGennaio2025 = [
         {
@@ -262,42 +432,97 @@
         } else if (esame === "gennaio2025") {
           titolo = "Appello Gennaio 2025";
           eserciziDaMostrare = eserciziGennaio2025;
-        } else {
+        } else if (esame === "giugno2024") {
           titolo = "Appello Giugno 2024";
           eserciziDaMostrare = eserciziGiugno2024;
+        } else if (esame === "lab2") {
+          titolo = "Laboratorio #2";
         }
-        gruppoDiv.innerHTML = `<h2 style=\"color:#2980b9;margin-top:2rem;\">${titolo}</h2>`;
+        gruppoDiv.innerHTML = `<h2 style=\"color:${
+          esame === "lab2" ? "#e67e22" : "#2980b9"
+        };margin-top:2rem;\">${titolo}</h2>`;
         eserciziList.appendChild(gruppoDiv);
-        eserciziDaMostrare.forEach((ex, idx) => {
-          const card = document.createElement("div");
-          card.className = "esercizio-card";
-          card.innerHTML = `
-          <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"false\">\n      <span>ESERCIZIO ${
-            idx + 1
-          }</span>\n      <span class=\"arrow\">&#9654;</span>\n    </div>\n    <div class=\"esercizio-content\">\n      <div class=\"domanda\">${
-            ex.domanda
-          }</div>\n      <div class=\"risposta\">Risposta: ${
-            ex.risposta
-          }</div>\n      <div class=\"spiegazione\">${
-            ex.spiegazione
-          }</div>\n    </div>\n  `;
-          const header = card.querySelector(".esercizio-header");
-          const content = card.querySelector(".esercizio-content");
-          const arrow = card.querySelector(".arrow");
-          content.style.display = "none";
-          header.addEventListener("click", function () {
-            const expanded = content.style.display === "block";
-            content.style.display = expanded ? "none" : "block";
-            arrow.innerHTML = expanded ? "&#9654;" : "&#9660;";
-            header.setAttribute("aria-expanded", !expanded);
-          });
-          header.addEventListener("keypress", function (e) {
-            if (e.key === "Enter" || e.key === " ") {
-              header.click();
+        if (esame === "lab2") {
+          eserciziLab2.forEach((item, idx) => {
+            if (item.riassunto) {
+              // Card riassunto
+              const riassunto = document.createElement("div");
+              riassunto.className = "esercizio-card";
+              riassunto.innerHTML = `
+                <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"true\">\n      <span>Riassunto OS/161</span>\n      <span class=\"arrow\">&#9660;</span>\n    </div>\n    <div class=\"esercizio-content\" style=\"display:block;\">\n      <div style=\"padding:0.5em 0 0.5em 0.5em;\">\n        <b>Gestione memoria</b><ul style=\"margin-top:0.2em;\"><li><b>Traduzione e TLB:</b> ${item.riassunto.gestione_memoria.traduzione_e_tlb.spazio_indirizzi}. Zone kernel: ${item.riassunto.gestione_memoria.traduzione_e_tlb.zone_kernel.join(", ")}. TLB: ${item.riassunto.gestione_memoria.traduzione_e_tlb.tlb}.</li><li><b>dumbvm addrspace:</b> ${item.riassunto.gestione_memoria.dumbvm_addrspace.descrizione}. Segmenti: ${item.riassunto.gestione_memoria.dumbvm_addrspace.segmenti.join(", ")}. Stack: ${item.riassunto.gestione_memoria.dumbvm_addrspace.stack}.</li><li><b>Allocazione memoria:</b> ${item.riassunto.gestione_memoria.allocazione_memoria.funzioni.join('; ')}.</li><li><b>Rilascio memoria:</b> ${item.riassunto.gestione_memoria.rilascio_memoria.note}; Bitmap: freeRamFrames (${item.riassunto.gestione_memoria.rilascio_memoria.bitmap.freeRamFrames}), allocSize (${item.riassunto.gestione_memoria.rilascio_memoria.bitmap.allocSize}). Funzioni: ${item.riassunto.gestione_memoria.rilascio_memoria.funzioni.join('; ')}.</li></ul>
+        <b>System call</b><ul style=\"margin-top:0.2em;\"><li><b>Meccanismo:</b> ${item.riassunto.system_call.meccanismo.trap}, ${item.riassunto.system_call.meccanismo.trapframe}, ${item.riassunto.system_call.meccanismo.syscall_dispatch}.</li><li><b>Implementate:</b> ${item.riassunto.system_call.syscall_implementate.join('; ')}.</li></ul>
+        <b>Funzioni chiave:</b> ${item.riassunto.funzioni_chiave.join(', ')}.<br/>
+        <b>Sincronizzazione:</b> ${item.riassunto.sincronizzazione.join(', ')}.<br/>
+        <b>Strutture dati:</b> ${item.riassunto.strutture_dati.join(', ')}.
+      </div>\n    </div>\n  `;
+              eserciziList.appendChild(riassunto);
+            }
+            if (item.codice) {
+              // Card codice
+              const card = document.createElement("div");
+              card.className = "esercizio-card";
+              card.innerHTML = `
+                <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"true\">\n      <span>Codice</span>\n      <span class=\"arrow\">&#9660;</span>\n    </div>\n    <div class=\"esercizio-content\" style=\"display:block;\">\n      <pre style=\"background:#f4f4f4;padding:1em;border-radius:4px;overflow-x:auto;\"><code>${item.codice
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")}</code></pre>\n    </div>\n  `;
+              eserciziList.appendChild(card);
+              // Domande
+              item.domande.forEach((ex, didx) => {
+                const domandaCard = document.createElement("div");
+                domandaCard.className = "esercizio-card";
+                domandaCard.innerHTML = `
+                  <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"false\">\n      <span>DOMANDA ${didx + 1}</span>\n      <span class=\"arrow\">&#9654;</span>\n    </div>\n    <div class=\"esercizio-content\">\n      <div class=\"domanda\">${ex.domanda}</div>\n      <div class=\"risposta\">Risposta: ${ex.risposta}</div>\n      <div class=\"spiegazione\">${ex.soluzione}</div>\n    </div>\n  `;
+                const header = domandaCard.querySelector(".esercizio-header");
+                const content = domandaCard.querySelector(".esercizio-content");
+                const arrow = domandaCard.querySelector(".arrow");
+                content.style.display = "none";
+                header.addEventListener("click", function () {
+                  const expanded = content.style.display === "block";
+                  content.style.display = expanded ? "none" : "block";
+                  arrow.innerHTML = expanded ? "&#9654;" : "&#9660;";
+                  header.setAttribute("aria-expanded", !expanded);
+                });
+                header.addEventListener("keypress", function (e) {
+                  if (e.key === "Enter" || e.key === " ") {
+                    header.click();
+                  }
+                });
+                eserciziList.appendChild(domandaCard);
+              });
             }
           });
-          eserciziList.appendChild(card);
-        });
+        } else {
+          eserciziDaMostrare.forEach((ex, idx) => {
+            const card = document.createElement("div");
+            card.className = "esercizio-card";
+            card.innerHTML = `
+            <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"false\">\n      <span>ESERCIZIO ${
+              idx + 1
+            }</span>\n      <span class=\"arrow\">&#9654;</span>\n    </div>\n    <div class=\"esercizio-content\">\n      <div class=\"domanda\">${
+              ex.domanda
+            }</div>\n      <div class=\"risposta\">Risposta: ${
+              ex.risposta
+            }</div>\n      <div class=\"spiegazione\">${
+              ex.spiegazione
+            }</div>\n    </div>\n  `;
+            const header = card.querySelector(".esercizio-header");
+            const content = card.querySelector(".esercizio-content");
+            const arrow = card.querySelector(".arrow");
+            content.style.display = "none";
+            header.addEventListener("click", function () {
+              const expanded = content.style.display === "block";
+              content.style.display = expanded ? "none" : "block";
+              arrow.innerHTML = expanded ? "&#9654;" : "&#9660;";
+              header.setAttribute("aria-expanded", !expanded);
+            });
+            header.addEventListener("keypress", function (e) {
+              if (e.key === "Enter" || e.key === " ") {
+                header.click();
+              }
+            });
+            eserciziList.appendChild(card);
+          });
+        }
       }
 
       esameSelect.addEventListener("change", function (e) {
