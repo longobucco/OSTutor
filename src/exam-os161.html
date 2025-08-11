@@ -102,7 +102,6 @@
       </p>
     </noscript>
     <script>
-      // Funzione per salvare il completamento dell'esame/lab su backend Python
       function salvaCompletamento(nome) {
         fetch("http://localhost:8080/completato", {
           method: "POST",
@@ -120,8 +119,7 @@
             alert("Errore di connessione col server completamento.")
           );
       }
-
-      // Funzione per rimuovere il completamento
+      
       function rimuoviCompletamento(nome) {
         fetch("http://localhost:8080/rimuovi_completato", {
           method: "POST",
@@ -139,8 +137,7 @@
             alert("Errore di connessione col server completamento.")
           );
       }
-
-      // Mostra o nasconde la scritta "Completato" accanto al select
+      
       function aggiornaCompletatoLabel() {
         fetch("http://localhost:8080/completed.json")
           .then((res) => res.json())
@@ -170,7 +167,7 @@
             document.getElementById("completato-label").style.display = "none";
           });
       }
-      // Laboratorio #2
+      
       const eserciziLab2 = [
         {
           riassunto: {
@@ -459,12 +456,11 @@
             "Il processo padre in attesa deve eliminare il processo figlio terminato (parametro proc), non se stesso, altrimenti verrebbe eliminato erroneamente.",
         },
       ];
-
-      // --- INIZIO INSERIMENTO SEZIONE LUGLIO 2016 (a riga 461) ---
+      
       const eserciziLuglio2016Section = [
         ...eserciziLuglio2016
       ];
-      // --- FINE INSERIMENTO SEZIONE LUGLIO 2016 ---
+      
       const eserciziGennaio2025 = [
         {
           domanda:
@@ -591,7 +587,6 @@
         if (esame === "lab2") {
           eserciziLab2.forEach((item, idx) => {
             if (item.riassunto) {
-              // Card riassunto
               const riassunto = document.createElement("div");
               riassunto.className = "esercizio-card";
               riassunto.innerHTML = `
@@ -639,7 +634,6 @@
               eserciziList.appendChild(riassunto);
             }
             if (item.codice) {
-              // Card codice
               const card = document.createElement("div");
               card.className = "esercizio-card";
               card.innerHTML = `
@@ -647,7 +641,6 @@
                   .replace(/</g, "&lt;")
                   .replace(/>/g, "&gt;")}</code></pre>\n    </div>\n  `;
               eserciziList.appendChild(card);
-              // Domande
               item.domande.forEach((ex, didx) => {
                 const domandaCard = document.createElement("div");
                 domandaCard.className = "esercizio-card";
@@ -718,13 +711,10 @@
         renderEsercizi(e.target.value);
         aggiornaCompletatoLabel();
       });
-      // Mostra di default settembre 2024
       renderEsercizi("settembre2024");
       aggiornaCompletatoLabel();
-
-      // Bottone Completato
+      
       const completatoBtn = document.getElementById("completato-btn");
-      // L'handler del bottone viene gestito dinamicamente in aggiornaCompletatoLabel
     </script>
   </body>
 </html>
