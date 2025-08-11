@@ -1,43 +1,41 @@
-# OSTutor: Esercizi Sistemi Operativi - Memoria Virtuale
+# OSTutor: Studio interattivo di Sistemi Operativi & OS161
 
-OSTutor è una piattaforma interattiva pensata per aiutare gli studenti a comprendere e mettere in pratica i concetti fondamentali dei sistemi operativi, con particolare attenzione alla memoria virtuale, gestione della paginazione, I/O, file system e hardware di memorizzazione. Il progetto integra un tutor digitale che guida l'utente nella risoluzione degli esercizi e fornisce spiegazioni dettagliate.
+OSTutor è una piattaforma interattiva per studiare e approfondire i concetti di sistemi operativi e OS161. Permette di esercitarsi su quiz, domande d'esame e teoria, con spiegazioni dettagliate e un tutor digitale che guida lo studente passo passo.
 
-## Obiettivi
+## Funzionalità principali
 
-- Fornire agli studenti uno strumento pratico per esercitarsi su domande d'esame e quiz riguardanti la memoria virtuale e altri aspetti dei sistemi operativi.
-- Presentare spiegazioni dettagliate e risposte commentate per favorire la comprensione dei meccanismi di base come paginazione, IPT, DMA, allocazione file system, interrupt e prestazioni dei dispositivi di memorizzazione.
-- Offrire una interfaccia web semplice e intuitiva per la consultazione e lo studio autonomo.
-- Integrare un tutor digitale che supporta lo studente nella comprensione degli esercizi, suggerisce strategie di risoluzione e fornisce feedback immediato.
+- Quiz interattivi e domande d'esame su memoria virtuale, paginazione, IPT, DMA, file system, interrupt, dispositivi di memorizzazione e OS161.
+- Spiegazioni dettagliate e risposte commentate per ogni esercizio.
+- Tutor digitale che suggerisce strategie di risoluzione, fornisce feedback immediato e aiuta nella comprensione degli argomenti.
+- Tracciamento del progresso utente e salvataggio degli esercizi svolti.
+- Generazione automatica di nuovi esercizi e verifica delle risposte inserite.
+- Interfaccia web semplice e intuitiva per consultare teoria, quiz e flashcards.
+- Materiali di supporto e PDF di approfondimento integrati.
 
 ## Struttura
 
-- Tutti gli esercizi sono visualizzati in modo interattivo tramite una pagina HTML (`exam-os.html`, `exam-os161.html`, `theory-os-internal.html`).
-- Ogni esercizio include domanda, risposta sintetica e spiegazione dettagliata, con la possibilità di ricevere suggerimenti e feedback dal tutor.
-- Il file `tutor.py` gestisce la logica degli esercizi, la valutazione delle risposte e l'integrazione con l'interfaccia web. Questo script permette di generare nuovi esercizi, verificare le soluzioni inserite dagli utenti e fornire spiegazioni personalizzate.
-- Il progresso degli utenti può essere tracciato tramite il file `progress.json`, che memorizza lo stato degli esercizi svolti.
+- Esercizi e quiz disponibili tramite pagine HTML (`exam-os.html`, `exam-os161.html`, `theory-os-internal.html`).
+- Ogni esercizio include domanda, risposta sintetica, spiegazione e suggerimenti.
+- `tutor.py` gestisce la logica degli esercizi, la valutazione e l'integrazione con l'interfaccia web.
+- Il file `progress.json` salva lo stato degli esercizi svolti.
 
 ## Destinatari
 
-Il progetto è pensato per studenti universitari di informatica, ingegneria informatica o chiunque voglia approfondire i concetti di base dei sistemi operativi in modo pratico e guidato. Grazie all'integrazione del tutor digitale, OSTutor è adatto sia per lo studio autonomo che per l'utilizzo in contesti didattici strutturati.
+OSTutor è pensato per studenti universitari di informatica, ingegneria informatica e chiunque voglia approfondire i sistemi operativi e OS161 in modo pratico e guidato, sia per studio autonomo che in contesti didattici.
 
 ## Prerequisiti
 
-- Python 3.x installato sul sistema
+- Python 3.x installato
 - Browser web
 
-## Cartella flashcards e PDF
+## Materiali di supporto
 
-La cartella `flashcards/` contiene materiali di supporto allo studio, tra cui il file `OS_flashcards.pdf` che raccoglie domande e risposte rapide sui principali argomenti di sistemi operativi.
-Sono inoltre presenti PDF di approfondimento nella cartella `src/OSTutor/` (ad esempio `OS-Internals.pdf`).
+La cartella `flashcards/` contiene domande e risposte rapide (`OS_flashcards.pdf`). Nella cartella `src/OSTutor/` sono disponibili PDF di approfondimento (es. `OS-Internals.pdf`).
 
 ## Contribuire
 
-Contributi, suggerimenti e nuove proposte di esercizi sono benvenuti!
-Per contribuire:
-
-- Forka il repository e crea una nuova branch per le tue modifiche.
-- Invia una pull request descrivendo chiaramente le modifiche proposte.
-- Puoi anche segnalare errori o suggerimenti tramite la sezione Issues di GitHub.
+Contributi, suggerimenti e nuove proposte di esercizi sono benvenuti! Forka il repository, crea una branch e invia una pull request, oppure segnala errori tramite la sezione Issues.
 
 ## Licenza
+
 Questo progetto è rilasciato sotto la licenza MIT. Consulta il file `LICENSE` per maggiori dettagli.
