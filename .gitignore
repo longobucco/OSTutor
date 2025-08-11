@@ -3,4 +3,4 @@ progress.json
 /.vscode
 .venv/
 /src/OSTutor/
-.DS_Store/
+.DS_Store
