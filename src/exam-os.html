@@ -72,8 +72,10 @@
     >
     <select id="scheda-select" style="margin-bottom: 2rem">
       <option value="gennaio-inglese">Gennaio 2025 [EN]</option>
+      <option value="gennaio-2025-it">Gennaio 2025 [IT]</option>
       <option value="settembre-2024">Settembre 2024</option>
       <option value="giugno-2024">Giugno 2024</option>
+      <option value="giugno-2025">Giugno 2025</option>
       <option value="luglio-2016">Luglio 2016</option>
     </select>
     <div id="esercizi-list"></div>
@@ -83,7 +85,245 @@
       </p>
     </noscript>
     <script>
-      
+      const eserciziGiugno2025 = [
+        {
+          domanda:
+            "Calcolare il TLB hit minimo necessario per ottenere un EAT al più del 40% superiore al tempo RAM (TRAM = 40 ns) in un sistema con TLB e page table a 3 livelli.",
+          risposta: "HR ≥ 0.87 (≈ 86.67%)",
+          spiegazione:
+            "Con 3 livelli, un TLB miss richiede 4 accessi RAM: EAT = HR·TRAM + (1−HR)·4·TRAM ⇒ EAT/TRAM = 4 − 3·HR. Imporre EAT ≤ 1.4·TRAM (massimo +40% rispetto a RAM) dà 4 − 3·HR ≤ 1.4 ⇒ 3·HR ≥ 2.6 ⇒ HR ≥ 2.6/3 = 0.8666… ≈ 0.87.",
+        },
+        {
+          domanda:
+            "In che modo un allocatore Buddy affronta il problema della frammentazione?",
+          risposta:
+            "I blocchi liberi possono avere solo dimensioni pari a una potenza di 2, il che riduce il problema della frammentazione esterna",
+          spiegazione:
+            "Il sistema Buddy suddivide e fonde blocchi di memoria in potenze di due. Questo vincolo semplifica la ricombinazione di blocchi adiacenti e riduce la frammentazione esterna, anche se può causare frammentazione interna quando la richiesta non utilizza tutto il blocco assegnato.",
+        },
+        {
+          domanda:
+            "Una free list (di frame liberi) potrebbe essere ordinata, per supportare l'allocazione di frame contigui a un costo lineare",
+          risposta:
+            "Per indirizzi fisici decrescenti; Per indirizzi fisici crescenti",
+          spiegazione:
+            "Ordinare la free list per indirizzi fisici, sia in ordine crescente che decrescente, consente di individuare facilmente frame fisicamente adiacenti, riducendo il costo di ricerca di blocchi contigui a O(n). L'ordinamento per dimensione o la mancanza di ordinamento non agevolano questa ricerca.",
+        },
+        {
+          domanda:
+            "In un file system con indicizzazione a due livelli (puntatori a 32 bit, blocchi da 4 KB), qual è la dimensione massima di un file?",
+          risposta: "4 GiB (4,294,967,296 byte)",
+          spiegazione:
+            "Ogni blocco indice contiene 4096/4 = 1024 puntatori. Con due livelli si hanno 1024 (primo livello) × 1024 (secondo livello) = 1,048,576 blocchi dati indirizzabili. Moltiplicando per 4096 byte/blocco si ottiene 1,048,576 × 4096 = 4,294,967,296 byte = 4 GiB.",
+        },
+        {
+          domanda:
+            "Per un file binario da 9019 KiB, quanti blocchi indice occupa?",
+          risposta:
+            "4 blocchi indice (3 di secondo livello + 1 di primo livello)",
+          spiegazione:
+            "Dimensione file: 9019 KiB = 9019 × 1024 = 9,235,456 byte. Blocchi dati necessari: ⌈9,235,456 / 4096⌉ = 2255. Ogni blocco indice di 2° livello punta a 1024 blocchi dati ⇒ ⌈2255 / 1024⌉ = 3 blocchi di 2° livello. Serve 1 blocco di 1° livello che contiene 3 puntatori ai blocchi di 2° livello. Totale indici: 3 + 1 = 4.",
+        },
+        {
+          domanda:
+            "Per il file da 9019 KiB, qual è la frammentazione interna dei soli blocchi indice?",
+          risposta:
+            "7,352 byte (3,268 B nei blocchi di 2° livello + 4,084 B nel blocco di 1° livello)",
+          spiegazione:
+            "Nei 3 blocchi di 2° livello: 2 sono pieni (2 × 1024 voci), il 3° usa solo 2255 − 2048 = 207 voci ⇒ voci libere = 1024 − 207 = 817 ⇒ 817 × 4 = 3,268 B. Nel blocco di 1° livello si usano 3 voci su 1024 ⇒ (1024 − 3) × 4 = 4,084 B. Somma frammentazione interna indici = 3,268 + 4,084 = 7,352 B.",
+        },
+        {
+          domanda:
+            "Il file contiene numeri double (64 bit). Quanti blocchi indice si leggono per accedere ai primi 128K numeri?",
+          risposta:
+            "2 blocchi indice (1 di primo livello + 1 di secondo livello)",
+          spiegazione:
+            "128K = 128 × 1024 = 131,072 numeri; ciascuno 8 byte ⇒ 1,048,576 byte. Blocchi dati richiesti: 1,048,576 / 4096 = 256. Questi 256 puntatori risiedono nello stesso blocco di 2° livello (capacità 1024 voci). Per indirizzarli occorre leggere 1 blocco indice di 1° livello (che punta al blocco di 2° livello) + 1 blocco di 2° livello.",
+        },
+        {
+          domanda:
+            "L'operazione di apertura di un file (open) può modificare sia la per-process file table che la system-wide?",
+          risposta: "Sì",
+          spiegazione:
+            "La chiamata open inserisce un nuovo entry nella tabella file del processo e, se il file non è già aperto globalmente, può creare o aggiornare l'entry corrispondente nella tabella globale (system-wide open file table).",
+        },
+        {
+          domanda:
+            "Il requisito principale per l'implementazione delle directory è l'efficienza nel creare e rimuovere (delete) un file?",
+          risposta: "No",
+          spiegazione:
+            "Le directory sono ottimizzate principalmente per ricerche rapide di nomi e mapping tra nomi e inode o FCB; l'efficienza nella creazione/cancellazione è importante ma non è il requisito principale.",
+        },
+        {
+          domanda: "Una per-process file table è allocata nello spazio kernel?",
+          risposta: "Sì",
+          spiegazione:
+            "In OS e file system tipici, la per-process file table risiede nello spazio kernel per motivi di protezione e gestione sicura delle strutture interne.",
+        },
+        {
+          domanda:
+            "Il puntatore alla posizione corrente di lettura/scrittura in un file aperto risiede nel blocco di controllo del file (file control block)?",
+          risposta: "No",
+          spiegazione:
+            "Il puntatore di posizione corrente (offset) è memorizzato nella system-wide open file table o struttura equivalente associata alla sessione di apertura, non nel FCB, che descrive proprietà permanenti del file.",
+        },
+        {
+          domanda:
+            "L'accesso sequenziale non può essere simulato dall'accesso casuale (diretto)?",
+          risposta: "No",
+          spiegazione:
+            "L’accesso sequenziale può essere simulato usando accessi casuali, incrementando progressivamente l’offset per leggere o scrivere il file in ordine.",
+        },
+        {
+          domanda:
+            "L'accesso casuale (diretto) non può essere implementato tramite formati di allocazione file basati su liste concatenate (ad esempio FAT, lista di blocchi)?",
+          risposta: "No",
+          spiegazione:
+            "Formati come FAT o liste di blocchi possono supportare l’accesso diretto, ma richiedono un attraversamento sequenziale della struttura per raggiungere il blocco desiderato, rendendo l’operazione meno efficiente.",
+        },
+        {
+          domanda:
+            "L'accesso casuale (diretto) può essere implementato da tutti i formati di allocazione dei file?",
+          risposta: "Sì",
+          spiegazione:
+            "Tutti i principali formati di allocazione (contigua, indicizzata, a lista concatenata) possono supportare accesso diretto; cambia solo l’efficienza del calcolo del blocco da leggere o scrivere.",
+        },
+        {
+          domanda:
+            "L'accesso casuale (diretto) può essere simulato dall'accesso sequenziale?",
+          risposta: "Sì",
+          spiegazione:
+            "Per simulare l’accesso diretto usando operazioni sequenziali, si può scorrere il file in ordine fino a raggiungere la posizione desiderata; è meno efficiente ma possibile.",
+        },
+        {
+          domanda:
+            "Sono date due configurazioni RAID: A con 2 dischi in mirroring e B con 4 dischi (striping + mirroring). Tutti i dischi hanno lo stesso MTTF. L'MTTTDL (perdita di dati) di B è superiore all'MTTTDL di A?",
+          risposta: "No",
+          spiegazione:
+            "Con striping + mirroring (RAID 10) e 4 dischi, la probabilità complessiva di perdita dati non è superiore a quella di un semplice mirroring a 2 dischi; anzi, la tolleranza ai guasti è almeno equivalente, se non migliore.",
+        },
+        {
+          domanda:
+            "Dati N dischi in configurazione striping, se tutti i dischi hanno un dato MTTF, la probabilità di un guasto diminuisce con l'aumento del valore di N?",
+          risposta: "No",
+          spiegazione:
+            "In striping puro (RAID 0), aumentando N cresce la probabilità che almeno un disco fallisca, quindi la probabilità complessiva di guasto aumenta, non diminuisce.",
+        },
+        {
+          domanda: "Il mirroring include bit di parità?",
+          risposta: "No",
+          spiegazione:
+            "Il mirroring (RAID 1) memorizza copie complete dei dati su dischi diversi, senza usare bit di parità; la parità è tipica di configurazioni come RAID 5 o RAID 6.",
+        },
+        {
+          domanda:
+            "Dopo un guasto, l'utilizzo del sistema deve essere interrotto fino al completamento della riparazione?",
+          risposta: "No",
+          spiegazione:
+            "Nelle configurazioni RAID ridondanti, dopo un guasto il sistema può continuare a funzionare in modalità degradata, ricostruendo i dati dal mirroring o dalla parità, senza interruzione completa del servizio.",
+        },
+      ];
+
+      const eserciziGennaio2025IT = [
+        {
+          domanda: "L’IPT permette sempre di risparmiare memoria?",
+          risposta: "NO",
+          spiegazione:
+            "Non c'è risparmio nel caso di pochi processi con spazio di indirizzamento piccolo.",
+        },
+        {
+          domanda:
+            "Il risparmio di memoria con IPT dipende dalle dimensioni della RAM, dal numero di processi e dal loro spazio di indirizzamento virtuale?",
+          risposta: "YES",
+          spiegazione:
+            "Per motivi simili alla risposta precedente: il risparmio varia in base a questi fattori.",
+        },
+        {
+          domanda:
+            "Si risparmia sempre memoria quando lo spazio di indirizzamento di un processo è maggiore della dimensione della RAM?",
+          risposta: "NO",
+          spiegazione:
+            "È un caso in cui IPT può essere più efficiente di PT, ma esistono anche altri scenari, ad esempio molti processi con spazio di indirizzamento minore della RAM ma la somma di tutte le Page Table maggiore della IPT.",
+        },
+        {
+          domanda:
+            "Si può risparmiare memoria anche se lo spazio di indirizzamento di ogni processo è inferiore alla dimensione della RAM?",
+          risposta: "YES",
+          spiegazione: "Perché la IPT è unica per tutti i processi.",
+        },
+        {
+          domanda: "Nella IPT, la chiave di ricerca è la coppia (pid, frame)?",
+          risposta: "NO",
+          spiegazione:
+            "Il frame corrisponde all'indice della tabella, quindi non fa parte della chiave di ricerca.",
+        },
+        {
+          domanda: "Nella IPT, la chiave di ricerca è la coppia (pid, pagina)?",
+          risposta: "YES",
+          spiegazione:
+            "La chiave di ricerca include la pagina e il pid; se si intende solo 'pagina', non è sufficiente.",
+        },
+        {
+          domanda:
+            "Per migliorare le prestazioni, si sostituisce la IPT con una tabella di hash?",
+          risposta: "NO",
+          spiegazione:
+            "Sarebbe un'altra soluzione e non un'IPT; non è un miglioramento ma un cambiamento di struttura.",
+        },
+        {
+          domanda:
+            "Per migliorare le prestazioni, si aggiunge alla IPT una tabella di hash?",
+          risposta: "YES",
+          spiegazione:
+            "È la tecnica tipicamente usata per migliorare le prestazioni di una IPT.",
+        },
+        {
+          domanda:
+            "Un processo ha spazio di indirizzamento virtuale di 48 GB in un sistema a 64 bit con 16 GB di RAM, gestione della memoria paginata (pagine/frame da 4 KB) e 4 GB di RAM riservati al kernel. Confrontare le dimensioni di una tabella delle pagine standard (una per processo) e di una IPT (Inverted Page Table). Il PID richiede 12 bit. Si utilizzano 28 bit per indici di pagina/frame e si allinea ogni cella a 32 o 64 bit. Calcolare: (A) le dimensioni di PT e IPT; (B) lo spazio di indirizzamento virtuale massimo di un processo con la IPT proposta.",
+          risposta: "A: PT: 48 MB; IPT: 24 MB; | B: 64 GB",
+          spiegazione:
+            "Page Table - Numero pagine: 48 GB / 4 KB = 12 milioni di pagine; Bit richiest per ogni entry: 24 bit indice + 4 bit extra → allineamento a 32 bit (4 B), Calcolo dimensione: 12M × 4 B = 48 MB | IP - Ram utente: 16 GB - 4 GB kernel = 12 GB, numero frame: 12 GB / 4 KB = 3 milioni di frame, Bit richiesti: 12 bit PID + 24 bit pagina + 4 bit extra = 40 bit → allineamento a 64 bit (8 B), Calcolo dimensione: 3M × 8 B = 24 MB; Spazio massimo IPT - Limite indici per la IPT proposta è di 24 bit per indice di pagina → massimo 2^24 = 16M pagine, per uno spazio totale di: 16M × 4 KB = 64 GB di spazio virtuale massimo",
+        },
+        {
+          domanda:
+            "Dato un disco con blocchi di 8KB e una partizione A con NM blocchi per metadati (inclusa una bitmap) e ND blocchi per dati, sapendo che NM/4 blocchi sono riservati alla bitmap con 1 bit per ciascuno dei ND blocchi, calcolare il rapporto ND/NM.",
+          risposta: "ND/NM = 16K",
+          spiegazione:
+            "La bitmap occupa NM/4 blocchi, cioè NM/4 × 8KB × 8 bit = 16K × NM bit. Ogni bit della bitmap corrisponde a un blocco dati, quindi ND = 16K × NM. Da ciò segue ND/NM = 16K.",
+        },
+        {
+          domanda:
+            "Supponendo che la bitmap indichi un rapporto blocchi liberi/usati di 33,33% (1 blocco libero ogni 3 usati), calcolare, in funzione di NM, la dimensione massima possibile per un intervallo contiguo di blocchi liberi nella configurazione più favorevole e in quella meno favorevole.",
+          risposta:
+            "massima configurazione favorevole: 4K * NM blocchi, massima configurazione sfavorevole: 1 blocco",
+          spiegazione:
+            "Con un rapporto Nfree/Nused = 1/3, la frazione di blocchi liberi è 0,25 del totale dei blocchi rappresentati dalla bitmap, cioè 0,25 * 16K * NM = 4K * NM blocchi liberi. Nella configurazione più favorevole tutti i blocchi liberi sono contigui formando un intervallo massimo di 4K * NM blocchi. Nella configurazione meno favorevole i blocchi liberi sono isolati e l'intervallo massimo contiguo è di un solo blocco.",
+        },
+        {
+          domanda:
+            "È possibile caricare dinamicamente un programma senza che sia necessario il dynamic linking? Il dynamic linking richiede che un programma sia anche caricabile dinamicamente (dynamic loading)?",
+          risposta: "Sì, è possibile.",
+          spiegazione:
+            "Il dynamic linking può essere combinato con il dynamic loading, ma non è obbligatorio. Un programma può essere staticamente linkato e caricato dinamicamente o incrementalmente, ad esempio tramite dynamic loading basato sul programma. Il dynamic loading significa che parti del programma sono caricate in memoria solo quando necessario, mentre il dynamic linking risolve i riferimenti tra moduli a runtime, utile soprattutto per le librerie condivise.",
+        },
+        {
+          domanda:
+            "Perché un’Inverted Page Table necessita di una tabella di HASH e perché la soluzione IPT + tabella di HASH è diversa da una soluzione con PT basata solo su tabella di HASH?",
+          risposta:
+            "Per evitare una ricerca lineare nella IPT, serve una tabella di HASH.",
+          spiegazione:
+            "Senza una tabella di HASH, la ricerca nella IPT sarebbe lineare e inefficiente. Nella soluzione IPT+HASH, le entry della IPT sono direttamente inserite nelle liste di concatenamento della tabella di HASH, rendendo più efficiente la gestione della memoria rispetto a una tabella di HASH semplice, che richiede allocazioni e deallocazioni classiche ad ogni inserimento o cancellazione.",
+        },
+        {
+          domanda:
+            'Una CPU dotata di TLB può contenere entry di più processi simultaneamente o solo per un processo? Il bit "valid" in una entry della TLB è una copia del bit "valid" nella Page Table?',
+          risposta:
+            "Esistono entrambe le tipologie: TLB che contengono entry di più processi e TLB che contengono solo entry del processo attivo.",
+          spiegazione:
+            'Le TLB che contengono solo entry del processo attivo richiedono un reset/clean della TLB ad ogni cambio di contesto. Il bit "valid" nella TLB indica se l\'entry è libera o usata, mentre nella Page Table indica se la pagina logica è mappata a un frame fisico.',
+        },
+      ];
+
       const eserciziGiugno = [
         {
           domanda:
@@ -197,7 +437,7 @@
             "Le free list non contengono dati, ma solo riferimenti a pagine libere. Quindi non introducono frammentazione interna: rappresentano solo spazio disponibile.",
         },
       ];
-      
+
       const eserciziGennaioInglese = [
         {
           domanda:
@@ -464,7 +704,7 @@
             "Trasferimento: 1 GB = 1.073.741.824 B. Capacità per traccia = 153.600 B. Tempo di trasferimento totale = (1.073.741.824 / 153.600) × 8,33 ms ≈ 58,21 s. Seek totale = 200 × 4 ms = 0,8 s. Latenza totale = 200 × 4,165 ms = 0,833 s. Tempo totale ≈ 58,21 + 0,8 + 0,833 = 59,8 s. Nota: il calcolo ignora che 200 tracce non possono contenere 1 GB, come segnalato nel testo.",
         },
       ];
-      
+
       const eserciziLuglio2016 = [
         {
           domanda:
@@ -492,6 +732,14 @@
           } else {
             rispostaHtml = `Risposta: ${ex.risposta}`;
           }
+
+          let spiegazioneHtml = "";
+          if (typeof ex.spiegazione === "object" && ex.spiegazione !== null) {
+            spiegazioneHtml = renderSpiegazioneObj(ex.spiegazione);
+          } else {
+            spiegazioneHtml = ex.spiegazione;
+          }
+
           card.innerHTML = `
                   <div class="esercizio-header" tabindex="0" role="button" aria-expanded="false">
                     <span>ESERCIZIO ${idx + 1}</span>
@@ -500,7 +748,7 @@
                   <div class="esercizio-content">
                     <div class="domanda">${ex.domanda}</div>
                     <div class="risposta">${rispostaHtml}</div>
-                    <div class="spiegazione">${ex.spiegazione}</div>
+                    <div class="spiegazione">${spiegazioneHtml}</div>
                   </div>
                 `;
           const header = card.querySelector(".esercizio-header");
@@ -522,20 +770,40 @@
         });
       }
 
+      function renderSpiegazioneObj(obj) {
+        if (typeof obj !== "object" || obj === null) return obj;
+        let html = '<ul style="margin-left:1em">';
+        for (const [k, v] of Object.entries(obj)) {
+          html += `<li><strong>${k}:</strong> `;
+          if (typeof v === "object" && v !== null) {
+            html += renderSpiegazioneObj(v);
+          } else {
+            html += v;
+          }
+          html += "</li>";
+        }
+        html += "</ul>";
+        return html;
+      }
+
       const schedaSelect = document.getElementById("scheda-select");
       function updateScheda() {
         if (schedaSelect.value === "giugno-2024") {
           renderEsercizi(eserciziGiugno);
+        } else if (schedaSelect.value === "giugno-2025") {
+          renderEsercizi(eserciziGiugno2025);
         } else if (schedaSelect.value === "settembre-2024") {
           renderEsercizi(eserciziSettembre);
         } else if (schedaSelect.value === "gennaio-inglese") {
           renderEsercizi(eserciziGennaioInglese);
+        } else if (schedaSelect.value === "gennaio-2025-it") {
+          renderEsercizi(eserciziGennaio2025IT);
         } else if (schedaSelect.value === "luglio-2016") {
           renderEsercizi(eserciziLuglio2016);
         }
       }
       schedaSelect.addEventListener("change", updateScheda);
-      
+
       renderEsercizi(eserciziGiugno);
     </script>
   </body>

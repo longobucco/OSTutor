@@ -74,6 +74,7 @@
       <option value="giugno2024">Giugno 2024</option>
       <option value="luglio2016">Luglio 2016</option>
       <option value="lab2">Laboratorio #2</option>
+      <option value="giugno2025">Giugno 2025</option>
     </select>
     <span
       id="completato-label"
@@ -119,7 +120,7 @@
             alert("Errore di connessione col server completamento.")
           );
       }
-      
+
       function rimuoviCompletamento(nome) {
         fetch("http://localhost:8080/rimuovi_completato", {
           method: "POST",
@@ -137,7 +138,7 @@
             alert("Errore di connessione col server completamento.")
           );
       }
-      
+
       function aggiornaCompletatoLabel() {
         fetch("http://localhost:8080/completed.json")
           .then((res) => res.json())
@@ -167,7 +168,7 @@
             document.getElementById("completato-label").style.display = "none";
           });
       }
-      
+
       const eserciziLab2 = [
         {
           riassunto: {
@@ -287,7 +288,8 @@
 
       const eserciziLuglio2016 = [
         {
-          domanda: "Che cosa è il trapframe? Quali dati vi vengono memorizzati?",
+          domanda:
+            "Che cosa è il trapframe? Quali dati vi vengono memorizzati?",
           risposta:
             "È una struttura che memorizza lo stato del processo durante un cambio di contesto.",
           spiegazione:
@@ -296,14 +298,16 @@
         {
           domanda:
             "Sia dato un puntatore a trapframe tf, che cosa sono i campi tf->tf_a0, tf->tf_a1, …?",
-          risposta: "Parametri della system call, corrispondenti ai registri MIPS a0, a1, …",
+          risposta:
+            "Parametri della system call, corrispondenti ai registri MIPS a0, a1, …",
           spiegazione:
             "Questi campi rappresentano gli argomenti passati alla system call. Ad esempio, in read/write possono contenere il file descriptor, il puntatore al buffer e la dimensione del trasferimento.",
         },
         {
           domanda:
             "Perché la printf in OS/161 non viene realizzata chiamando direttamente kprintf?",
-          risposta: "Perché kprintf è una funzione del kernel e non è invocabile direttamente dall'user space.",
+          risposta:
+            "Perché kprintf è una funzione del kernel e non è invocabile direttamente dall'user space.",
           spiegazione:
             "La printf di libreria C in OS/161 usa vprintf, che a sua volta chiama write per passare i dati al kernel. kprintf è accessibile solo dal codice kernel, quindi il codice utente deve passare tramite una system call.",
         },
@@ -316,7 +320,7 @@
             "Attualmente, menu_execute avvia il programma ma il kernel non aspetta la sua terminazione. Servirebbe un'implementazione di sys_exit e un sistema di attesa basato su interrupt e sincronizzazione per bloccare il menu fino alla conclusione del processo.",
         },
       ];
-      
+
       const esercizi = [
         {
           domanda:
@@ -456,11 +460,9 @@
             "Il processo padre in attesa deve eliminare il processo figlio terminato (parametro proc), non se stesso, altrimenti verrebbe eliminato erroneamente.",
         },
       ];
-      
-      const eserciziLuglio2016Section = [
-        ...eserciziLuglio2016
-      ];
-      
+
+      const eserciziLuglio2016Section = [...eserciziLuglio2016];
+
       const eserciziGennaio2025 = [
         {
           domanda:
@@ -557,6 +559,181 @@
             "La traduzione degli indirizzi logici in fisici è gestita dal TLB, che opera a livello di pagina. Per questo motivo, anche se l’allocazione è contigua, la memoria è gestita in unità di pagina. Le altre motivazioni sono errate: l’allocazione a pagina può aumentare la frammentazione, dumbvm non usa una page table, e kmalloc può richiedere qualsiasi dimensione.",
         },
       ];
+
+      const eserciziGiugno2025 = [
+        {
+          codice: `/* Parametri noti */\n#define PAGE_SIZE 4096 /* 0x1000 */\n#define DUMBVM_STACKPAGES 18 /* 0x12000 bytes */\n#define KSEG0_BASE 0x80000000\n#define USERSTACK 0x80000000\n\nstruct addrspace {\n vaddr_t as_vbase1; paddr_t as_pbase1; size_t as_npages1;\n vaddr_t as_vbase2; paddr_t as_pbase2; size_t as_npages2;\n paddr_t as_stackpbase;\n};\n\n/* Valori P1 */\n/* as_pbase1=0x300000, as_pbase2=0x100000,\n as_vbase1=0x4000, as_vbase2=0x8000,\n as_npages1=3, as_npages2=4,\n as_stackpbase=0x200000 */\n/* Intervalli fisici allocati a P1:\n seg2: [0x100000, 0x103FFF] (4 * 0x1000)\n stack:[0x200000, 0x211FFF] (18 * 0x1000)\n seg1: [0x300000, 0x302FFF] (3 * 0x1000)\n*/`,
+          domande: [
+            {
+              domanda:
+                "La funzione thread_exit() distrugge la struttura dati del thread e restituisce il puntatore al processo padre?",
+              risposta: "No",
+              soluzione:
+                "thread_exit() non ritorna al chiamante né restituisce valori; marca il thread come terminato e passa il controllo allo scheduler. La distruzione della struct thread è demandata al percorso di “reaper/cleanup”, non a thread_exit().",
+            },
+            {
+              domanda:
+                "La funzione thread_exit() decrementa il contatore dei thread in un processo?",
+              risposta: "No",
+              soluzione:
+                "L’aggiornamento del numero di thread appartiene alle routine che aggiungono/rimuovono thread dal processo (es. proc_addthread/proc_remthread). thread_exit() non tocca direttamente tale contatore.",
+            },
+            {
+              domanda:
+                "La funzione thread_exit() cancella (assegnando NULL) il puntatore al thread nella struttura del processo?",
+              risposta: "No",
+              soluzione:
+                "La rimozione del legame thread↔processo è responsabilità delle funzioni di gestione del processo (proc_remthread/proc_destroy). thread_exit() non azzera campi del PCB.",
+            },
+            {
+              domanda:
+                "La funzione thread_exit() chiama la funzione proc_rem_thread()?",
+              risposta: "No",
+              soluzione:
+                "La separazione di ruoli prevede che la rimozione dal processo sia eseguita dalle routine del sottosistema ‘proc’. thread_exit() si limita a terminare il thread e a cedere la CPU; non invoca proc_remthread().",
+            },
+            {
+              domanda:
+                "Converti 0x100A00: indirizzo logico kernel e (se P1) indirizzo logico user.",
+              risposta: "kernel: 0x80100A00; user: 0x00008A00",
+              soluzione:
+                "Kernel (KSEG0) = 0x80000000 + 0x100A00 = 0x80100A00. È in seg2 perché 0x100000 ≤ 0x100A00 ≤ 0x103FFF. Offset = 0x100A00 − 0x100000 = 0x0A00. User = as_vbase2 + offset = 0x8000 + 0x0A00 = 0x8A00.",
+            },
+            {
+              domanda:
+                "Converti 0x20A0F0: indirizzo logico kernel e (se P1) indirizzo logico user.",
+              risposta: "kernel: 0x8020A0F0; user: 0x7FFF80F0",
+              soluzione:
+                "Kernel = 0x80000000 + 0x20A0F0 = 0x8020A0F0. È nello stack perché 0x200000 ≤ 0x20A0F0 ≤ 0x211FFF. Stack_size = 18 * 0x1000 = 0x12000. Base virtuale stack = USERSTACK − stack_size = 0x80000000 − 0x12000 = 0x7FFEE000. Offset = 0x20A0F0 − 0x200000 = 0xA0F0. User = 0x7FFEE000 + 0xA0F0 = 0x7FFF80F0.",
+            },
+            {
+              domanda:
+                "Converti 0x21A500: indirizzo logico kernel e (se P1) indirizzo logico user.",
+              risposta:
+                "kernel: 0x8021A500; user: non appartenente allo spazio di P1",
+              soluzione:
+                "Kernel = 0x80000000 + 0x21A500 = 0x8021A500. 0x21A500 è fuori da seg2 (≤0x103FFF), fuori dallo stack (≤0x211FFF) e fuori da seg1 (≥0x300000); quindi non mappato nello spazio user di P1.",
+            },
+            {
+              domanda:
+                "Converti 0x302D00: indirizzo logico kernel e (se P1) indirizzo logico user.",
+              risposta: "kernel: 0x80302D00; user: 0x00006D00",
+              soluzione:
+                "Kernel = 0x80000000 + 0x302D00 = 0x80302D00. È in seg1 perché 0x300000 ≤ 0x302D00 ≤ 0x302FFF. Offset = 0x302D00 − 0x300000 = 0x2D00. User = as_vbase1 + offset = 0x4000 + 0x2D00 = 0x6D00.",
+            },
+            {
+              domanda: "getppages chiama ram_stealmem?",
+              risposta: "Sì",
+              soluzione:
+                "In dumbvm, l’allocazione fisica di pagine usa getppages, che delega a ram_stealmem nelle fasi iniziali (prima del VM allocator).",
+            },
+            {
+              domanda: "free_kpages può liberare lo stack user di un processo?",
+              risposta: "No",
+              soluzione:
+                "free_kpages(vaddr_t) è per pagine kernel (KSEG0/KSEG1). Lo stack user è gestito dallo spazio di indirizzamento del processo (VM/user), non va liberato con API kernel di paginazione per KVA.",
+            },
+            {
+              domanda:
+                "Il tipo vaddr_t è riservato ai soli indirizzi logici kernel?",
+              risposta: "No",
+              soluzione:
+                "vaddr_t rappresenta indirizzi virtuali in generale (user o kernel). Non è limitato al solo spazio kernel.",
+            },
+            {
+              domanda:
+                "as_prepare_load restituisce la dimensione dello spazio degli indirizzi in pagine?",
+              risposta: "No",
+              soluzione:
+                "as_prepare_load(struct addrspace*) prepara lo spazio per il caricamento (es. riserva/alloca pagine o adegua mapping), non restituisce un conteggio di pagine come valore di ritorno.",
+            },
+            {
+              domanda:
+                "La funzione thread_exit() distrugge la struttura dati del thread e restituisce il puntatore al processo padre?",
+              risposta: "No",
+              soluzione:
+                "thread_exit() non restituisce nulla; segna il thread come terminato e lascia al thread reaper la distruzione della struttura dati.",
+            },
+            {
+              domanda:
+                "La funzione thread_exit() decrementa il contatore dei thread in un processo?",
+              risposta: "No",
+              soluzione:
+                "La gestione del numero di thread è compito delle funzioni di associazione/rimozione dei thread da un processo (proc_addthread/proc_remthread), non di thread_exit().",
+            },
+            {
+              domanda:
+                "La funzione thread_exit() cancella (assegnando NULL) il puntatore al thread nella struttura del processo?",
+              risposta: "No",
+              soluzione:
+                "L'azzeramento del puntatore al thread nel PCB è gestito da proc_remthread o funzioni affini, non da thread_exit().",
+            },
+            {
+              domanda:
+                "La funzione thread_exit() chiama la funzione proc_rem_thread()?",
+              risposta: "No",
+              soluzione:
+                "thread_exit() non invoca proc_remthread(); la rimozione del thread dal processo è effettuata in altre parti del codice di gestione dei processi.",
+            },
+            {
+              domanda:
+                "La funzione proc_destroy() può essere chiamata all'interno della chiamata di sistema SYS__EXIT, dopo aver chiamato thread_exit(), se il numero di thread nel processo diventa 0?",
+              risposta: "No",
+              soluzione:
+                "proc_destroy() non viene invocata direttamente dopo thread_exit() in SYS__EXIT; la distruzione del processo avviene separatamente e non all’interno della stessa sequenza immediata.",
+            },
+            {
+              domanda:
+                "La funzione proc_destroy() non può essere chiamata prima di thread_exit(), a meno che tutti i thread siano stati staccati dal processo e lo stato di uscita sia stato letto?",
+              risposta: "Sì",
+              soluzione:
+                "proc_destroy() richiede che il processo non abbia più thread associati e che eventuali dati di uscita siano stati gestiti, altrimenti si rischiano inconsistenze e accessi a memoria non valida.",
+            },
+            {
+              domanda:
+                "La funzione proc_destroy() attende la terminazione del processo, quindi libera la struttura del processo?",
+              risposta: "No",
+              soluzione:
+                "proc_destroy() non attende attivamente la terminazione; presuppone che il processo sia già terminato e procede subito a liberare la struttura e le risorse associate.",
+            },
+            {
+              domanda:
+                "La funzione proc_destroy() legge lo stato di uscita e lo restituisce al chiamante?",
+              risposta: "No",
+              soluzione:
+                "proc_destroy() non è responsabile della lettura o del ritorno dello stato di uscita; si limita a deallocare la struttura del processo e le risorse collegate.",
+            },
+            {
+              domanda:
+                "La system call waitpid() riceve come parametro il puntatore al processo da attendere?",
+              risposta: "No",
+              soluzione:
+                "waitpid() riceve come parametro un PID e non un puntatore diretto alla struttura del processo; l'identificazione del processo avviene tramite lookup interno.",
+            },
+            {
+              domanda:
+                "La system call waitpid() attende un cambio di stato di un processo (in lab4 viene gestito solo lo stato di uscita/exit)?",
+              risposta: "Sì",
+              soluzione:
+                "In lab4 l'implementazione di waitpid() si limita a bloccare il chiamante finché il processo figlio specificato non termina, quindi attende il cambio di stato a 'exited'.",
+            },
+            {
+              domanda:
+                "La system call waitpid() può essere chiamata in OS161 dalla funzione common_prog(), chiamata dal menu dopo aver creato un processo utente?",
+              risposta: "No",
+              soluzione:
+                "common_prog() è usata per eseguire programmi dal menu kernel; waitpid() è pensata per essere invocata da processi user tramite trap di sistema, non direttamente dal kernel.",
+            },
+            {
+              domanda:
+                "La system call waitpid() può chiamare proc_destroy(curproc), dopo che il semaforo utilizzato per attendere (o un’altra primitiva) è stato segnalato?",
+              risposta: "No",
+              soluzione:
+                "waitpid() non distrugge il processo chiamante; può eventualmente deallocare il processo figlio terminato, ma non invoca proc_destroy() sul processo corrente.",
+            },
+          ],
+        },
+      ];
       const eserciziList = document.getElementById("esercizi-list");
       const esameSelect = document.getElementById("esame-select");
 
@@ -579,6 +756,61 @@
           eserciziDaMostrare = eserciziLuglio2016Section;
         } else if (esame === "lab2") {
           titolo = "Laboratorio #2";
+        } else if (esame === "gennaio2025-it") {
+          titolo = "Gennaio 2025 [IT]";
+          eserciziDaMostrare = eserciziGennaio2025IT;
+        } else if (esame === "giugno2025") {
+          titolo = "Appello Giugno 2025";
+          // eserciziGiugno2025 is an array of objects, each with 'codice' and 'domande'.
+          // To render like lab2, we need to show code and then each question as a card.
+          eserciziDaMostrare = eserciziGiugno2025;
+          gruppoDiv.innerHTML = `<h2 style=\"color:#2980b9;margin-top:2rem;\">${titolo}</h2>`;
+          eserciziList.appendChild(gruppoDiv);
+          eserciziGiugno2025.forEach((item, idx) => {
+            if (item.codice) {
+              const card = document.createElement("div");
+              card.className = "esercizio-card";
+              card.innerHTML = `
+                <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"true\">\n      <span>Codice</span>\n      <span class=\"arrow\">&#9660;</span>\n    </div>\n    <div class=\"esercizio-content\" style=\"display:block;\">\n      <pre style=\"background:#f4f4f4;padding:1em;border-radius:4px;overflow-x:auto;\"><code>${item.codice
+                  .replace(/</g, "&lt;")
+                  .replace(/>/g, "&gt;")}</code></pre>\n    </div>\n  `;
+              eserciziList.appendChild(card);
+              if (item.domande) {
+                item.domande.forEach((ex, didx) => {
+                  const domandaCard = document.createElement("div");
+                  domandaCard.className = "esercizio-card";
+                  domandaCard.innerHTML = `
+                    <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"false\">\n      <span>DOMANDA ${
+                      didx + 1
+                    }</span>\n      <span class=\"arrow\">&#9654;</span>\n    </div>\n    <div class=\"esercizio-content\">\n      <div class=\"domanda\">${
+                    ex.domanda
+                  }</div>\n      <div class=\"risposta\">Risposta: ${
+                    ex.risposta
+                  }</div>\n      <div class=\"spiegazione\">${
+                    ex.soluzione
+                  }</div>\n    </div>\n  `;
+                  const header = domandaCard.querySelector(".esercizio-header");
+                  const content =
+                    domandaCard.querySelector(".esercizio-content");
+                  const arrow = domandaCard.querySelector(".arrow");
+                  content.style.display = "none";
+                  header.addEventListener("click", function () {
+                    const expanded = content.style.display === "block";
+                    content.style.display = expanded ? "none" : "block";
+                    arrow.innerHTML = expanded ? "&#9654;" : "&#9660;";
+                    header.setAttribute("aria-expanded", !expanded);
+                  });
+                  header.addEventListener("keypress", function (e) {
+                    if (e.key === "Enter" || e.key === " ") {
+                      header.click();
+                    }
+                  });
+                  eserciziList.appendChild(domandaCard);
+                });
+              }
+            }
+          });
+          return;
         }
         gruppoDiv.innerHTML = `<h2 style=\"color:${
           esame === "lab2" ? "#e67e22" : "#2980b9"
@@ -629,7 +861,7 @@
         <b>Sincronizzazione:</b> ${item.riassunto.sincronizzazione.join(
           ", "
         )}.<br/>
-        <b>Strutture dati:</b> ${item.riassunto.strutture_dati.join(", ")}.
+        <b>Strutture dati:</b> ${item.riassunto.strutture_dati.join(", ")}
       </div>\n    </div>\n  `;
               eserciziList.appendChild(riassunto);
             }
@@ -713,7 +945,7 @@
       });
       renderEsercizi("settembre2024");
       aggiornaCompletatoLabel();
-      
+
       const completatoBtn = document.getElementById("completato-btn");
     </script>
   </body>
