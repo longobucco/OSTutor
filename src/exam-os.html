@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- Luglio 2025 -->
 <html lang="it">
   <head>
     <meta charset="UTF-8" />
@@ -76,6 +76,7 @@
       <option value="settembre-2024">Settembre 2024</option>
       <option value="giugno-2024">Giugno 2024</option>
       <option value="giugno-2025">Giugno 2025</option>
+      <option value="luglio-2025">Luglio 2025</option>
       <option value="luglio-2016">Luglio 2016</option>
     </select>
     <div id="esercizi-list"></div>
@@ -722,22 +723,67 @@
         esercizi.forEach((ex, idx) => {
           const card = document.createElement("div");
           card.className = "esercizio-card";
+
+          // Escape HTML special chars
+          function escapeHtml(text) {
+            return text
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/\"/g, "&quot;")
+              .replace(/'/g, "&#39;");
+          }
+
+          // Detect code fragments and wrap in <pre><code> con word wrap
+          let domandaHtml = ex.domanda;
+          function wrapCode(text, maxLen = 80) {
+            // Inserisce un '\n' ogni maxLen caratteri, solo se non già presente
+            const lines = text.split("\n");
+            return lines
+              .map((line) => {
+                if (line.length <= maxLen) return line;
+                let out = "";
+                for (let i = 0; i < line.length; i += maxLen) {
+                  out += line.slice(i, i + maxLen) + "\n";
+                }
+                return out;
+              })
+              .join("\n");
+          }
+          if (
+            domandaHtml.includes("#define") ||
+            domandaHtml.includes("for (k=0")
+          ) {
+            domandaHtml = `<pre style="white-space:pre-wrap;word-break:break-all"><code>${escapeHtml(
+              wrapCode(domandaHtml)
+            )}</code></pre>`;
+          } else {
+            domandaHtml = escapeHtml(domandaHtml);
+          }
+
           let rispostaHtml = "";
           if (typeof ex.risposta === "object" && !Array.isArray(ex.risposta)) {
             rispostaHtml = Object.entries(ex.risposta)
-              .map(([k, v]) => `<div><strong>${k}:</strong> ${v}</div>`)
+              .map(
+                ([k, v]) =>
+                  `<div><strong>${escapeHtml(k)}:</strong> ${escapeHtml(
+                    v
+                  )}</div>`
+              )
               .join("");
           } else if (Array.isArray(ex.risposta)) {
-            rispostaHtml = ex.risposta.map((r) => `<div>${r}</div>`).join("");
+            rispostaHtml = ex.risposta
+              .map((r) => `<div>${escapeHtml(r)}</div>`)
+              .join("");
           } else {
-            rispostaHtml = `Risposta: ${ex.risposta}`;
+            rispostaHtml = `Risposta: ${escapeHtml(ex.risposta)}`;
           }
 
           let spiegazioneHtml = "";
           if (typeof ex.spiegazione === "object" && ex.spiegazione !== null) {
             spiegazioneHtml = renderSpiegazioneObj(ex.spiegazione);
           } else {
-            spiegazioneHtml = ex.spiegazione;
+            spiegazioneHtml = escapeHtml(ex.spiegazione);
           }
 
           card.innerHTML = `
@@ -746,7 +792,7 @@
                     <span class="arrow">&#9654;</span>
                   </div>
                   <div class="esercizio-content">
-                    <div class="domanda">${ex.domanda}</div>
+                    <div class="domanda">${domandaHtml}</div>
                     <div class="risposta">${rispostaHtml}</div>
                     <div class="spiegazione">${spiegazioneHtml}</div>
                   </div>
@@ -787,6 +833,114 @@
       }
 
       const schedaSelect = document.getElementById("scheda-select");
+      const eserciziLuglio2025 = [
+        {
+          domanda:
+            "Si consideri il seguente frammento di programma : #define N 64 data_t M[N][N/2]; int i,j,k; for (k=0; k<4; k++) { for (i=0; i<N; i++) { for (j=k; j<N/2; j+=4) { M[i][j].num = ij; } } } Il codice macchina generato dal programma viene eseguito su un sistema con gestione della memoria basata sulla paginazione a richiesta, pagine da 2 KB, sostituzione delle pagine guidata da una politica LRU. Supponiamo che:  sizeof(data_t) == 512 è vero  data_t ha un campo num di tipo int (dimensione 32 bit)  il segmento di codice (istruzioni macchina) ha una dimensione inferiore a una pagina  M viene assegnato a partire dall'indirizzo logico 0x3870A400  la matrice M viene allocata seguendo la strategia “row major”, cioè per righe (prima riga, seguita dalla seconda riga, …). A) Quante pagine (e frame) sono necessarie per memorizzare la matrice (contando anche pagine parzialmente usate)?",
+          risposta: "513",
+          spiegazione:
+            "Elementi: N(N/2)=64×32=2048; dimensione totale = 2048×512 B = 1,048,576 B = 0x100000. Page size = 2 KB = 0x800. L’inizio (0x3870A400) ha offset 0x400 nella pagina, quindi pagine = ceil((0x400 + 0x100000)/0x800) = ceil(0x100400/0x800) = 513. In decimale: ceil((1,024 + 1,048,576)/2,048) = 513.",
+        },
+        {
+          domanda:
+            "Si consideri il seguente frammento di programma : #define N 64 data_t M[N][N/2]; int i,j,k; ... for (k=0; k<4; k++) { for (i=0; i<N; i++) { for (j=k; j<N/2; j+=4) { M[i][j].num = ij; } } } Il codice macchina generato dal programma viene eseguito su un sistema con gestione della memoria basata sulla paginazione a richiesta, pagine da 2 KB, sostituzione delle pagine guidata da una politica LRU. Supponiamo che:  sizeof(data_t) == 512 è vero  data_t ha un campo num di tipo int (dimensione 32 bit)  il segmento di codice (istruzioni macchina) ha una dimensione inferiore a una pagina  M viene assegnato a partire dall'indirizzo logico 0x3870A400  la matrice M viene allocata seguendo la strategia “row major”, cioè per righe (prima riga, seguita dalla seconda riga, …). B) Supponendo i, j e k in registri, quanti riferimenti a memoria produce il programma (solo dati, no fetch istruzioni)?",
+          risposta: "2048",
+          spiegazione:
+            "Iterazioni totali dello store: 4 (k) × 64 (i) × 8 (j: da k a 31 con passo 4) = 2048. Ogni iterazione effettua uno store su M[i][j].num ⇒ 2048 riferimenti a memoria per i dati.",
+        },
+        {
+          domanda:
+            "Si consideri il seguente frammento di programma : #define N 64 data_t M[N][N/2]; int i,j,k; ... for (k=0; k<4; k++) { for (i=0; i<N; i++) { for (j=k; j<N/2; j+=4) { M[i][j].num = ij; } } } Il codice macchina generato dal programma viene eseguito su un sistema con gestione della memoria basata sulla paginazione a richiesta, pagine da 2 KB, sostituzione delle pagine guidata da una politica LRU. Supponiamo che:  sizeof(data_t) == 512 è vero  data_t ha un campo num di tipo int (dimensione 32 bit)  il segmento di codice (istruzioni macchina) ha una dimensione inferiore a una pagina  M viene assegnato a partire dall'indirizzo logico 0x3870A400  la matrice M viene allocata seguendo la strategia “row major”, cioè per righe (prima riga, seguita dalla seconda riga, …). C) Calcolare il numero di page fault generati dal programma proposto.",
+          risposta: "2048",
+          spiegazione:
+            "L’accesso ha stride di una pagina (512 B per elemento, passo j=4 ⇒ 2048 B) e il resident set non trattiene le pagine fino al successivo riuso ⇒ ogni store tende a causare un PF. Gli accessi ai dati sono 2048, quindi i PF sono 2048. L’eventuale disallineamento iniziale aumenta il numero di pagine distinte (513), ma non può superare il numero di accessi: le due pagine parziali sono toccate 2 volte ciascuna e le altre 511 pagine 4 volte ciascuna: 2×2 + 511×4 = 2048. Iterazioni del corpo: 4 · 64 · 8 = 2048 (uno store per iterazione). Ogni iterazione tocca una pagina diversa rispetto alla precedente (stride=1 pagina) e il riuso arriva troppo tardi per restare nel resident set.Quindi i page fault ≈ 2048 (uno per accesso). (Con il disallineamento iniziale si contano 513 pagine distinte complessive, ma il punto chiave resta che il riuso non è “vicino” → niente hit.)",
+        },
+        {
+          domanda:
+            "Si consideri il seguente frammento di programma : #define N 64 data_t M[N][N/2]; int i,j,k; ... for (k=0; k<4; k++) { for (i=0; i<N; i++) { for (j=k; j<N/2; j+=4) { M[i][j].num = ij; } } } Il codice macchina generato dal programma viene eseguito su un sistema con gestione della memoria basata sulla paginazione a richiesta, pagine da 2 KB, sostituzione delle pagine guidata da una politica LRU. Supponiamo che:  sizeof(data_t) == 512 è vero  data_t ha un campo num di tipo int (dimensione 32 bit)  il segmento di codice (istruzioni macchina) ha una dimensione inferiore a una pagina  M viene assegnato a partire dall'indirizzo logico 0x3870A400  la matrice M viene allocata seguendo la strategia “row major”, cioè per righe (prima riga, seguita dalla seconda riga, …). D) Completare il codice equivalente che riduce i page fault e calcolare i PF.",
+          risposta:
+            "Completamento: V[k].num = (k / (N/2)) * (k % (N/2)); Numero di page fault: 513 (≈512 se si ignora il disallineamento iniziale).",
+          spiegazione:
+            "Linearizzando M in V e iterando k da 0 a N(N/2)-1 si accede in ordine row-major contiguo: ogni pagina dati viene caricata una volta e consumata completamente prima di passare alla successiva ⇒ 1 PF per pagina distinta. Poiché l’array parte a offset 0x400, le pagine toccate sono 513; se si approssima ignorando l’offset, 512.",
+        },
+        {
+          domanda:
+            "Si consideri un file system di tipo Unix, basato su inode, con 15 puntatori/indici (12 diretti, 1 singolo indiretto, 1 doppio indiretto e 1 triplo indiretto). I puntatori/indici hanno dimensione di 32 bit e i blocchi del disco hanno dimensione di 4 KB. Il file system risiede su una partizione del disco, dove 2 TB sono riservati ai blocchi di dati. Lo spazio extra riservato ai metadati (inclusi i blocchi di indice) può essere trascurato ai fini di questo esercizio. A) È noto che il numero di file è 1024, con una dimensione media di 240 KB. È anche noto che il file più piccolo nel file system ha una dimensione di 32 KB e il più grande di 400 KB. Calcolare il numero di blocchi di dati utilizzati nel file system, come intervallo min-max (numero minimo e massimo di blocchi di dati).",
+          risposta: "Min: 61440 blocchi, Max: 61952 blocchi",
+          spiegazione:
+            "Numero medio di blocchi = (240 KB * 1024) / 4 KB = 61440. Max = Min + 512 = 61952 per via della frammentazione.",
+        },
+        {
+          domanda:
+            "B) Calcolare il numero minimo e massimo di file allocati con formato single indirect.",
+          risposta: "Min: 1 (anche 0 accettabile), Max: 1024",
+          spiegazione:
+            "Il minimo è almeno 1 file che può richiedere puntatore indiretto, anche se 0 è ammissibile se tutti rientrano nei diretti. Il massimo è uguale al numero totale di file presenti, 1024.",
+        },
+        {
+          domanda:
+            "C) Dato un file binario di dimensione 70481 KB, calcolare esattamente quanti blocchi indice e blocchi dati utilizza il file.",
+          risposta: "Blocchi dati: 17621, Blocchi indice: 19",
+          spiegazione:
+            "Blocchi dati = 70481 KB * 1024 / 4096 = 17621. Blocchi indice = 1 (inode) + 1 (singolo indiretto) + ceil((17621 - 12 - 1024)/(1024)) = 19.",
+        },
+        {
+          domanda:
+            "L'applicazione può presupporre che l'intestazione e ciascuna sezione siano allineate ai limiti dei blocchi del disco nel file system?",
+          risposta: "No",
+          spiegazione:
+            "Il file system non garantisce che le parti interne di un file (header o sezioni) inizino esattamente allineate ai limiti dei blocchi fisici: il contenuto è gestito come sequenza di byte.",
+        },
+        {
+          domanda:
+            "È obbligatorio che l'applicazione organizzi i dati in più file (invece che in un unico file): un file per l'intestazione e uno per ogni sezione?",
+          risposta: "No",
+          spiegazione:
+            "L'applicazione può organizzare liberamente i dati in un unico file, includendo header e sezioni, oppure in più file. Il file system non impone una divisione obbligatoria.",
+        },
+        {
+          domanda:
+            "Se l'intestazione è memorizzata in un file separato, questa deve essere allocata in blocchi di dati contigui?",
+          risposta: "No",
+          spiegazione:
+            "Il file system può allocare i blocchi di un file anche in posizioni non contigue. L'applicazione non può assumere la contiguità fisica dei blocchi.",
+        },
+        {
+          domanda:
+            "Una volta che conosciamo (dopo averlo letto dall'intestazione) l'offset (nel file) di una sezione, è possibile leggere la sezione con accesso diretto/casuale con tutti i formati di allocazione dei file (oppure alcuni formati richiedono l'accesso sequenziale)?",
+          risposta: "Si",
+          spiegazione:
+            "Una volta noto l’offset, l’accesso casuale è possibile con qualsiasi metodo di allocazione supportato dal file system (contiguo, linked list, FAT, indicizzato), perché il sistema traduce automaticamente gli offset logici in blocchi fisici.",
+        },
+        {
+          domanda:
+            "La dimensione di un blocco del disco è la stessa su tutti e tre i file system. Possiamo supporre che la frammentazione interna sia la stessa su tutti i file system?",
+          risposta: "No",
+          spiegazione:
+            "La frammentazione interna dipende dal metodo di allocazione. Anche se la dimensione del blocco è la stessa, i tre formati di allocazione possono comportare sprechi diversi.",
+        },
+        {
+          domanda:
+            "L'allocazione contigua e l'inode garantiscono l'accesso casuale/diretto a tempo costante (O(1))?",
+          risposta: "Si",
+          spiegazione:
+            "Con l'allocazione contigua l'indirizzo è calcolato aritmeticamente; con inode i puntatori consentono accesso diretto senza dover percorrere una lista. Entrambi quindi supportano accesso O(1).",
+        },
+        {
+          domanda:
+            "Durante la lettura dell'intero file dall'inizio alla fine, l'allocazione basata su linked list sarà probabilmente più efficiente dell'inode, in termini di tempo di esecuzione, grazie al DMA?",
+          risposta: "Si",
+          spiegazione:
+            "Con DMA abilitato, la linked list può trasferire blocchi in sequenza direttamente senza interventi CPU frequenti, risultando più veloce dell’inode in lettura sequenziale.",
+        },
+        {
+          domanda:
+            "Durante la lettura dell'intero file dall'inizio alla fine, l'allocazione collegata sarà più efficiente rispetto ad altri formati di allocazione (contigui e inode) perché l'elenco collegato è particolarmente efficace con l'accesso sequenziale?",
+          risposta: "No",
+          spiegazione:
+            "L’allocazione contigua è la più efficiente per accesso sequenziale, perché i blocchi sono già in ordine sul disco. La linked list richiede comunque il caricamento dei puntatori e non supera le prestazioni del contiguo.",
+        },
+      ];
       function updateScheda() {
         if (schedaSelect.value === "giugno-2024") {
           renderEsercizi(eserciziGiugno);
@@ -798,6 +952,8 @@
           renderEsercizi(eserciziGennaioInglese);
         } else if (schedaSelect.value === "gennaio-2025-it") {
           renderEsercizi(eserciziGennaio2025IT);
+        } else if (schedaSelect.value === "luglio-2025") {
+          renderEsercizi(eserciziLuglio2025);
         } else if (schedaSelect.value === "luglio-2016") {
           renderEsercizi(eserciziLuglio2016);
         }

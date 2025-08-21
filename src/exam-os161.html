@@ -61,6 +61,13 @@
       .spiegazione {
         margin-top: 0.5rem;
       }
+      pre {
+        white-space: pre-wrap;
+        background-color: #f4f4f4;
+        padding: 1rem;
+        border-radius: 4px;
+        overflow-x: auto;
+      }
     </style>
   </head>
   <body>
@@ -69,12 +76,13 @@
       >Scegli scheda:</label
     >
     <select id="esame-select" style="margin-bottom: 2rem">
+      <option value="lab2" selected>Laboratorio #2</option>
       <option value="settembre2024">Settembre 2024</option>
       <option value="gennaio2025">Gennaio 2025</option>
       <option value="giugno2024">Giugno 2024</option>
       <option value="luglio2016">Luglio 2016</option>
-      <option value="lab2">Laboratorio #2</option>
       <option value="giugno2025">Giugno 2025</option>
+      <option value="luglio2025">Luglio 2025</option>
     </select>
     <span
       id="completato-label"
@@ -285,39 +293,394 @@
           ],
         },
       ];
+      function mostraEsercizi(scheda) {
+        let esercizi = [];
 
-      const eserciziLuglio2016 = [
+        switch (scheda) {
+          case "lab2":
+            esercizi = eserciziLab2;
+            break;
+          case "luglio2025":
+            esercizi = eserciziLuglio2025;
+            break;
+          case "settembre2024":
+            esercizi = eserciziSettembre2024;
+            break;
+          case "luglio2016":
+            esercizi = eserciziLuglio2016Section;
+            break;
+          case "gennaio2025":
+            esercizi = eserciziGennaio2025;
+            break;
+          case "giugno2024":
+            esercizi = eserciziGiugno2024;
+            break;
+          case "giugno2025":
+            esercizi = eserciziGiugno2025;
+            break;
+          default:
+            esercizi = [];
+        }
+
+        renderEsercizi(esercizi);
+      }
+
+      // Scheda Luglio 2025
+
+      function renderEsercizi(esercizi) {
+        const eserciziList = document.getElementById("esercizi-list");
+        eserciziList.innerHTML = "";
+
+        esercizi.forEach((ex, idx) => {
+          // Handle Lab2 riassunto format
+          if (ex.riassunto) {
+            const riassuntoCard = document.createElement("div");
+            riassuntoCard.className = "esercizio-card";
+
+            const riassuntoHeader = document.createElement("div");
+            riassuntoHeader.className = "esercizio-header";
+            riassuntoHeader.tabIndex = 0;
+            riassuntoHeader.innerHTML = `<span>RIASSUNTO LAB 2</span><span class="arrow">&#9660;</span>`;
+
+            const riassuntoContent = document.createElement("div");
+            riassuntoContent.className = "esercizio-content";
+            riassuntoContent.style.display = "block";
+            riassuntoContent.innerHTML = `
+              <div style="padding:0.5em;">
+                <strong>Gestione memoria:</strong><br>
+                Spazio indirizzi: ${
+                  ex.riassunto.gestione_memoria.traduzione_e_tlb
+                    .spazio_indirizzi
+                }<br>
+                Zone kernel: ${ex.riassunto.gestione_memoria.traduzione_e_tlb.zone_kernel.join(
+                  ", "
+                )}<br>
+                TLB: ${
+                  ex.riassunto.gestione_memoria.traduzione_e_tlb.tlb
+                }<br><br>
+                
+                <strong>System call:</strong><br>
+                Meccanismo: ${ex.riassunto.system_call.meccanismo.trap}<br>
+                Trapframe: ${ex.riassunto.system_call.meccanismo.trapframe}<br>
+                Syscall dispatch: ${
+                  ex.riassunto.system_call.meccanismo.syscall_dispatch
+                }<br>
+                Implementate: ${ex.riassunto.system_call.syscall_implementate.join(
+                  "; "
+                )}<br><br>
+                
+                <strong>Funzioni chiave:</strong> ${ex.riassunto.funzioni_chiave.join(
+                  ", "
+                )}<br>
+                <strong>Sincronizzazione:</strong> ${ex.riassunto.sincronizzazione.join(
+                  ", "
+                )}<br>
+                <strong>Strutture dati:</strong> ${ex.riassunto.strutture_dati.join(
+                  ", "
+                )}
+              </div>
+            `;
+
+            riassuntoCard.appendChild(riassuntoHeader);
+            riassuntoCard.appendChild(riassuntoContent);
+            eserciziList.appendChild(riassuntoCard);
+            return; // Skip other processing for riassunto
+          }
+
+          // Handle Lab2 codice + domande format
+          if (ex.codice && ex.domande && Array.isArray(ex.domande)) {
+            // Add code block
+            const codeCard = document.createElement("div");
+            codeCard.className = "esercizio-card";
+
+            const codeHeader = document.createElement("div");
+            codeHeader.className = "esercizio-header";
+            codeHeader.tabIndex = 0;
+            codeHeader.innerHTML = `<span>CODICE SYS_WRITE</span><span class="arrow">&#9654;</span>`;
+
+            const codeContent = document.createElement("div");
+            codeContent.className = "esercizio-content";
+            codeContent.innerHTML = `<pre><code>${ex.codice
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")}</code></pre>`;
+            codeContent.style.display = "none";
+
+            codeHeader.addEventListener("click", function () {
+              const expanded = codeContent.style.display === "block";
+              codeContent.style.display = expanded ? "none" : "block";
+              codeHeader.querySelector(".arrow").innerHTML = expanded
+                ? "&#9654;"
+                : "&#9660;";
+            });
+
+            codeCard.appendChild(codeHeader);
+            codeCard.appendChild(codeContent);
+            eserciziList.appendChild(codeCard);
+
+            // Add each question as separate card
+            ex.domande.forEach((domanda, qIdx) => {
+              const domandaCard = document.createElement("div");
+              domandaCard.className = "esercizio-card";
+
+              const domandaHeader = document.createElement("div");
+              domandaHeader.className = "esercizio-header";
+              domandaHeader.tabIndex = 0;
+              domandaHeader.innerHTML = `<span>DOMANDA ${
+                qIdx + 1
+              }</span><span class="arrow">&#9654;</span>`;
+
+              const domandaContent = document.createElement("div");
+              domandaContent.className = "esercizio-content";
+              domandaContent.innerHTML = `
+                <div class="domanda"><strong>Domanda:</strong> ${
+                  domanda.domanda
+                }</div>
+                <div class="risposta"><strong>Risposta:</strong> ${
+                  domanda.risposta
+                }</div>
+                <div class="spiegazione"><strong>Spiegazione:</strong> ${
+                  domanda.soluzione || domanda.spiegazione
+                }</div>
+              `;
+              domandaContent.style.display = "none";
+
+              domandaHeader.addEventListener("click", function () {
+                const expanded = domandaContent.style.display === "block";
+                domandaContent.style.display = expanded ? "none" : "block";
+                domandaHeader.querySelector(".arrow").innerHTML = expanded
+                  ? "&#9654;"
+                  : "&#9660;";
+              });
+
+              domandaCard.appendChild(domandaHeader);
+              domandaCard.appendChild(domandaContent);
+              eserciziList.appendChild(domandaCard);
+            });
+            return; // Skip other processing for codice+domande format
+          }
+
+          // Standard format for other exercises
+          const card = document.createElement("div");
+          card.className = "esercizio-card";
+
+          // Header
+          const header = document.createElement("div");
+          header.className = "esercizio-header";
+          header.tabIndex = 0;
+          header.innerHTML = `<span>ESERCIZIO ${
+            idx + 1
+          }</span><span class="arrow">&#9654;</span>`;
+
+          // Content
+          const content = document.createElement("div");
+          content.className = "esercizio-content";
+
+          let codiceHtml = "";
+          if (ex.codice) {
+            codiceHtml = `<pre><code>${ex.codice}</code></pre>`;
+          }
+
+          // Handle different exercise formats
+          let contenutoHtml = "";
+          if (ex.domande && Array.isArray(ex.domande)) {
+            // Multiple questions format (like giugno2025)
+            ex.domande.forEach((domanda, qIdx) => {
+              contenutoHtml += `
+                <div style="margin-bottom: 1rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
+                  <div class="domanda"><strong>Domanda ${qIdx + 1}:</strong> ${
+                domanda.domanda
+              }</div>
+                  <div class="risposta"><strong>Risposta:</strong> ${
+                    domanda.risposta
+                  }</div>
+                  <div class="spiegazione"><strong>Spiegazione:</strong> ${
+                    domanda.soluzione || domanda.spiegazione
+                  }</div>
+                </div>
+              `;
+            });
+          } else {
+            // Single question format
+            contenutoHtml = `
+              <div class="domanda"><strong>Domanda:</strong> ${
+                ex.domanda || ""
+              }</div>
+              <div class="risposta"><strong>Risposta:</strong> ${
+                ex.risposta || ""
+              }</div>
+              <div class="spiegazione"><strong>Spiegazione:</strong> ${
+                ex.spiegazione || ex.soluzione || ""
+              }</div>
+            `;
+          }
+
+          content.innerHTML = `
+            ${codiceHtml}
+            ${contenutoHtml}
+          `;
+
+          content.style.display = "none";
+
+          // Toggle functionality
+          header.addEventListener("click", function () {
+            const expanded = content.style.display === "block";
+            content.style.display = expanded ? "none" : "block";
+            header.querySelector(".arrow").innerHTML = expanded
+              ? "&#9654;"
+              : "&#9660;";
+          });
+
+          header.addEventListener("keypress", function (e) {
+            if (e.key === "Enter" || e.key === " ") {
+              header.click();
+            }
+          });
+
+          card.appendChild(header);
+          card.appendChild(content);
+          eserciziList.appendChild(card);
+        });
+      }
+
+      // Scheda Luglio 2025
+      const eserciziLuglio2025 = [
         {
           domanda:
-            "Che cosa è il trapframe? Quali dati vi vengono memorizzati?",
-          risposta:
-            "È una struttura che memorizza lo stato del processo durante un cambio di contesto.",
+            "La free-list può essere organizzata efficacemente come una lista di intervalli contigui di frame liberi?",
+          risposta: "Si",
           spiegazione:
-            "Il trapframe contiene i registri e altre informazioni di stato necessarie per ripristinare l'esecuzione del processo dopo un'eccezione o system call. Ad esempio, durante una syscall salva i valori dei registri MIPS del processo utente.",
+            "Organizzare la free-list come una lista di intervalli contigui permette di gestire efficacemente la memoria libera, riducendo la frammentazione e facilitando l'allocazione di blocchi di frame contigui.",
         },
         {
           domanda:
-            "Sia dato un puntatore a trapframe tf, che cosa sono i campi tf->tf_a0, tf->tf_a1, …?",
-          risposta:
-            "Parametri della system call, corrispondenti ai registri MIPS a0, a1, …",
+            "Occorre supportare la ricerca di intervalli di frame liberi contigui?",
+          risposta: "Si",
           spiegazione:
-            "Questi campi rappresentano gli argomenti passati alla system call. Ad esempio, in read/write possono contenere il file descriptor, il puntatore al buffer e la dimensione del trasferimento.",
+            "La ricerca di intervalli contigui è necessaria per allocare blocchi di memoria che richiedono più frame adiacenti, come segmenti di codice o dati di processo.",
         },
         {
           domanda:
-            "Perché la printf in OS/161 non viene realizzata chiamando direttamente kprintf?",
-          risposta:
-            "Perché kprintf è una funzione del kernel e non è invocabile direttamente dall'user space.",
+            "Non è necessaria la ricerca di frame liberi contigui, perché MIPS ha una TLB?",
+          risposta: "No",
           spiegazione:
-            "La printf di libreria C in OS/161 usa vprintf, che a sua volta chiama write per passare i dati al kernel. kprintf è accessibile solo dal codice kernel, quindi il codice utente deve passare tramite una system call.",
+            "La presenza della TLB non elimina la necessità di trovare frame contigui: la TLB gestisce la traduzione degli indirizzi, ma l'allocazione fisica può richiedere blocchi contigui per efficienza.",
         },
         {
           domanda:
-            "Perché, in OS/161, il menu non attende la fine del programma utente lanciato con p <file eseguibile>?",
-          risposta:
-            "Perché mancano la system call sys_exit e il meccanismo di attesa/sincronizzazione nel kernel.",
+            "La free list dovrebbe essere utilizzata solo per il segmento di codice e il segmento di dati di un processo, non per lo stack utente, poiché lo stack ha una dimensione fissa in dumbvm?",
+          risposta: "No",
           spiegazione:
-            "Attualmente, menu_execute avvia il programma ma il kernel non aspetta la sua terminazione. Servirebbe un'implementazione di sys_exit e un sistema di attesa basato su interrupt e sincronizzazione per bloccare il menu fino alla conclusione del processo.",
+            "La free list può essere usata anche per lo stack utente, che pur avendo dimensione fissa, necessita comunque di frame fisici allocati e liberati.",
+        },
+        {
+          domanda:
+            "La funzione alloca memoria fisica per i segmenti di codice e dati, ma non per lo stack?",
+          risposta: "No",
+          spiegazione:
+            "Nel frammento di codice di as_define_region non c’è alcuna allocazione di frame fisici: la funzione si limita a registrare gli indirizzi e le dimensioni dei segmenti nello struct addrspace. Lo stack verrà gestito separatamente, ma nessun segmento viene mappato fisicamente qui.",
+        },
+        {
+          domanda:
+            "La funzione definisce semplicemente (e memorizza nei campi dati appropriati di una struttura addrspace) l'indirizzo di partenza e la dimensione di un segmento per ogni chiamata di funzione?",
+          risposta: "Si",
+          spiegazione:
+            "Come si vede dal codice di as_define_region, se as->as_vbase1 è zero assegna vaddr e npages ai campi as_vbase1 e as_npages1; se invece è la seconda chiamata, li memorizza in as_vbase2 e as_npages2. Quindi la funzione serve solo a definire i parametri dei segmenti, non a riservare memoria fisica.",
+        },
+        {
+          domanda:
+            "L'istruzione sz += vaddr & ~(vaddr_t)PAGE_FRAME; potrebbe essere sostituita dall'istruzione sz += vaddr % 4096?",
+          risposta: "Si",
+          spiegazione:
+            "L’operazione serve a recuperare l’offset dell’indirizzo rispetto al confine di pagina (pagina da 4096 byte). Usare la maschera con PAGE_FRAME o il modulo 4096 produce lo stesso risultato.",
+        },
+        {
+          domanda:
+            "L'istruzione vaddr &= PAGE_FRAME; cancella i 12 bit meno significativi di un indirizzo fisico?",
+          risposta: "Si",
+          spiegazione:
+            "PAGE_FRAME = 0xfffff000: l’AND azzera i 12 bit meno significativi, allineando l’indirizzo al confine di pagina (4 KB).",
+        },
+        {
+          domanda:
+            "Calcolare la dimensione complessiva di una tabella delle pagine standard (considerando tutti i 2GB di spazio disponibile per i programmi utente).",
+          risposta: "1 MB",
+          spiegazione:
+            "Lo spazio utente è 2 GB = 2^31 byte. Con pagine da 4 KB (2^12), il numero di pagine è 2^(31-12) = 2^19 = 524288. Ogni entry occupa 2 byte, quindi 524288 × 2 = 1048576 byte = 1 MB.",
+        },
+        {
+          domanda:
+            "Calcolare la dimensione di una tabella delle pagine organizzata in due distinte tabelle, una per codice+dati e una per lo stack (considerando solo lo spazio effettivamente occupato dal programma utente).",
+          risposta: "50 Byte",
+          spiegazione:
+            "Il programma usa 4 pagine per il codice + 3 per i dati = 7 pagine, e 18 per lo stack, in totale 25 pagine. Con entry da 2 byte ciascuna, la dimensione è 25 × 2 = 50 byte.",
+        },
+        {
+          domanda:
+            "I lock possono essere implementati sia mediante l’utilizzo di semafori che di condition variables.",
+          risposta: "No",
+          spiegazione:
+            "Un lock può essere implementato con semafori, ma non con condition variables perché queste ultime richiedono già un lock per funzionare.",
+        },
+        {
+          domanda: "I lock possono essere implementati solo tramite semafori.",
+          risposta: "No",
+          spiegazione:
+            "Non solo con semafori: i lock si possono implementare anche con spinlock e wait channel, come in OS/161.",
+        },
+        {
+          domanda:
+            "Così come per i semafori, anche i lock si basano sul concetto di ownership.",
+          risposta: "No",
+          spiegazione:
+            "I semafori non hanno ownership, mentre i lock sì: solo il thread che acquisisce il lock può rilasciarlo.",
+        },
+        {
+          domanda:
+            "È sempre conveniente l’utilizzo di lock rispetto agli spinlock.",
+          risposta: "No",
+          spiegazione:
+            "I lock sono più efficienti per sezioni critiche lunghe, mentre gli spinlock sono utili in sezioni brevissime. Non esiste una scelta sempre migliore.",
+        },
+        {
+          domanda:
+            "Quando vengono eseguite le funzioni lock_acquire e lock_release, viene sempre fatto un aggiornamento del puntatore al thread che possiede il lock.",
+          risposta: "Si",
+          spiegazione:
+            "lock_acquire registra il thread come owner e lock_release lo azzera, garantendo l’ownership corretta.",
+        },
+        {
+          domanda: "La cv_signal può chiamare la funzione wchan_wakeall.",
+          risposta: "No",
+          spiegazione:
+            "cv_signal sveglia un solo thread in attesa (wchan_wakeone), non tutti.",
+        },
+        {
+          domanda:
+            "Quando viene chiamata la cv_wait, al suo interno è necessario effettuare un controllo per verificare che il thread corrente sia l’owner del lock.",
+          risposta: "Si",
+          spiegazione:
+            "cv_wait rilascia e riacquisisce il lock, quindi è necessario che il thread chiamante ne sia owner.",
+        },
+        {
+          domanda:
+            "La cv_broadcast riceve come parametro un lock, il quale sarà utilizzato dalla wchan_wakeall.",
+          risposta: "No",
+          spiegazione:
+            "Il lock passato a cv_broadcast serve a garantire l’ownership, ma non viene usato da wchan_wakeall.",
+        },
+        {
+          domanda:
+            "La funzione cv_wait consente di mettere in stato di sleep un thread.",
+          risposta: "Si",
+          spiegazione:
+            "Lo scopo di cv_wait è sospendere il thread finché non riceve un segnale da cv_signal o cv_broadcast.",
+        },
+        {
+          domanda:
+            "Nel caso in cui più thread tentino di accedere ad una risorsa condivisa, la creazione di un lock/condition variable (per la gestione della critical section) può essere fatta sia nei thread che utilizzano questa risorsa, sia nel master/parent thread.",
+          risposta: "Si",
+          spiegazione:
+            "Non importa chi crea la variabile di sincronizzazione, basta che sia condivisa tra tutti i thread che usano la risorsa.",
         },
       ];
 
@@ -461,6 +824,7 @@
         },
       ];
 
+      const eserciziLuglio2016 = []; // Array vuoto per ora
       const eserciziLuglio2016Section = [...eserciziLuglio2016];
 
       const eserciziGennaio2025 = [
@@ -523,6 +887,7 @@
       ];
       const eserciziGiugno2024 = [
         {
+          codice: `// vm.h includes the definition\n// #define PAGE_FRAME 0xfffff000\nint as_define_region(struct addrspace *as, vaddr_t vaddr, size_t sz,\n    int readable, int writeable, int executable) {\n    size_t npages;\n    ...\n    /* Align the region. First, the base... */\n    sz += vaddr & ~(vaddr_t)PAGE_FRAME;\n    vaddr &= PAGE_FRAME;\n    ...\n    if (as->as_vbase1 == 0) {\n        as->as_vbase1 = vaddr; as->as_npages1 = npages; return 0;\n    }\n    if (as->as_vbase2 == 0) {\n        as->as_vbase2 = vaddr; as->as_npages2 = npages; return 0;\n    }\n}`,
           domanda:
             "L'indirizzo 0x80803005 può essere un indirizzo logico utente, un indirizzo logico kernel o un indirizzo fisico?",
           risposta: "Indirizzo logico kernel",
@@ -546,7 +911,7 @@
         {
           domanda:
             "Dato l'indirizzo logico utente 0x4010, calcolare l'indirizzo fisico corrispondente usando: as_pbase1 = 0x100000, as_pbase2 = 0x200000, as_vbase1 = 0x3000, as_vbase2 = 0x6000, as_npages1 = 2, as_npages2 = 4",
-          risposta: "0x10001010",
+          risposta: "0x101010",
           spiegazione:
             "Le pagine in OS/161 sono da 4KB (12 bit di offset). L'indirizzo 0x4010 appartiene alla pagina 4 ed ha un offset di 0x10. Il primo segmento utente parte da 0x3000 e ha 2 pagine (fino a 0x7000), quindi 0x4010 appartiene al segmento 1. L'offset rispetto alla base virtuale è 0x4010 - 0x3000 = 0x1010. Indirizzo fisico = 0x100000 + 0x1010 = 0x10001010.",
         },
@@ -734,219 +1099,29 @@
           ],
         },
       ];
-      const eserciziList = document.getElementById("esercizi-list");
-      const esameSelect = document.getElementById("esame-select");
 
-      function renderEsercizi(esame) {
-        eserciziList.innerHTML = "";
-        let gruppoDiv = document.createElement("div");
-        let eserciziDaMostrare = [];
-        let titolo = "";
-        if (esame === "settembre2024") {
-          titolo = "Appello Settembre 2024";
-          eserciziDaMostrare = eserciziSettembre2024;
-        } else if (esame === "gennaio2025") {
-          titolo = "Appello Gennaio 2025";
-          eserciziDaMostrare = eserciziGennaio2025;
-        } else if (esame === "giugno2024") {
-          titolo = "Appello Giugno 2024";
-          eserciziDaMostrare = eserciziGiugno2024;
-        } else if (esame === "luglio2016") {
-          titolo = "Appello Luglio 2016";
-          eserciziDaMostrare = eserciziLuglio2016Section;
-        } else if (esame === "lab2") {
-          titolo = "Laboratorio #2";
-        } else if (esame === "gennaio2025-it") {
-          titolo = "Gennaio 2025 [IT]";
-          eserciziDaMostrare = eserciziGennaio2025IT;
-        } else if (esame === "giugno2025") {
-          titolo = "Appello Giugno 2025";
-          // eserciziGiugno2025 is an array of objects, each with 'codice' and 'domande'.
-          // To render like lab2, we need to show code and then each question as a card.
-          eserciziDaMostrare = eserciziGiugno2025;
-          gruppoDiv.innerHTML = `<h2 style=\"color:#2980b9;margin-top:2rem;\">${titolo}</h2>`;
-          eserciziList.appendChild(gruppoDiv);
-          eserciziGiugno2025.forEach((item, idx) => {
-            if (item.codice) {
-              const card = document.createElement("div");
-              card.className = "esercizio-card";
-              card.innerHTML = `
-                <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"true\">\n      <span>Codice</span>\n      <span class=\"arrow\">&#9660;</span>\n    </div>\n    <div class=\"esercizio-content\" style=\"display:block;\">\n      <pre style=\"background:#f4f4f4;padding:1em;border-radius:4px;overflow-x:auto;\"><code>${item.codice
-                  .replace(/</g, "&lt;")
-                  .replace(/>/g, "&gt;")}</code></pre>\n    </div>\n  `;
-              eserciziList.appendChild(card);
-              if (item.domande) {
-                item.domande.forEach((ex, didx) => {
-                  const domandaCard = document.createElement("div");
-                  domandaCard.className = "esercizio-card";
-                  domandaCard.innerHTML = `
-                    <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"false\">\n      <span>DOMANDA ${
-                      didx + 1
-                    }</span>\n      <span class=\"arrow\">&#9654;</span>\n    </div>\n    <div class=\"esercizio-content\">\n      <div class=\"domanda\">${
-                    ex.domanda
-                  }</div>\n      <div class=\"risposta\">Risposta: ${
-                    ex.risposta
-                  }</div>\n      <div class=\"spiegazione\">${
-                    ex.soluzione
-                  }</div>\n    </div>\n  `;
-                  const header = domandaCard.querySelector(".esercizio-header");
-                  const content =
-                    domandaCard.querySelector(".esercizio-content");
-                  const arrow = domandaCard.querySelector(".arrow");
-                  content.style.display = "none";
-                  header.addEventListener("click", function () {
-                    const expanded = content.style.display === "block";
-                    content.style.display = expanded ? "none" : "block";
-                    arrow.innerHTML = expanded ? "&#9654;" : "&#9660;";
-                    header.setAttribute("aria-expanded", !expanded);
-                  });
-                  header.addEventListener("keypress", function (e) {
-                    if (e.key === "Enter" || e.key === " ") {
-                      header.click();
-                    }
-                  });
-                  eserciziList.appendChild(domandaCard);
-                });
-              }
-            }
-          });
-          return;
-        }
-        gruppoDiv.innerHTML = `<h2 style=\"color:${
-          esame === "lab2" ? "#e67e22" : "#2980b9"
-        };margin-top:2rem;\">${titolo}</h2>`;
-        eserciziList.appendChild(gruppoDiv);
-        if (esame === "lab2") {
-          eserciziLab2.forEach((item, idx) => {
-            if (item.riassunto) {
-              const riassunto = document.createElement("div");
-              riassunto.className = "esercizio-card";
-              riassunto.innerHTML = `
-                <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"true\">\n      <span>Riassunto OS/161</span>\n      <span class=\"arrow\">&#9660;</span>\n    </div>\n    <div class=\"esercizio-content\" style=\"display:block;\">\n      <div style=\"padding:0.5em 0 0.5em 0.5em;\">\n        <b>Gestione memoria</b><ul style=\"margin-top:0.2em;\"><li><b>Traduzione e TLB:</b> ${
-                  item.riassunto.gestione_memoria.traduzione_e_tlb
-                    .spazio_indirizzi
-                }. Zone kernel: ${item.riassunto.gestione_memoria.traduzione_e_tlb.zone_kernel.join(
-                ", "
-              )}. TLB: ${
-                item.riassunto.gestione_memoria.traduzione_e_tlb.tlb
-              }.</li><li><b>dumbvm addrspace:</b> ${
-                item.riassunto.gestione_memoria.dumbvm_addrspace.descrizione
-              }. Segmenti: ${item.riassunto.gestione_memoria.dumbvm_addrspace.segmenti.join(
-                ", "
-              )}. Stack: ${
-                item.riassunto.gestione_memoria.dumbvm_addrspace.stack
-              }.</li><li><b>Allocazione memoria:</b> ${item.riassunto.gestione_memoria.allocazione_memoria.funzioni.join(
-                "; "
-              )}.</li><li><b>Rilascio memoria:</b> ${
-                item.riassunto.gestione_memoria.rilascio_memoria.note
-              }; Bitmap: freeRamFrames (${
-                item.riassunto.gestione_memoria.rilascio_memoria.bitmap
-                  .freeRamFrames
-              }), allocSize (${
-                item.riassunto.gestione_memoria.rilascio_memoria.bitmap
-                  .allocSize
-              }). Funzioni: ${item.riassunto.gestione_memoria.rilascio_memoria.funzioni.join(
-                "; "
-              )}.</li></ul>
-        <b>System call</b><ul style=\"margin-top:0.2em;\"><li><b>Meccanismo:</b> ${
-          item.riassunto.system_call.meccanismo.trap
-        }, ${item.riassunto.system_call.meccanismo.trapframe}, ${
-                item.riassunto.system_call.meccanismo.syscall_dispatch
-              }.</li><li><b>Implementate:</b> ${item.riassunto.system_call.syscall_implementate.join(
-                "; "
-              )}.</li></ul>
-        <b>Funzioni chiave:</b> ${item.riassunto.funzioni_chiave.join(
-          ", "
-        )}.<br/>
-        <b>Sincronizzazione:</b> ${item.riassunto.sincronizzazione.join(
-          ", "
-        )}.<br/>
-        <b>Strutture dati:</b> ${item.riassunto.strutture_dati.join(", ")}
-      </div>\n    </div>\n  `;
-              eserciziList.appendChild(riassunto);
-            }
-            if (item.codice) {
-              const card = document.createElement("div");
-              card.className = "esercizio-card";
-              card.innerHTML = `
-                <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"true\">\n      <span>Codice</span>\n      <span class=\"arrow\">&#9660;</span>\n    </div>\n    <div class=\"esercizio-content\" style=\"display:block;\">\n      <pre style=\"background:#f4f4f4;padding:1em;border-radius:4px;overflow-x:auto;\"><code>${item.codice
-                  .replace(/</g, "&lt;")
-                  .replace(/>/g, "&gt;")}</code></pre>\n    </div>\n  `;
-              eserciziList.appendChild(card);
-              item.domande.forEach((ex, didx) => {
-                const domandaCard = document.createElement("div");
-                domandaCard.className = "esercizio-card";
-                domandaCard.innerHTML = `
-                  <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"false\">\n      <span>DOMANDA ${
-                    didx + 1
-                  }</span>\n      <span class=\"arrow\">&#9654;</span>\n    </div>\n    <div class=\"esercizio-content\">\n      <div class=\"domanda\">${
-                  ex.domanda
-                }</div>\n      <div class=\"risposta\">Risposta: ${
-                  ex.risposta
-                }</div>\n      <div class=\"spiegazione\">${
-                  ex.soluzione
-                }</div>\n    </div>\n  `;
-                const header = domandaCard.querySelector(".esercizio-header");
-                const content = domandaCard.querySelector(".esercizio-content");
-                const arrow = domandaCard.querySelector(".arrow");
-                content.style.display = "none";
-                header.addEventListener("click", function () {
-                  const expanded = content.style.display === "block";
-                  content.style.display = expanded ? "none" : "block";
-                  arrow.innerHTML = expanded ? "&#9654;" : "&#9660;";
-                  header.setAttribute("aria-expanded", !expanded);
-                });
-                header.addEventListener("keypress", function (e) {
-                  if (e.key === "Enter" || e.key === " ") {
-                    header.click();
-                  }
-                });
-                eserciziList.appendChild(domandaCard);
-              });
-            }
-          });
-        } else {
-          eserciziDaMostrare.forEach((ex, idx) => {
-            const card = document.createElement("div");
-            card.className = "esercizio-card";
-            card.innerHTML = `
-            <div class=\"esercizio-header\" tabindex=\"0\" role=\"button\" aria-expanded=\"false\">\n      <span>ESERCIZIO ${
-              idx + 1
-            }</span>\n      <span class=\"arrow\">&#9654;</span>\n    </div>\n    <div class=\"esercizio-content\">\n      <div class=\"domanda\">${
-              ex.domanda
-            }</div>\n      <div class=\"risposta\">Risposta: ${
-              ex.risposta
-            }</div>\n      <div class=\"spiegazione\">${
-              ex.spiegazione
-            }</div>\n    </div>\n  `;
-            const header = card.querySelector(".esercizio-header");
-            const content = card.querySelector(".esercizio-content");
-            const arrow = card.querySelector(".arrow");
-            content.style.display = "none";
-            header.addEventListener("click", function () {
-              const expanded = content.style.display === "block";
-              content.style.display = expanded ? "none" : "block";
-              arrow.innerHTML = expanded ? "&#9654;" : "&#9660;";
-              header.setAttribute("aria-expanded", !expanded);
-            });
-            header.addEventListener("keypress", function (e) {
-              if (e.key === "Enter" || e.key === " ") {
-                header.click();
-              }
-            });
-            eserciziList.appendChild(card);
-          });
-        }
-      }
+      window.addEventListener("DOMContentLoaded", function () {
+        const eserciziList = document.getElementById("esercizi-list");
+        const esameSelect = document.getElementById("esame-select");
 
-      esameSelect.addEventListener("change", function (e) {
-        renderEsercizi(e.target.value);
-        aggiornaCompletatoLabel();
+        // Inizializza con la prima scheda selezionata
+        mostraEsercizi(esameSelect.value);
+
+        try {
+          aggiornaCompletatoLabel();
+        } catch (e) {
+          console.warn("Sistema di completamento non disponibile:", e);
+        }
+
+        esameSelect.addEventListener("change", function (e) {
+          mostraEsercizi(e.target.value);
+          try {
+            aggiornaCompletatoLabel();
+          } catch (e) {
+            console.warn("Sistema di completamento non disponibile:", e);
+          }
+        });
       });
-      renderEsercizi("settembre2024");
-      aggiornaCompletatoLabel();
-
-      const completatoBtn = document.getElementById("completato-btn");
     </script>
   </body>
 </html>
