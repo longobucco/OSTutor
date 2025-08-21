@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- Luglio 2025 -->
 <html lang="it">
   <head>
     <meta charset="UTF-8" />
@@ -71,9 +71,13 @@
       >Scegli scheda:</label
     >
     <select id="scheda-select" style="margin-bottom: 2rem">
-      <option value="giugno">Giugno 2024</option>
-      <option value="settembre">Settembre 2024</option>
       <option value="gennaio-inglese">Gennaio 2025 [EN]</option>
+      <option value="gennaio-2025-it">Gennaio 2025 [IT]</option>
+      <option value="settembre-2024">Settembre 2024</option>
+      <option value="giugno-2024">Giugno 2024</option>
+      <option value="giugno-2025">Giugno 2025</option>
+      <option value="luglio-2025">Luglio 2025</option>
+      <option value="luglio-2016">Luglio 2016</option>
     </select>
     <div id="esercizi-list"></div>
     <noscript>
@@ -82,7 +86,245 @@
       </p>
     </noscript>
     <script>
-      // Esercizi giugno 2024 (primi 4)
+      const eserciziGiugno2025 = [
+        {
+          domanda:
+            "Calcolare il TLB hit minimo necessario per ottenere un EAT al più del 40% superiore al tempo RAM (TRAM = 40 ns) in un sistema con TLB e page table a 3 livelli.",
+          risposta: "HR ≥ 0.87 (≈ 86.67%)",
+          spiegazione:
+            "Con 3 livelli, un TLB miss richiede 4 accessi RAM: EAT = HR·TRAM + (1−HR)·4·TRAM ⇒ EAT/TRAM = 4 − 3·HR. Imporre EAT ≤ 1.4·TRAM (massimo +40% rispetto a RAM) dà 4 − 3·HR ≤ 1.4 ⇒ 3·HR ≥ 2.6 ⇒ HR ≥ 2.6/3 = 0.8666… ≈ 0.87.",
+        },
+        {
+          domanda:
+            "In che modo un allocatore Buddy affronta il problema della frammentazione?",
+          risposta:
+            "I blocchi liberi possono avere solo dimensioni pari a una potenza di 2, il che riduce il problema della frammentazione esterna",
+          spiegazione:
+            "Il sistema Buddy suddivide e fonde blocchi di memoria in potenze di due. Questo vincolo semplifica la ricombinazione di blocchi adiacenti e riduce la frammentazione esterna, anche se può causare frammentazione interna quando la richiesta non utilizza tutto il blocco assegnato.",
+        },
+        {
+          domanda:
+            "Una free list (di frame liberi) potrebbe essere ordinata, per supportare l'allocazione di frame contigui a un costo lineare",
+          risposta:
+            "Per indirizzi fisici decrescenti; Per indirizzi fisici crescenti",
+          spiegazione:
+            "Ordinare la free list per indirizzi fisici, sia in ordine crescente che decrescente, consente di individuare facilmente frame fisicamente adiacenti, riducendo il costo di ricerca di blocchi contigui a O(n). L'ordinamento per dimensione o la mancanza di ordinamento non agevolano questa ricerca.",
+        },
+        {
+          domanda:
+            "In un file system con indicizzazione a due livelli (puntatori a 32 bit, blocchi da 4 KB), qual è la dimensione massima di un file?",
+          risposta: "4 GiB (4,294,967,296 byte)",
+          spiegazione:
+            "Ogni blocco indice contiene 4096/4 = 1024 puntatori. Con due livelli si hanno 1024 (primo livello) × 1024 (secondo livello) = 1,048,576 blocchi dati indirizzabili. Moltiplicando per 4096 byte/blocco si ottiene 1,048,576 × 4096 = 4,294,967,296 byte = 4 GiB.",
+        },
+        {
+          domanda:
+            "Per un file binario da 9019 KiB, quanti blocchi indice occupa?",
+          risposta:
+            "4 blocchi indice (3 di secondo livello + 1 di primo livello)",
+          spiegazione:
+            "Dimensione file: 9019 KiB = 9019 × 1024 = 9,235,456 byte. Blocchi dati necessari: ⌈9,235,456 / 4096⌉ = 2255. Ogni blocco indice di 2° livello punta a 1024 blocchi dati ⇒ ⌈2255 / 1024⌉ = 3 blocchi di 2° livello. Serve 1 blocco di 1° livello che contiene 3 puntatori ai blocchi di 2° livello. Totale indici: 3 + 1 = 4.",
+        },
+        {
+          domanda:
+            "Per il file da 9019 KiB, qual è la frammentazione interna dei soli blocchi indice?",
+          risposta:
+            "7,352 byte (3,268 B nei blocchi di 2° livello + 4,084 B nel blocco di 1° livello)",
+          spiegazione:
+            "Nei 3 blocchi di 2° livello: 2 sono pieni (2 × 1024 voci), il 3° usa solo 2255 − 2048 = 207 voci ⇒ voci libere = 1024 − 207 = 817 ⇒ 817 × 4 = 3,268 B. Nel blocco di 1° livello si usano 3 voci su 1024 ⇒ (1024 − 3) × 4 = 4,084 B. Somma frammentazione interna indici = 3,268 + 4,084 = 7,352 B.",
+        },
+        {
+          domanda:
+            "Il file contiene numeri double (64 bit). Quanti blocchi indice si leggono per accedere ai primi 128K numeri?",
+          risposta:
+            "2 blocchi indice (1 di primo livello + 1 di secondo livello)",
+          spiegazione:
+            "128K = 128 × 1024 = 131,072 numeri; ciascuno 8 byte ⇒ 1,048,576 byte. Blocchi dati richiesti: 1,048,576 / 4096 = 256. Questi 256 puntatori risiedono nello stesso blocco di 2° livello (capacità 1024 voci). Per indirizzarli occorre leggere 1 blocco indice di 1° livello (che punta al blocco di 2° livello) + 1 blocco di 2° livello.",
+        },
+        {
+          domanda:
+            "L'operazione di apertura di un file (open) può modificare sia la per-process file table che la system-wide?",
+          risposta: "Sì",
+          spiegazione:
+            "La chiamata open inserisce un nuovo entry nella tabella file del processo e, se il file non è già aperto globalmente, può creare o aggiornare l'entry corrispondente nella tabella globale (system-wide open file table).",
+        },
+        {
+          domanda:
+            "Il requisito principale per l'implementazione delle directory è l'efficienza nel creare e rimuovere (delete) un file?",
+          risposta: "No",
+          spiegazione:
+            "Le directory sono ottimizzate principalmente per ricerche rapide di nomi e mapping tra nomi e inode o FCB; l'efficienza nella creazione/cancellazione è importante ma non è il requisito principale.",
+        },
+        {
+          domanda: "Una per-process file table è allocata nello spazio kernel?",
+          risposta: "Sì",
+          spiegazione:
+            "In OS e file system tipici, la per-process file table risiede nello spazio kernel per motivi di protezione e gestione sicura delle strutture interne.",
+        },
+        {
+          domanda:
+            "Il puntatore alla posizione corrente di lettura/scrittura in un file aperto risiede nel blocco di controllo del file (file control block)?",
+          risposta: "No",
+          spiegazione:
+            "Il puntatore di posizione corrente (offset) è memorizzato nella system-wide open file table o struttura equivalente associata alla sessione di apertura, non nel FCB, che descrive proprietà permanenti del file.",
+        },
+        {
+          domanda:
+            "L'accesso sequenziale non può essere simulato dall'accesso casuale (diretto)?",
+          risposta: "No",
+          spiegazione:
+            "L’accesso sequenziale può essere simulato usando accessi casuali, incrementando progressivamente l’offset per leggere o scrivere il file in ordine.",
+        },
+        {
+          domanda:
+            "L'accesso casuale (diretto) non può essere implementato tramite formati di allocazione file basati su liste concatenate (ad esempio FAT, lista di blocchi)?",
+          risposta: "No",
+          spiegazione:
+            "Formati come FAT o liste di blocchi possono supportare l’accesso diretto, ma richiedono un attraversamento sequenziale della struttura per raggiungere il blocco desiderato, rendendo l’operazione meno efficiente.",
+        },
+        {
+          domanda:
+            "L'accesso casuale (diretto) può essere implementato da tutti i formati di allocazione dei file?",
+          risposta: "Sì",
+          spiegazione:
+            "Tutti i principali formati di allocazione (contigua, indicizzata, a lista concatenata) possono supportare accesso diretto; cambia solo l’efficienza del calcolo del blocco da leggere o scrivere.",
+        },
+        {
+          domanda:
+            "L'accesso casuale (diretto) può essere simulato dall'accesso sequenziale?",
+          risposta: "Sì",
+          spiegazione:
+            "Per simulare l’accesso diretto usando operazioni sequenziali, si può scorrere il file in ordine fino a raggiungere la posizione desiderata; è meno efficiente ma possibile.",
+        },
+        {
+          domanda:
+            "Sono date due configurazioni RAID: A con 2 dischi in mirroring e B con 4 dischi (striping + mirroring). Tutti i dischi hanno lo stesso MTTF. L'MTTTDL (perdita di dati) di B è superiore all'MTTTDL di A?",
+          risposta: "No",
+          spiegazione:
+            "Con striping + mirroring (RAID 10) e 4 dischi, la probabilità complessiva di perdita dati non è superiore a quella di un semplice mirroring a 2 dischi; anzi, la tolleranza ai guasti è almeno equivalente, se non migliore.",
+        },
+        {
+          domanda:
+            "Dati N dischi in configurazione striping, se tutti i dischi hanno un dato MTTF, la probabilità di un guasto diminuisce con l'aumento del valore di N?",
+          risposta: "No",
+          spiegazione:
+            "In striping puro (RAID 0), aumentando N cresce la probabilità che almeno un disco fallisca, quindi la probabilità complessiva di guasto aumenta, non diminuisce.",
+        },
+        {
+          domanda: "Il mirroring include bit di parità?",
+          risposta: "No",
+          spiegazione:
+            "Il mirroring (RAID 1) memorizza copie complete dei dati su dischi diversi, senza usare bit di parità; la parità è tipica di configurazioni come RAID 5 o RAID 6.",
+        },
+        {
+          domanda:
+            "Dopo un guasto, l'utilizzo del sistema deve essere interrotto fino al completamento della riparazione?",
+          risposta: "No",
+          spiegazione:
+            "Nelle configurazioni RAID ridondanti, dopo un guasto il sistema può continuare a funzionare in modalità degradata, ricostruendo i dati dal mirroring o dalla parità, senza interruzione completa del servizio.",
+        },
+      ];
+
+      const eserciziGennaio2025IT = [
+        {
+          domanda: "L’IPT permette sempre di risparmiare memoria?",
+          risposta: "NO",
+          spiegazione:
+            "Non c'è risparmio nel caso di pochi processi con spazio di indirizzamento piccolo.",
+        },
+        {
+          domanda:
+            "Il risparmio di memoria con IPT dipende dalle dimensioni della RAM, dal numero di processi e dal loro spazio di indirizzamento virtuale?",
+          risposta: "YES",
+          spiegazione:
+            "Per motivi simili alla risposta precedente: il risparmio varia in base a questi fattori.",
+        },
+        {
+          domanda:
+            "Si risparmia sempre memoria quando lo spazio di indirizzamento di un processo è maggiore della dimensione della RAM?",
+          risposta: "NO",
+          spiegazione:
+            "È un caso in cui IPT può essere più efficiente di PT, ma esistono anche altri scenari, ad esempio molti processi con spazio di indirizzamento minore della RAM ma la somma di tutte le Page Table maggiore della IPT.",
+        },
+        {
+          domanda:
+            "Si può risparmiare memoria anche se lo spazio di indirizzamento di ogni processo è inferiore alla dimensione della RAM?",
+          risposta: "YES",
+          spiegazione: "Perché la IPT è unica per tutti i processi.",
+        },
+        {
+          domanda: "Nella IPT, la chiave di ricerca è la coppia (pid, frame)?",
+          risposta: "NO",
+          spiegazione:
+            "Il frame corrisponde all'indice della tabella, quindi non fa parte della chiave di ricerca.",
+        },
+        {
+          domanda: "Nella IPT, la chiave di ricerca è la coppia (pid, pagina)?",
+          risposta: "YES",
+          spiegazione:
+            "La chiave di ricerca include la pagina e il pid; se si intende solo 'pagina', non è sufficiente.",
+        },
+        {
+          domanda:
+            "Per migliorare le prestazioni, si sostituisce la IPT con una tabella di hash?",
+          risposta: "NO",
+          spiegazione:
+            "Sarebbe un'altra soluzione e non un'IPT; non è un miglioramento ma un cambiamento di struttura.",
+        },
+        {
+          domanda:
+            "Per migliorare le prestazioni, si aggiunge alla IPT una tabella di hash?",
+          risposta: "YES",
+          spiegazione:
+            "È la tecnica tipicamente usata per migliorare le prestazioni di una IPT.",
+        },
+        {
+          domanda:
+            "Un processo ha spazio di indirizzamento virtuale di 48 GB in un sistema a 64 bit con 16 GB di RAM, gestione della memoria paginata (pagine/frame da 4 KB) e 4 GB di RAM riservati al kernel. Confrontare le dimensioni di una tabella delle pagine standard (una per processo) e di una IPT (Inverted Page Table). Il PID richiede 12 bit. Si utilizzano 28 bit per indici di pagina/frame e si allinea ogni cella a 32 o 64 bit. Calcolare: (A) le dimensioni di PT e IPT; (B) lo spazio di indirizzamento virtuale massimo di un processo con la IPT proposta.",
+          risposta: "A: PT: 48 MB; IPT: 24 MB; | B: 64 GB",
+          spiegazione:
+            "Page Table - Numero pagine: 48 GB / 4 KB = 12 milioni di pagine; Bit richiest per ogni entry: 24 bit indice + 4 bit extra → allineamento a 32 bit (4 B), Calcolo dimensione: 12M × 4 B = 48 MB | IP - Ram utente: 16 GB - 4 GB kernel = 12 GB, numero frame: 12 GB / 4 KB = 3 milioni di frame, Bit richiesti: 12 bit PID + 24 bit pagina + 4 bit extra = 40 bit → allineamento a 64 bit (8 B), Calcolo dimensione: 3M × 8 B = 24 MB; Spazio massimo IPT - Limite indici per la IPT proposta è di 24 bit per indice di pagina → massimo 2^24 = 16M pagine, per uno spazio totale di: 16M × 4 KB = 64 GB di spazio virtuale massimo",
+        },
+        {
+          domanda:
+            "Dato un disco con blocchi di 8KB e una partizione A con NM blocchi per metadati (inclusa una bitmap) e ND blocchi per dati, sapendo che NM/4 blocchi sono riservati alla bitmap con 1 bit per ciascuno dei ND blocchi, calcolare il rapporto ND/NM.",
+          risposta: "ND/NM = 16K",
+          spiegazione:
+            "La bitmap occupa NM/4 blocchi, cioè NM/4 × 8KB × 8 bit = 16K × NM bit. Ogni bit della bitmap corrisponde a un blocco dati, quindi ND = 16K × NM. Da ciò segue ND/NM = 16K.",
+        },
+        {
+          domanda:
+            "Supponendo che la bitmap indichi un rapporto blocchi liberi/usati di 33,33% (1 blocco libero ogni 3 usati), calcolare, in funzione di NM, la dimensione massima possibile per un intervallo contiguo di blocchi liberi nella configurazione più favorevole e in quella meno favorevole.",
+          risposta:
+            "massima configurazione favorevole: 4K * NM blocchi, massima configurazione sfavorevole: 1 blocco",
+          spiegazione:
+            "Con un rapporto Nfree/Nused = 1/3, la frazione di blocchi liberi è 0,25 del totale dei blocchi rappresentati dalla bitmap, cioè 0,25 * 16K * NM = 4K * NM blocchi liberi. Nella configurazione più favorevole tutti i blocchi liberi sono contigui formando un intervallo massimo di 4K * NM blocchi. Nella configurazione meno favorevole i blocchi liberi sono isolati e l'intervallo massimo contiguo è di un solo blocco.",
+        },
+        {
+          domanda:
+            "È possibile caricare dinamicamente un programma senza che sia necessario il dynamic linking? Il dynamic linking richiede che un programma sia anche caricabile dinamicamente (dynamic loading)?",
+          risposta: "Sì, è possibile.",
+          spiegazione:
+            "Il dynamic linking può essere combinato con il dynamic loading, ma non è obbligatorio. Un programma può essere staticamente linkato e caricato dinamicamente o incrementalmente, ad esempio tramite dynamic loading basato sul programma. Il dynamic loading significa che parti del programma sono caricate in memoria solo quando necessario, mentre il dynamic linking risolve i riferimenti tra moduli a runtime, utile soprattutto per le librerie condivise.",
+        },
+        {
+          domanda:
+            "Perché un’Inverted Page Table necessita di una tabella di HASH e perché la soluzione IPT + tabella di HASH è diversa da una soluzione con PT basata solo su tabella di HASH?",
+          risposta:
+            "Per evitare una ricerca lineare nella IPT, serve una tabella di HASH.",
+          spiegazione:
+            "Senza una tabella di HASH, la ricerca nella IPT sarebbe lineare e inefficiente. Nella soluzione IPT+HASH, le entry della IPT sono direttamente inserite nelle liste di concatenamento della tabella di HASH, rendendo più efficiente la gestione della memoria rispetto a una tabella di HASH semplice, che richiede allocazioni e deallocazioni classiche ad ogni inserimento o cancellazione.",
+        },
+        {
+          domanda:
+            'Una CPU dotata di TLB può contenere entry di più processi simultaneamente o solo per un processo? Il bit "valid" in una entry della TLB è una copia del bit "valid" nella Page Table?',
+          risposta:
+            "Esistono entrambe le tipologie: TLB che contengono entry di più processi e TLB che contengono solo entry del processo attivo.",
+          spiegazione:
+            'Le TLB che contengono solo entry del processo attivo richiedono un reset/clean della TLB ad ogni cambio di contesto. Il bit "valid" nella TLB indica se l\'entry è libera o usata, mentre nella Page Table indica se la pagina logica è mappata a un frame fisico.',
+        },
+      ];
+
       const eserciziGiugno = [
         {
           domanda:
@@ -196,7 +438,7 @@
             "Le free list non contengono dati, ma solo riferimenti a pagine libere. Quindi non introducono frammentazione interna: rappresentano solo spazio disponibile.",
         },
       ];
-      // Esercizi Gennaio 2025 Inglese
+
       const eserciziGennaioInglese = [
         {
           domanda:
@@ -211,132 +453,132 @@
             "[EN] Comparison between standard Page Table and Inverted Page Table (IPT)",
           risposta: "See details below.",
           spiegazione: `
-            <strong>System:</strong><br>
-            Architecture: 64 bit<br>
-            Total RAM: 16GB (Kernel: 4GB, User: 12GB)<br>
-            Page size: 4KB<br>
-            Virtual address space per process: 48GB<br>
-            PID bits: 12<br>
-            Page index bits: 28<br><br>
-            <strong>Advantages of IPT:</strong><br>
-            <ul>
-              <li>"Always saves memory": <span style="color:red;">False</span> – With few processes and small address space, PT can be smaller.</li>
-              <li>"Depends on RAM size, number of processes, and their virtual address space": <span style="color:green;">True</span> – Memory saving with IPT depends on context.</li>
-              <li>"Always saves memory when process address space > RAM size": <span style="color:green;">True</span> – PT grows with virtual space, IPT is fixed size.</li>
-              <li>"Can save memory even if process address space < RAM size": <span style="color:green;">True</span> – IPT is unique for all processes, PTs are many.</li>
-            </ul>
-            <strong>Disadvantages of IPT:</strong><br>
-            <ul>
-              <li>"Search key is (pid,frame)": <span style="color:red;">False</span> – Frame is the index, not the search key.</li>
-              <li>"Search key is (pid,page)": <span style="color:green;">True</span> – IPT is accessed via (pid, page number).</li>
-              <li>"To improve performance, replace IPT with a hash table": <span style="color:red;">False</span> – That is a different approach.</li>
-              <li>"To improve performance, add a hash table to IPT": <span style="color:green;">True</span> – Standard technique to speed up IPT access.</li>
-            </ul>
-            <strong>Calculations:</strong><br>
-            <u>Standard Page Table:</u><br>
-            Number of pages: 12,582,912<br>
-            Cell size: 4B<br>
-            Total size: 48MB<br>
-            <u>IPT:</u><br>
-            Number of frames: 3,145,728<br>
-            Cell size: 8B (PID: 12 bits, Page: 28 bits)<br>
-            Total size: 24MB<br>
-            <strong>Maximum virtual address space with IPT:</strong><br>
-            Page index bits: 28 → Max pages: 268,435,456<br>
-            Page size: 4KB<br>
-            Max virtual space: 1TB<br>
-            Reason: 28 bits = 256M pages × 4KB = 1TB<br>
-            <strong>Conclusions:</strong><br>
-            <ul>
-              <li>Memory advantage: IPT is more compact (24MB vs 48MB)</li>
-              <li>Virtual address space limit: 1TB per process (with 28 page index bits)</li>
-              <li>IPT performance: Slower, improved with hash table</li>
-              <li>PT flexibility: Can support larger virtual spaces if hierarchical</li>
-            </ul>
-          `,
+                  <strong>System:</strong><br>
+                  Architecture: 64 bit<br>
+                  Total RAM: 16GB (Kernel: 4GB, User: 12GB)<br>
+                  Page size: 4KB<br>
+                  Virtual address space per process: 48GB<br>
+                  PID bits: 12<br>
+                  Page index bits: 28<br><br>
+                  <strong>Advantages of IPT:</strong><br>
+                  <ul>
+                    <li>"Always saves memory": <span style="color:red;">False</span> – With few processes and small address space, PT can be smaller.</li>
+                    <li>"Depends on RAM size, number of processes, and their virtual address space": <span style="color:green;">True</span> – Memory saving with IPT depends on context.</li>
+                    <li>"Always saves memory when process address space > RAM size": <span style="color:green;">True</span> – PT grows with virtual space, IPT is fixed size.</li>
+                    <li>"Can save memory even if process address space < RAM size": <span style="color:green;">True</span> – IPT is unique for all processes, PTs are many.</li>
+                  </ul>
+                  <strong>Disadvantages of IPT:</strong><br>
+                  <ul>
+                    <li>"Search key is (pid,frame)": <span style="color:red;">False</span> – Frame is the index, not the search key.</li>
+                    <li>"Search key is (pid,page)": <span style="color:green;">True</span> – IPT is accessed via (pid, page number).</li>
+                    <li>"To improve performance, replace IPT with a hash table": <span style="color:red;">False</span> – That is a different approach.</li>
+                    <li>"To improve performance, add a hash table to IPT": <span style="color:green;">True</span> – Standard technique to speed up IPT access.</li>
+                  </ul>
+                  <strong>Calculations:</strong><br>
+                  <u>Standard Page Table:</u><br>
+                  Number of pages: 12,582,912<br>
+                  Cell size: 4B<br>
+                  Total size: 48MB<br>
+                  <u>IPT:</u><br>
+                  Number of frames: 3,145,728<br>
+                  Cell size: 8B (PID: 12 bits, Page: 28 bits)<br>
+                  Total size: 24MB<br>
+                  <strong>Maximum virtual address space with IPT:</strong><br>
+                  Page index bits: 28 → Max pages: 268,435,456<br>
+                  Page size: 4KB<br>
+                  Max virtual space: 1TB<br>
+                  Reason: 28 bits = 256M pages × 4KB = 1TB<br>
+                  <strong>Conclusions:</strong><br>
+                  <ul>
+                    <li>Memory advantage: IPT is more compact (24MB vs 48MB)</li>
+                    <li>Virtual address space limit: 1TB per process (with 28 page index bits)</li>
+                    <li>IPT performance: Slower, improved with hash table</li>
+                    <li>PT flexibility: Can support larger virtual spaces if hierarchical</li>
+                  </ul>
+                `,
         },
         {
           domanda: "[IT] Link/Load, Inverted Page Table (IPT) e TLB (JSON)",
           risposta: "Vedi dettagli sotto.",
           spiegazione: `
-            <strong>Titolo:</strong> Link/Load, Inverted Page Table (IPT) e TLB<br><br>
-            <u>Sezione A</u><br>
-            <strong>1. È possibile caricare dinamicamente un programma senza che sia necessario il dynamic linking?</strong><br>
-            <span style='color:green;'>Risposta: Sì</span><br>
-            <em>Motivazione:</em> Il caricamento dinamico (dynamic loading) consiste nel caricare parti del programma solo quando necessarie. Può essere usato anche con linking statico, ad esempio caricando moduli opzionali in runtime senza doverli linkare dinamicamente.<br><br>
-            <strong>2. Il dynamic linking richiede che un programma sia anche caricabile dinamicamente?</strong><br>
-            <span style='color:red;'>Risposta: No</span><br>
-            <em>Motivazione:</em> Il linking dinamico (dynamic linking) può avvenire anche con moduli già presenti in memoria (come librerie condivise), senza caricare il programma in modo incrementale. Sono due concetti separati e indipendenti.<br><br>
-            <u>Sezione B</u><br>
-            <strong>Perché un'Inverted Page Table necessita di una tabella di hash e in che cosa differisce da una Page Table basata su hash?</strong><br>
-            <ul>
-              <li><strong>PID nella IPT:</strong> Ogni entry della IPT deve contenere il PID per distinguere tra le pagine di processi diversi. Questo non è necessario nella PT classica, perché ogni processo ha la propria tabella delle pagine.</li>
-              <li><strong>Necessità hash:</strong> Una ricerca nella IPT senza hash sarebbe lineare: si deve cercare la coppia (PID, numero di pagina virtuale) per trovare il frame.</li>
-              <li><strong>Differenza hash IPT vs PT hash:</strong> Con la IPT + hash table, le entry della IPT sono referenziate direttamente tramite le liste della hash table (più efficiente), mentre in una PT hash-based si allocano dinamicamente nuove entry, con maggiore overhead di memoria e gestione.</li>
-              <li><strong>Nota:</strong> La IPT è globale per tutto il sistema, mentre le PT (anche se hash-based) sono per singolo processo.</li>
-            </ul>
-            <u>Sezione C</u><br>
-            <strong>1. La TLB può contenere entry di più processi simultaneamente?</strong><br>
-            <span style='color:green;'>Risposta: Sì, ma dipende dall'architettura</span><br>
-            <em>Motivazione:</em> Esistono TLB con campo ASID (Address Space Identifier), che permettono di distinguere tra processi e mantenere entry multiple. Se assente, la TLB è monoprocesso e deve essere azzerata a ogni context switch.<br><br>
-            <strong>2. Il valid bit della TLB è una semplice copia del valid bit della Page Table?</strong><br>
-            <span style='color:red;'>Risposta: No</span><br>
-            <em>Motivazione:</em> Il significato è diverso: nella TLB il 'valid' indica se l'entry è attiva o può essere riutilizzata; nella Page Table indica se la pagina è effettivamente mappata in un frame di memoria fisica.<br>
-          `,
+                  <strong>Titolo:</strong> Link/Load, Inverted Page Table (IPT) e TLB<br><br>
+                  <u>Sezione A</u><br>
+                  <strong>1. È possibile caricare dinamicamente un programma senza che sia necessario il dynamic linking?</strong><br>
+                  <span style='color:green;'>Risposta: Sì</span><br>
+                  <em>Motivazione:</em> Il caricamento dinamico (dynamic loading) consiste nel caricare parti del programma solo quando necessarie. Può essere usato anche con linking statico, ad esempio caricando moduli opzionali in runtime senza doverli linkare dinamicamente.<br><br>
+                  <strong>2. Il dynamic linking richiede che un programma sia anche caricabile dinamicamente?</strong><br>
+                  <span style='color:red;'>Risposta: No</span><br>
+                  <em>Motivazione:</em> Il linking dinamico (dynamic linking) può avvenire anche con moduli già presenti in memoria (come librerie condivise), senza caricare il programma in modo incrementale. Sono due concetti separati e indipendenti.<br><br>
+                  <u>Sezione B</u><br>
+                  <strong>Perché un'Inverted Page Table necessita di una tabella di hash e in che cosa differisce da una Page Table basata su hash?</strong><br>
+                  <ul>
+                    <li><strong>PID nella IPT:</strong> Ogni entry della IPT deve contenere il PID per distinguere tra le pagine di processi diversi. Questo non è necessario nella PT classica, perché ogni processo ha la propria tabella delle pagine.</li>
+                    <li><strong>Necessità hash:</strong> Una ricerca nella IPT senza hash sarebbe lineare: si deve cercare la coppia (PID, numero di pagina virtuale) per trovare il frame.</li>
+                    <li><strong>Differenza hash IPT vs PT hash:</strong> Con la IPT + hash table, le entry della IPT sono referenziate direttamente tramite le liste della hash table (più efficiente), mentre in una PT hash-based si allocano dinamicamente nuove entry, con maggiore overhead di memoria e gestione.</li>
+                    <li><strong>Nota:</strong> La IPT è globale per tutto il sistema, mentre le PT (anche se hash-based) sono per singolo processo.</li>
+                  </ul>
+                  <u>Sezione C</u><br>
+                  <strong>1. La TLB può contenere entry di più processi simultaneamente?</strong><br>
+                  <span style='color:green;'>Risposta: Sì, ma dipende dall'architettura</span><br>
+                  <em>Motivazione:</em> Esistono TLB con campo ASID (Address Space Identifier), che permettono di distinguere tra processi e mantenere entry multiple. Se assente, la TLB è monoprocesso e deve essere azzerata a ogni context switch.<br><br>
+                  <strong>2. Il valid bit della TLB è una semplice copia del valid bit della Page Table?</strong><br>
+                  <span style='color:red;'>Risposta: No</span><br>
+                  <em>Motivazione:</em> Il significato è diverso: nella TLB il 'valid' indica se l'entry è attiva o può essere riutilizzata; nella Page Table indica se la pagina è effettivamente mappata in un frame di memoria fisica.<br>
+                `,
         },
         {
           domanda:
             "[IT] Organizzazione di un disco: calcoli e rapporti tra blocchi, bitmap e FCB",
           risposta: "Vedi dettagli sotto.",
           spiegazione: `
-            <strong>Specifiche disco:</strong><br>
-            Dimensione blocco: <strong>8KB</strong><br>
-            Partizione: <strong>A</strong><br>
-            NB: numero totale di blocchi<br>
-            NM: numero blocchi metadati<br>
-            ND: numero blocchi dati<br>
-            Bitmap blocchi: <strong>NM/4</strong><br>
-            Bitmap note: 1 bit per ogni blocco dati<br><br>
-            <strong>Sezione A:</strong><br>
-            <u>Domanda:</u> Calcolare il rapporto ND/NM<br>
-            <u>Calcoli:</u><br>
-            Dimensione bitmap (bit): NM/4 × 8KB × 8 = 16K × NM bit<br>
-            ND = 16K × NM<br>
-            <u>Risultato:</u><br>
-            ND/NM = <strong>16K</strong><br><br>
-            <strong>Sezione B:</strong><br>
-            <u>Domanda:</u> Dimensione massima di un intervallo contiguo di blocchi liberi, in base alla configurazione della bitmap<br>
-            <u>Ipotesi:</u> 1 blocco libero ogni 3 usati (33.33%)<br>
-            <u>Calcoli:</u><br>
-            Nbit totali = 16K × NM<br>
-            Nfree = 0.25 × Nbit totali = 4K × NM<br>
-            <u>Risultato:</u><br>
-            Più favorevole: <strong>4K × NM blocchi liberi contigui</strong><br>
-            Meno favorevole: <strong>1 blocco libero contiguo massimo</strong><br><br>
-            <strong>Sezione C:</strong><br>
-            <u>Domanda:</u> Calcolo di ND, NM, NB e dimensione partizione A, dati FCB da 256B e 16K file massimi<br>
-            <u>Dati:</u><br>
-            Dimensione FCB: 256B<br>
-            FCB per blocco: 32<br>
-            Blocchi FCB: NM/4<br>
-            Max file: 16K<br>
-            <u>Calcoli:</u><br>
-            FCB totali: 32 × NM/4 = 8 × NM<br>
-            Equazione: 8 × NM = 16K ⇒ NM = 2K<br>
-            ND = 16K × NM = 32M<br>
-            NB = ND + NM = 32M + 2K<br>
-            Dimensione bitmap: NM/4 × 8KB = 512 × 8KB = 4MB<br>
-            Dimensione partizione A: (32M + 2K) × 8KB = 256GB + 16MB<br>
-            <u>Risultato:</u><br>
-            NM: <strong>2K blocchi</strong><br>
-            ND: <strong>32M blocchi</strong><br>
-            NB: <strong>32M + 2K blocchi</strong><br>
-            Bitmap: <strong>4MB</strong><br>
-            Dimensione partizione A: <strong>256GB + 16MB</strong><br>
-          `,
+                  <strong>Specifiche disco:</strong><br>
+                  Dimensione blocco: <strong>8KB</strong><br>
+                  Partizione: <strong>A</strong><br>
+                  NB: numero totale di blocchi<br>
+                  NM: numero blocchi metadati<br>
+                  ND: numero blocchi dati<br>
+                  Bitmap blocchi: <strong>NM/4</strong><br>
+                  Bitmap note: 1 bit per ogni blocco dati<br><br>
+                  <strong>Sezione A:</strong><br>
+                  <u>Domanda:</u> Calcolare il rapporto ND/NM<br>
+                  <u>Calcoli:</u><br>
+                  Dimensione bitmap (bit): NM/4 × 8KB × 8 = 16K × NM bit<br>
+                  ND = 16K × NM<br>
+                  <u>Risultato:</u><br>
+                  ND/NM = <strong>16K</strong><br><br>
+                  <strong>Sezione B:</strong><br>
+                  <u>Domanda:</u> Dimensione massima di un intervallo contiguo di blocchi liberi, in base alla configurazione della bitmap<br>
+                  <u>Ipotesi:</u> 1 blocco libero ogni 3 usati (33.33%)<br>
+                  <u>Calcoli:</u><br>
+                  Nbit totali = 16K × NM<br>
+                  Nfree = 0.25 × Nbit totali = 4K × NM<br>
+                  <u>Risultato:</u><br>
+                  Più favorevole: <strong>4K × NM blocchi liberi contigui</strong><br>
+                  Meno favorevole: <strong>1 blocco libero contiguo massimo</strong><br><br>
+                  <strong>Sezione C:</strong><br>
+                  <u>Domanda:</u> Calcolo di ND, NM, NB e dimensione partizione A, dati FCB da 256B e 16K file massimi<br>
+                  <u>Dati:</u><br>
+                  Dimensione FCB: 256B<br>
+                  FCB per blocco: 32<br>
+                  Blocchi FCB: NM/4<br>
+                  Max file: 16K<br>
+                  <u>Calcoli:</u><br>
+                  FCB totali: 32 × NM/4 = 8 × NM<br>
+                  Equazione: 8 × NM = 16K ⇒ NM = 2K<br>
+                  ND = 16K × NM = 32M<br>
+                  NB = ND + NM = 32M + 2K<br>
+                  Dimensione bitmap: NM/4 × 8KB = 512 × 8KB = 4MB<br>
+                  Dimensione partizione A: (32M + 2K) × 8KB = 256GB + 16MB<br>
+                  <u>Risultato:</u><br>
+                  NM: <strong>2K blocchi</strong><br>
+                  ND: <strong>32M blocchi</strong><br>
+                  NB: <strong>32M + 2K blocchi</strong><br>
+                  Bitmap: <strong>4MB</strong><br>
+                  Dimensione partizione A: <strong>256GB + 16MB</strong><br>
+                `,
         },
       ];
-      // Appello Settembre 2024
+
       const eserciziSettembre = [
         {
           domanda:
@@ -464,33 +706,97 @@
         },
       ];
 
+      const eserciziLuglio2016 = [
+        {
+          domanda:
+            "Dato un file di 80MB su un file system da 200GB, con blocchi da 4KB e puntatori/indici da 32 bit, quanti blocchi sono necessari per organizzarlo con linked list allocation, FAT e indexed allocation (non iNode)?",
+          risposta:
+            "Linked list: 20501 blocchi dati; FAT: 20480 blocchi dati; Indexed allocation: 20480 blocchi dati + 21 blocchi indice.",
+          spiegazione:
+            "Linked list allocation: 80MB / (4KB - 4B) = 20501 blocchi dati, nessun blocco indice. FAT: 80MB / 4KB = 20K = 20480 blocchi dati, nessun blocco indice. Indexed allocation: 20480 blocchi dati; ogni blocco indice contiene 1K indici (4KB/4B), quindi servono 20 blocchi di secondo livello più 1 di primo livello, per un totale di 21 blocchi indice.",
+        },
+      ];
+
       function renderEsercizi(esercizi) {
         const eserciziList = document.getElementById("esercizi-list");
         eserciziList.innerHTML = "";
         esercizi.forEach((ex, idx) => {
           const card = document.createElement("div");
           card.className = "esercizio-card";
+
+          // Escape HTML special chars
+          function escapeHtml(text) {
+            return text
+              .replace(/&/g, "&amp;")
+              .replace(/</g, "&lt;")
+              .replace(/>/g, "&gt;")
+              .replace(/\"/g, "&quot;")
+              .replace(/'/g, "&#39;");
+          }
+
+          // Detect code fragments and wrap in <pre><code> con word wrap
+          let domandaHtml = ex.domanda;
+          function wrapCode(text, maxLen = 80) {
+            // Inserisce un '\n' ogni maxLen caratteri, solo se non già presente
+            const lines = text.split("\n");
+            return lines
+              .map((line) => {
+                if (line.length <= maxLen) return line;
+                let out = "";
+                for (let i = 0; i < line.length; i += maxLen) {
+                  out += line.slice(i, i + maxLen) + "\n";
+                }
+                return out;
+              })
+              .join("\n");
+          }
+          if (
+            domandaHtml.includes("#define") ||
+            domandaHtml.includes("for (k=0")
+          ) {
+            domandaHtml = `<pre style="white-space:pre-wrap;word-break:break-all"><code>${escapeHtml(
+              wrapCode(domandaHtml)
+            )}</code></pre>`;
+          } else {
+            domandaHtml = escapeHtml(domandaHtml);
+          }
+
           let rispostaHtml = "";
           if (typeof ex.risposta === "object" && !Array.isArray(ex.risposta)) {
             rispostaHtml = Object.entries(ex.risposta)
-              .map(([k, v]) => `<div><strong>${k}:</strong> ${v}</div>`)
+              .map(
+                ([k, v]) =>
+                  `<div><strong>${escapeHtml(k)}:</strong> ${escapeHtml(
+                    v
+                  )}</div>`
+              )
               .join("");
           } else if (Array.isArray(ex.risposta)) {
-            rispostaHtml = ex.risposta.map((r) => `<div>${r}</div>`).join("");
+            rispostaHtml = ex.risposta
+              .map((r) => `<div>${escapeHtml(r)}</div>`)
+              .join("");
           } else {
-            rispostaHtml = `Risposta: ${ex.risposta}`;
+            rispostaHtml = `Risposta: ${escapeHtml(ex.risposta)}`;
           }
+
+          let spiegazioneHtml = "";
+          if (typeof ex.spiegazione === "object" && ex.spiegazione !== null) {
+            spiegazioneHtml = renderSpiegazioneObj(ex.spiegazione);
+          } else {
+            spiegazioneHtml = escapeHtml(ex.spiegazione);
+          }
+
           card.innerHTML = `
-            <div class="esercizio-header" tabindex="0" role="button" aria-expanded="false">
-              <span>ESERCIZIO ${idx + 1}</span>
-              <span class="arrow">&#9654;</span>
-            </div>
-            <div class="esercizio-content">
-              <div class="domanda">${ex.domanda}</div>
-              <div class="risposta">${rispostaHtml}</div>
-              <div class="spiegazione">${ex.spiegazione}</div>
-            </div>
-          `;
+                  <div class="esercizio-header" tabindex="0" role="button" aria-expanded="false">
+                    <span>ESERCIZIO ${idx + 1}</span>
+                    <span class="arrow">&#9654;</span>
+                  </div>
+                  <div class="esercizio-content">
+                    <div class="domanda">${domandaHtml}</div>
+                    <div class="risposta">${rispostaHtml}</div>
+                    <div class="spiegazione">${spiegazioneHtml}</div>
+                  </div>
+                `;
           const header = card.querySelector(".esercizio-header");
           const content = card.querySelector(".esercizio-content");
           const arrow = card.querySelector(".arrow");
@@ -510,18 +816,150 @@
         });
       }
 
+      function renderSpiegazioneObj(obj) {
+        if (typeof obj !== "object" || obj === null) return obj;
+        let html = '<ul style="margin-left:1em">';
+        for (const [k, v] of Object.entries(obj)) {
+          html += `<li><strong>${k}:</strong> `;
+          if (typeof v === "object" && v !== null) {
+            html += renderSpiegazioneObj(v);
+          } else {
+            html += v;
+          }
+          html += "</li>";
+        }
+        html += "</ul>";
+        return html;
+      }
+
       const schedaSelect = document.getElementById("scheda-select");
+      const eserciziLuglio2025 = [
+        {
+          domanda:
+            "Si consideri il seguente frammento di programma : #define N 64 data_t M[N][N/2]; int i,j,k; for (k=0; k<4; k++) { for (i=0; i<N; i++) { for (j=k; j<N/2; j+=4) { M[i][j].num = ij; } } } Il codice macchina generato dal programma viene eseguito su un sistema con gestione della memoria basata sulla paginazione a richiesta, pagine da 2 KB, sostituzione delle pagine guidata da una politica LRU. Supponiamo che:  sizeof(data_t) == 512 è vero  data_t ha un campo num di tipo int (dimensione 32 bit)  il segmento di codice (istruzioni macchina) ha una dimensione inferiore a una pagina  M viene assegnato a partire dall'indirizzo logico 0x3870A400  la matrice M viene allocata seguendo la strategia “row major”, cioè per righe (prima riga, seguita dalla seconda riga, …). A) Quante pagine (e frame) sono necessarie per memorizzare la matrice (contando anche pagine parzialmente usate)?",
+          risposta: "513",
+          spiegazione:
+            "Elementi: N(N/2)=64×32=2048; dimensione totale = 2048×512 B = 1,048,576 B = 0x100000. Page size = 2 KB = 0x800. L’inizio (0x3870A400) ha offset 0x400 nella pagina, quindi pagine = ceil((0x400 + 0x100000)/0x800) = ceil(0x100400/0x800) = 513. In decimale: ceil((1,024 + 1,048,576)/2,048) = 513.",
+        },
+        {
+          domanda:
+            "Si consideri il seguente frammento di programma : #define N 64 data_t M[N][N/2]; int i,j,k; ... for (k=0; k<4; k++) { for (i=0; i<N; i++) { for (j=k; j<N/2; j+=4) { M[i][j].num = ij; } } } Il codice macchina generato dal programma viene eseguito su un sistema con gestione della memoria basata sulla paginazione a richiesta, pagine da 2 KB, sostituzione delle pagine guidata da una politica LRU. Supponiamo che:  sizeof(data_t) == 512 è vero  data_t ha un campo num di tipo int (dimensione 32 bit)  il segmento di codice (istruzioni macchina) ha una dimensione inferiore a una pagina  M viene assegnato a partire dall'indirizzo logico 0x3870A400  la matrice M viene allocata seguendo la strategia “row major”, cioè per righe (prima riga, seguita dalla seconda riga, …). B) Supponendo i, j e k in registri, quanti riferimenti a memoria produce il programma (solo dati, no fetch istruzioni)?",
+          risposta: "2048",
+          spiegazione:
+            "Iterazioni totali dello store: 4 (k) × 64 (i) × 8 (j: da k a 31 con passo 4) = 2048. Ogni iterazione effettua uno store su M[i][j].num ⇒ 2048 riferimenti a memoria per i dati.",
+        },
+        {
+          domanda:
+            "Si consideri il seguente frammento di programma : #define N 64 data_t M[N][N/2]; int i,j,k; ... for (k=0; k<4; k++) { for (i=0; i<N; i++) { for (j=k; j<N/2; j+=4) { M[i][j].num = ij; } } } Il codice macchina generato dal programma viene eseguito su un sistema con gestione della memoria basata sulla paginazione a richiesta, pagine da 2 KB, sostituzione delle pagine guidata da una politica LRU. Supponiamo che:  sizeof(data_t) == 512 è vero  data_t ha un campo num di tipo int (dimensione 32 bit)  il segmento di codice (istruzioni macchina) ha una dimensione inferiore a una pagina  M viene assegnato a partire dall'indirizzo logico 0x3870A400  la matrice M viene allocata seguendo la strategia “row major”, cioè per righe (prima riga, seguita dalla seconda riga, …). C) Calcolare il numero di page fault generati dal programma proposto.",
+          risposta: "2048",
+          spiegazione:
+            "L’accesso ha stride di una pagina (512 B per elemento, passo j=4 ⇒ 2048 B) e il resident set non trattiene le pagine fino al successivo riuso ⇒ ogni store tende a causare un PF. Gli accessi ai dati sono 2048, quindi i PF sono 2048. L’eventuale disallineamento iniziale aumenta il numero di pagine distinte (513), ma non può superare il numero di accessi: le due pagine parziali sono toccate 2 volte ciascuna e le altre 511 pagine 4 volte ciascuna: 2×2 + 511×4 = 2048. Iterazioni del corpo: 4 · 64 · 8 = 2048 (uno store per iterazione). Ogni iterazione tocca una pagina diversa rispetto alla precedente (stride=1 pagina) e il riuso arriva troppo tardi per restare nel resident set.Quindi i page fault ≈ 2048 (uno per accesso). (Con il disallineamento iniziale si contano 513 pagine distinte complessive, ma il punto chiave resta che il riuso non è “vicino” → niente hit.)",
+        },
+        {
+          domanda:
+            "Si consideri il seguente frammento di programma : #define N 64 data_t M[N][N/2]; int i,j,k; ... for (k=0; k<4; k++) { for (i=0; i<N; i++) { for (j=k; j<N/2; j+=4) { M[i][j].num = ij; } } } Il codice macchina generato dal programma viene eseguito su un sistema con gestione della memoria basata sulla paginazione a richiesta, pagine da 2 KB, sostituzione delle pagine guidata da una politica LRU. Supponiamo che:  sizeof(data_t) == 512 è vero  data_t ha un campo num di tipo int (dimensione 32 bit)  il segmento di codice (istruzioni macchina) ha una dimensione inferiore a una pagina  M viene assegnato a partire dall'indirizzo logico 0x3870A400  la matrice M viene allocata seguendo la strategia “row major”, cioè per righe (prima riga, seguita dalla seconda riga, …). D) Completare il codice equivalente che riduce i page fault e calcolare i PF.",
+          risposta:
+            "Completamento: V[k].num = (k / (N/2)) * (k % (N/2)); Numero di page fault: 513 (≈512 se si ignora il disallineamento iniziale).",
+          spiegazione:
+            "Linearizzando M in V e iterando k da 0 a N(N/2)-1 si accede in ordine row-major contiguo: ogni pagina dati viene caricata una volta e consumata completamente prima di passare alla successiva ⇒ 1 PF per pagina distinta. Poiché l’array parte a offset 0x400, le pagine toccate sono 513; se si approssima ignorando l’offset, 512.",
+        },
+        {
+          domanda:
+            "Si consideri un file system di tipo Unix, basato su inode, con 15 puntatori/indici (12 diretti, 1 singolo indiretto, 1 doppio indiretto e 1 triplo indiretto). I puntatori/indici hanno dimensione di 32 bit e i blocchi del disco hanno dimensione di 4 KB. Il file system risiede su una partizione del disco, dove 2 TB sono riservati ai blocchi di dati. Lo spazio extra riservato ai metadati (inclusi i blocchi di indice) può essere trascurato ai fini di questo esercizio. A) È noto che il numero di file è 1024, con una dimensione media di 240 KB. È anche noto che il file più piccolo nel file system ha una dimensione di 32 KB e il più grande di 400 KB. Calcolare il numero di blocchi di dati utilizzati nel file system, come intervallo min-max (numero minimo e massimo di blocchi di dati).",
+          risposta: "Min: 61440 blocchi, Max: 61952 blocchi",
+          spiegazione:
+            "Numero medio di blocchi = (240 KB * 1024) / 4 KB = 61440. Max = Min + 512 = 61952 per via della frammentazione.",
+        },
+        {
+          domanda:
+            "B) Calcolare il numero minimo e massimo di file allocati con formato single indirect.",
+          risposta: "Min: 1 (anche 0 accettabile), Max: 1024",
+          spiegazione:
+            "Il minimo è almeno 1 file che può richiedere puntatore indiretto, anche se 0 è ammissibile se tutti rientrano nei diretti. Il massimo è uguale al numero totale di file presenti, 1024.",
+        },
+        {
+          domanda:
+            "C) Dato un file binario di dimensione 70481 KB, calcolare esattamente quanti blocchi indice e blocchi dati utilizza il file.",
+          risposta: "Blocchi dati: 17621, Blocchi indice: 19",
+          spiegazione:
+            "Blocchi dati = 70481 KB * 1024 / 4096 = 17621. Blocchi indice = 1 (inode) + 1 (singolo indiretto) + ceil((17621 - 12 - 1024)/(1024)) = 19.",
+        },
+        {
+          domanda:
+            "L'applicazione può presupporre che l'intestazione e ciascuna sezione siano allineate ai limiti dei blocchi del disco nel file system?",
+          risposta: "No",
+          spiegazione:
+            "Il file system non garantisce che le parti interne di un file (header o sezioni) inizino esattamente allineate ai limiti dei blocchi fisici: il contenuto è gestito come sequenza di byte.",
+        },
+        {
+          domanda:
+            "È obbligatorio che l'applicazione organizzi i dati in più file (invece che in un unico file): un file per l'intestazione e uno per ogni sezione?",
+          risposta: "No",
+          spiegazione:
+            "L'applicazione può organizzare liberamente i dati in un unico file, includendo header e sezioni, oppure in più file. Il file system non impone una divisione obbligatoria.",
+        },
+        {
+          domanda:
+            "Se l'intestazione è memorizzata in un file separato, questa deve essere allocata in blocchi di dati contigui?",
+          risposta: "No",
+          spiegazione:
+            "Il file system può allocare i blocchi di un file anche in posizioni non contigue. L'applicazione non può assumere la contiguità fisica dei blocchi.",
+        },
+        {
+          domanda:
+            "Una volta che conosciamo (dopo averlo letto dall'intestazione) l'offset (nel file) di una sezione, è possibile leggere la sezione con accesso diretto/casuale con tutti i formati di allocazione dei file (oppure alcuni formati richiedono l'accesso sequenziale)?",
+          risposta: "Si",
+          spiegazione:
+            "Una volta noto l’offset, l’accesso casuale è possibile con qualsiasi metodo di allocazione supportato dal file system (contiguo, linked list, FAT, indicizzato), perché il sistema traduce automaticamente gli offset logici in blocchi fisici.",
+        },
+        {
+          domanda:
+            "La dimensione di un blocco del disco è la stessa su tutti e tre i file system. Possiamo supporre che la frammentazione interna sia la stessa su tutti i file system?",
+          risposta: "No",
+          spiegazione:
+            "La frammentazione interna dipende dal metodo di allocazione. Anche se la dimensione del blocco è la stessa, i tre formati di allocazione possono comportare sprechi diversi.",
+        },
+        {
+          domanda:
+            "L'allocazione contigua e l'inode garantiscono l'accesso casuale/diretto a tempo costante (O(1))?",
+          risposta: "Si",
+          spiegazione:
+            "Con l'allocazione contigua l'indirizzo è calcolato aritmeticamente; con inode i puntatori consentono accesso diretto senza dover percorrere una lista. Entrambi quindi supportano accesso O(1).",
+        },
+        {
+          domanda:
+            "Durante la lettura dell'intero file dall'inizio alla fine, l'allocazione basata su linked list sarà probabilmente più efficiente dell'inode, in termini di tempo di esecuzione, grazie al DMA?",
+          risposta: "Si",
+          spiegazione:
+            "Con DMA abilitato, la linked list può trasferire blocchi in sequenza direttamente senza interventi CPU frequenti, risultando più veloce dell’inode in lettura sequenziale.",
+        },
+        {
+          domanda:
+            "Durante la lettura dell'intero file dall'inizio alla fine, l'allocazione collegata sarà più efficiente rispetto ad altri formati di allocazione (contigui e inode) perché l'elenco collegato è particolarmente efficace con l'accesso sequenziale?",
+          risposta: "No",
+          spiegazione:
+            "L’allocazione contigua è la più efficiente per accesso sequenziale, perché i blocchi sono già in ordine sul disco. La linked list richiede comunque il caricamento dei puntatori e non supera le prestazioni del contiguo.",
+        },
+      ];
       function updateScheda() {
-        if (schedaSelect.value === "giugno") {
+        if (schedaSelect.value === "giugno-2024") {
           renderEsercizi(eserciziGiugno);
-        } else if (schedaSelect.value === "settembre") {
+        } else if (schedaSelect.value === "giugno-2025") {
+          renderEsercizi(eserciziGiugno2025);
+        } else if (schedaSelect.value === "settembre-2024") {
           renderEsercizi(eserciziSettembre);
         } else if (schedaSelect.value === "gennaio-inglese") {
           renderEsercizi(eserciziGennaioInglese);
+        } else if (schedaSelect.value === "gennaio-2025-it") {
+          renderEsercizi(eserciziGennaio2025IT);
+        } else if (schedaSelect.value === "luglio-2025") {
+          renderEsercizi(eserciziLuglio2025);
+        } else if (schedaSelect.value === "luglio-2016") {
+          renderEsercizi(eserciziLuglio2016);
         }
       }
       schedaSelect.addEventListener("change", updateScheda);
-      // Mostra di default la scheda di giugno
+
       renderEsercizi(eserciziGiugno);
     </script>
   </body>

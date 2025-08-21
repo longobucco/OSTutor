@@ -4,3 +4,4 @@ progress.json
 .venv/
 /src/OSTutor/
 .DS_Store
+src/completed.json

@@ -3740,11 +3740,38 @@
             registri della CPU MIPS.
           </div>
         </div>
+        <div class="card">
+          <div class="question">
+            Che cosa si intende, nel contesto della gestione della memoria
+            virtuale da parte di un sistema operativo, con il termine
+            paginazione a richiesta (demand paging)?
+          </div>
+          <div class="answer">
+            È una strategia di gestione della memoria che sfrutta la
+            suddivisione della memoria in pagine (frame) caricando in memoria i
+            frame corrispondenti alle pagine solo nel momento in cui servono
+            realmente. Le pagine cui non si accede mai, pertanto, non saranno
+            mai caricate in memoria fisica.
+          </div>
+        </div>
+        <div class="card">
+          <div class="question">
+            È possibile effettuare la paginazione a richiesta con allocazione
+            contigua di memoria?
+          </div>
+          <div class="answer">
+            I due tipi di allocazione sono concettualmente diversi.
+            Nell'allocazione contigua non si sfrutta la suddivisione in pagine
+            della memoria, allocando spazio per l'intero programma. La
+            paginazione, tra l'altro, è proprio un meccanismo adottato per
+            evitare l'allocazione contigua.
+          </div>
+        </div>
       </div>
     </div>
 
     <script>
-      // Mostra solo la sezione selezionata
+      
       document.querySelectorAll(".section-btn").forEach((btn) => {
         btn.addEventListener("click", () => {
           document.querySelectorAll(".section-cards").forEach((sec) => {
@@ -3753,8 +3780,7 @@
           document.getElementById(btn.dataset.section).style.display = "block";
         });
       });
-
-      // Gestione apertura card
+      
       function setupCardListeners(sectionId) {
         document.querySelectorAll(`#${sectionId} .card`).forEach((card) => {
           card.addEventListener("click", () => {
